@@ -31,9 +31,9 @@ clLines = [
 
 #
     # Free control lines for use later
-    {'key':"U0",  'bit':15, 'active': ACTIVEHIGH,'desc':"Some Decription"},
-    {'key':"U1",  'bit':14, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U2",  'bit':13, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"nLal",  'bit':15, 'active': ACTIVELOW,'desc':"Some Decription"},
+    {'key':"nLah",  'bit':14, 'active': ACTIVELOW, 'desc':"Some Decription"},
+    {'key':"E16",  'bit':13, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
     {'key':"U3",  'bit':12, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
 
     {'key':"U4",  'bit':11, 'active': ACTIVEHIGH,'desc':"Some Decription"},
@@ -62,12 +62,56 @@ fetchControlWords = [{'Ep','nLm'},{'Cp'},{'nCE','nLi'}]
 # those control lines which are active in each cycle.
 # Note: The first three cycles T1, T2, T3
 # are already defined in our 'fetchControlWords' array.
+#    {'name':'LDI','bytecode': 0x6,
+#    'control':
+#    [
+#        {'Ep','nLm'},
+#        {'Cp','nCE','nLa'}
+#    ]},
 
 opcodes = [
 
+    {'name':'LDA','bytecode': 0x00, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+        {'nCE','nLa'}         # Finally Write the contents of the current address in MAR to A reg
+    ]},
+
+
+    {'name':'STA','bytecode': 0x01, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+        {'Ea','Lr'}         # Finally Write the contents of the current address in MAR to A reg
+    ]},
+
+
+    {'name':'NOP','bytecode': 0x20, 'control':
+    [
+    ]},
+
+    {'name':'HLT','bytecode': 0xff,
+    'control':
+    [
+
+    ]}
+
+]
+
+opcodesOld = [
+
     {'name':'LDA','bytecode': 0, 'control':
     [
-        {'nLm','nEi'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'nLm','E16'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
         {'nCE','nLa'}
     ]},
 
@@ -263,22 +307,39 @@ def produce32BitNOPROM(romName, raw = True):
 def produce32BitROM(romName, raw = True):
 
     opcodes.sort(key=sortKey)
-    print("Producing 32bit Rom")
+    nopCntWord = buildNOPControlWord()
+    print(f"Producing 32bit Rom NOP {nopCntWord:08x}")
 
     file = open(romName, "w+")
     file.write("v2.0 raw\n" if raw else "v3.0 hex words addressed\n")
 
     fetchWords = []
-    nopCntWord = buildNOPControlWord()
 
     for fmicrocode in fetchControlWords:
         fetchWords.append(buildControlWord(fmicrocode, nopCntWord))
 
     # Now start producing ROM output
     address = 0
+    lastbytecode = -1
+
     for op in opcodes:
         if (not raw):
             file.write(f"{address:02x}: ")
+
+        bytecode = op['bytecode']
+        gap = bytecode - lastbytecode - 1
+        print(f"Filling in gap of {gap} opcodes")
+        if (gap > 0):
+            for n in range(gap):
+                for word in fetchWords:
+                    file.write(f"{word:08x} ")
+
+                remaining =  32 - len(fetchWords)
+
+                for i in range(remaining):
+                    file.write(f"{nopCntWord:08x} ")
+            #print(f"{nopCntWord:06x} ", end = '')
+                address += 32
 
         for word in fetchWords:
             file.write(f"{word:08x} ")
@@ -288,12 +349,13 @@ def produce32BitROM(romName, raw = True):
             file.write(f"{word:08x} ")
             #print(f"{word:06x} ", end = '')
 
-        remaining =  8 - len(fetchWords) -  len(op['controlwords'])
+        remaining =  32 - len(fetchWords) -  len(op['controlwords'])
 
         for i in range(remaining):
             file.write(f"{nopCntWord:08x} ")
             #print(f"{nopCntWord:06x} ", end = '')
-        address += 8
+        address += 32
+        lastbytecode = op['bytecode']
 
         file.write("\n")
         #print()
