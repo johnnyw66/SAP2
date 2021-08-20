@@ -1,5 +1,5 @@
 
-controlWordSize = 24
+controlWordSize = 32
 ACTIVEHIGH = 1
 ACTIVELOW = 0
 
@@ -8,39 +8,48 @@ ACTIVELOW = 0
 
 
 clLines = [
-    {'key':"Cp", 'bit':23, 'active': ACTIVEHIGH, 'desc':"Enable PC count (inc PC)"},
-    {'key':"Ep", 'bit':22, 'active': ACTIVEHIGH, 'desc':"Place PC onto the Bus"},
-    {'key':"nLm", 'bit':21, 'active': ACTIVELOW, 'desc':"Load contents of Bus into Memory Address Reg"},
-    {'key':"nCE", 'bit':20, 'active': ACTIVELOW, 'desc':"Place current data in RAM onto BUS"},
+    {'key':"Cp", 'bit':31, 'active': ACTIVEHIGH, 'desc':"Enable PC count (inc PC)"},
+    {'key':"Ep", 'bit':30, 'active': ACTIVEHIGH, 'desc':"Place PC onto the Bus"},
+    {'key':"nLm", 'bit':29, 'active': ACTIVELOW, 'desc':"Load contents of Bus into Memory Address Reg"},
+    {'key':"nCE", 'bit':28, 'active': ACTIVELOW, 'desc':"Place current data in RAM onto BUS"},
 
-    {'key':"nLi", 'bit':19, 'active': ACTIVELOW, 'desc':"Load contents of Bus into the Instruction Reg"},
-    {'key':"nEi", 'bit':18, 'active': ACTIVELOW, 'desc':"Place contents of the Instruction Reg onto the Bus"},
-    {'key':"nLa", 'bit':17, 'active': ACTIVELOW, 'desc':"Load contents of the Bus into the A Reg"},
-    {'key':"Ea",  'bit':16, 'active': ACTIVEHIGH, 'desc':"Place contents of the A Reg onto the BUS"},
+    {'key':"nLi", 'bit':27, 'active': ACTIVELOW, 'desc':"Load contents of Bus into the Instruction Reg"},
+    {'key':"nEi", 'bit':26, 'active': ACTIVELOW, 'desc':"Place contents of the Instruction Reg onto the Bus"},
+    {'key':"nLa", 'bit':25, 'active': ACTIVELOW, 'desc':"Load contents of the Bus into the A Reg"},
+    {'key':"Ea",  'bit':24, 'active': ACTIVEHIGH, 'desc':"Place contents of the A Reg onto the BUS"},
 
-    {'key':"Su",  'bit':15, 'active': ACTIVEHIGH, 'desc':"set ALU function to Subtract (otherwise it will be 'ADD')"},
-    {'key':"Eu",  'bit':14, 'active': ACTIVEHIGH, 'desc':"Enable ALU (output directly to B Reg)"},
-    {'key':"nLb", 'bit':13, 'active': ACTIVELOW, 'desc':"Load contents of B reg 'bus' into B Reg"},
-    {'key':"nLo", 'bit':12, 'active': ACTIVELOW, 'desc':"Load contents of Bus into Output Reg"},
+    {'key':"Su",  'bit':23, 'active': ACTIVEHIGH, 'desc':"set ALU function to Subtract (otherwise it will be 'ADD')"},
+    {'key':"Eu",  'bit':22, 'active': ACTIVEHIGH, 'desc':"Enable ALU (output directly to B Reg)"},
+    {'key':"nLb", 'bit':21, 'active': ACTIVELOW, 'desc':"Load contents of B reg 'bus' into B Reg"},
+    {'key':"nLo", 'bit':20, 'active': ACTIVELOW, 'desc':"Load contents of Bus into Output Reg"},
 
-    {'key':"Lr",  'bit':11, 'active': ACTIVEHIGH, 'desc':"Load to RAM (STA op)"},
-    {'key':"Lp",  'bit':10, 'active': ACTIVEHIGH, 'desc':"Load PC (JUMP instructions) used with f1 and f0"},
-    {'key':"f1",  'bit':9, 'active': ACTIVEHIGH, 'desc':"JUMP condition function bit 1"},
-    {'key':"f0",  'bit':8, 'active': ACTIVEHIGH, 'desc':"JUMP condition Function bit 0 {00 -> Carry, 01 -> Non Zero, 10 -> Parity Odd, 11 --> Always}"},
+    {'key':"Lr",  'bit':19, 'active': ACTIVEHIGH, 'desc':"Load to RAM (STA op)"},
+    {'key':"Lp",  'bit':18, 'active': ACTIVEHIGH, 'desc':"Load PC (JUMP instructions) used with f1 and f0"},
+    {'key':"f1",  'bit':17, 'active': ACTIVEHIGH, 'desc':"JUMP condition function bit 1"},
+    {'key':"f0",  'bit':16, 'active': ACTIVEHIGH, 'desc':"JUMP condition Function bit 0 {00 -> Carry, 01 -> Non Zero, 10 -> Parity Odd, 11 --> Always}"},
 #    {'key':"Cp", 'bit':7, 'active': ACTIVEHIGH, 'desc':"TEST DUP"},
 
 #
     # Free control lines for use later
-    #{'key':"U0",  'bit':7, 'active': ACTIVEHIGH,'desc':"Some Decription"},
-    {'key':"U1",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U2",  'bit':5, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U3",  'bit':4, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"U0",  'bit':15, 'active': ACTIVEHIGH,'desc':"Some Decription"},
+    {'key':"U1",  'bit':14, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"U2",  'bit':13, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"U3",  'bit':12, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
 
-    {'key':"U4",  'bit':3, 'active': ACTIVEHIGH,'desc':"Some Decription"},
-    {'key':"U5",  'bit':2, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U6",  'bit':1, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U7",  'bit':0, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"U4",  'bit':11, 'active': ACTIVEHIGH,'desc':"Some Decription"},
+    {'key':"U5",  'bit':10, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"U6",  'bit':9, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"U7",  'bit':8, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
 
+    {'key':"U8",  'bit':7, 'active': ACTIVEHIGH,'desc':"Some Decription"},
+    {'key':"U9",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"U10",  'bit':5, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"U11",  'bit':4, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+
+    {'key':"U12",  'bit':3, 'active': ACTIVEHIGH,'desc':"Some Decription"},
+    {'key':"U13",  'bit':2, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"U14",  'bit':1, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"U15",  'bit':0, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
 ]
 # Every microprocessor opcode instruction will have the
 # same three controlwords for T1,T2 and T3,
@@ -226,16 +235,35 @@ def buildMicrocode():
 
     return
 
+# Useful for testing bits of our circuit
+
+def produce32BitNOPROM(romName, raw = True):
+
+    print("Producing 32bit Rom")
+
+    file = open(romName, "w+")
+    file.write("v2.0 raw\n")
+
+    # 256*32 ops
+    nopCntWord = buildNOPControlWord()
+
+    for n in range(32*256):
+        file.write(f"{nopCntWord:08x} ")
+        if (n % 8 == 7):
+            file.write("\n")
+
+    file.close()
+
 
 # Produce LogiSim memory file ROM/RAM  files
 # from opcodes control word arrays.
 # In this version - the 'Execute' control words proceed
 # after the generic 'Fetch' control words
 
-def produce24BitROM(romName, raw = True):
+def produce32BitROM(romName, raw = True):
 
     opcodes.sort(key=sortKey)
-    print("Producing 24bit Rom")
+    print("Producing 32bit Rom")
 
     file = open(romName, "w+")
     file.write("v2.0 raw\n" if raw else "v3.0 hex words addressed\n")
@@ -253,17 +281,17 @@ def produce24BitROM(romName, raw = True):
             file.write(f"{address:02x}: ")
 
         for word in fetchWords:
-            file.write(f"{word:06x} ")
+            file.write(f"{word:08x} ")
             #print(f"{word:06x} ", end = '')
 
         for word in op['controlwords']:
-            file.write(f"{word:06x} ")
+            file.write(f"{word:08x} ")
             #print(f"{word:06x} ", end = '')
 
         remaining =  8 - len(fetchWords) -  len(op['controlwords'])
 
         for i in range(remaining):
-            file.write(f"{nopCntWord:06x} ")
+            file.write(f"{nopCntWord:08x} ")
             #print(f"{nopCntWord:06x} ", end = '')
         address += 8
 
@@ -313,10 +341,13 @@ def produce8BitROM(romName, shift, raw = True):
 
 def produceROMs(romType = 0, raw = True):
     #
-    produce24BitROM('microcode24bit.rom', raw)
-    produce8BitROM('microcode24bit-8bitrom-rom1.rom', 16,raw) # upper 8-bits
-    produce8BitROM('microcode24bit-8bitrom-rom2.rom', 8,raw) #middle 8-bits
-    produce8BitROM('microcode24bit-8bitrom-rom3.rom', 0,raw) #bottom 8-bits
+    produce32BitROM('microcode32bit.rom', raw)
+    produce32BitNOPROM('microcodeNOPs32bit.rom', raw)
+
+    produce8BitROM('microcode32bit-8bitrom-rom1.rom', 24,raw) # upper 8-bits
+    produce8BitROM('microcode32bit-8bitrom-rom2.rom', 16,raw) #middle 8-bits
+    produce8BitROM('microcode32bit-8bitrom-rom3.rom', 8,raw) #bottom 8-bits
+    produce8BitROM('microcode32bit-8bitrom-rom4.rom', 0,raw) #bottom 8-bits
 
 
 
