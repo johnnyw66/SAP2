@@ -36,15 +36,20 @@ clLines = [
     {'key':"E16",  'bit':13, 'active': ACTIVEHIGH, 'desc':"Show DBUS<->ABUS regsiters (two) on Address Bus"},
     {'key':"Lf",  'bit':12, 'active': ACTIVEHIGH, 'desc':"Latch Flag Register"},
 
-    {'key':"U4",  'bit':11, 'active': ACTIVEHIGH,'desc':"Some Decription"},
-    {'key':"U5",  'bit':10, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U6",  'bit':9, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U7",  'bit':8, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"Ek",  'bit':11, 'active': ACTIVEHIGH,'desc':"Load Conents of Bank Reg onto DBUS"},
+    # Uses f0, f1
+    {'key':"nLk",  'bit':10, 'active': ACTIVELOW, 'desc':"Latch Conents on DBUS into Bank Reg"},
+    {'key':"k1",  'bit':9, 'active': ACTIVEHIGH, 'desc':"Bank Register Write Select bit 1"},
+    {'key':"k0",  'bit':8, 'active': ACTIVEHIGH, 'desc':"Bank Register Write select bit 0"},
 
-    {'key':"U8",  'bit':7, 'active': ACTIVEHIGH,'desc':"Some Decription"},
-    {'key':"U9",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U10",  'bit':5, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U11",  'bit':4, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+
+    {'key':"f2",  'bit':7, 'active': ACTIVEHIGH,'desc':"Select bit for Constant Bank/ALU Function"},
+    {'key':"Ec",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Place Constant (from Constant Bank) defined by {f2,f1,f0} on the DBUS"},
+    {'key':"Ex",  'bit':5, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+
+#    {'key':"Ds",  'bit':7, 'active': ACTIVEHIGH,'desc':"Some Decription"},
+#    {'key':"Is",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"Es",  'bit':4, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
 
     {'key':"U12",  'bit':3, 'active': ACTIVEHIGH,'desc':"Some Decription"},
     {'key':"U13",  'bit':2, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
@@ -62,14 +67,9 @@ fetchControlWords = [{'Ep','nLm'},{'Cp'},{'nCE','nLi'}]
 # those control lines which are active in each cycle.
 # Note: The first three cycles T1, T2, T3
 # are already defined in our 'fetchControlWords' array.
-#    {'name':'LDI','bytecode': 0x6,
-#    'control':
-#    [
-#        {'Ep','nLm'},
-#        {'Cp','nCE','nLa'}
-#    ]},
 
 opcodes = [
+    # Legacy OPCODES TBDeprecated
 
     {'name':'LDA','bytecode': 0x00, 'control':
     [
@@ -168,6 +168,145 @@ opcodes = [
         {'Ea','nLo'},
     ]},
 
+    # NEW BANK REG instructions
+    # k1,k0 used to determin which register to write to.
+
+    # {k1,k0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
+
+    {'name':'MOVIR0','bytecode': 0x09,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLk'},
+
+    ]},
+
+    {'name':'MOVIR1','bytecode': 0x0a,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLk','k0'},
+    ]},
+
+    {'name':'MOVIR2','bytecode': 0x0b,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLk','k1'},
+    ]},
+    {'name':'MOVIR3','bytecode': 0x0c,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLk','k0','k1'},
+    ]},
+
+    # 'MOV Rx, Ry' -  Move into REGx the contents of REGy
+    # Use Ek and f0,f1 combinations for the register you are reading
+    # and 'nLk' with k0,k1 combinations for the register you are writing to.
+    # {f1,f0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
+    # {k1,k0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
+
+    {'name':'MOV R0,R1','bytecode': 0x0d,
+    'control':
+    [
+        {'Ek','f0','nLk'},
+    ]},
+
+
+    {'name':'MOV R1,R0','bytecode': 0x0e,
+    'control':
+    [
+        {'Ek','nLk','k0'},
+    ]},
+
+
+
+    {'name':'ADD R0,R1','bytecode': 0x0f,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ek','f0','nLb'},
+        {'nLk','Eu','Lf'}
+    ]},
+
+    {'name':'ADD R1,R0','bytecode': 0x10,
+    'control':
+    [
+        {'Ek','f0','nLa'},
+        {'Ek','nLb'},
+        {'nLk','k0','Eu','Lf'}
+    ]},
+
+    {'name':'SUB R0,R1','bytecode': 0x11,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ek','f0','nLb'},
+        {'nLk','Su','Eu','Lf'}
+    ]},
+
+
+    {'name':'OUT R0','bytecode': 0x12,
+    'control':
+    [
+        {'dbg','Ek','nLo'},
+    ]},
+    {'name':'OUT R1','bytecode': 0x13,
+    'control':
+    [
+        {'Ek','f0','nLo'},
+    ]},
+    {'name':'OUT R2','bytecode': 0x14,
+    'control':
+    [
+        {'Ek','f1','nLo'},
+    ]},
+    {'name':'OUT R3','bytecode': 0x15,
+    'control':
+    [
+        {'Ek','f0','f1','nLo'},
+    ]},
+
+    {'name':'EXX','bytecode': 0x16,
+    'control':
+    [
+        {'Ex'},
+    ]},
+
+
+    # inc
+
+    {'name':'INC R0','bytecode': 0x17,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Lf','nLa'}
+    ]},
+
+    {'name':'DEC R0','bytecode': 0x18,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk'}
+    ]},
+
+    {'name':'DJNZ R0','bytecode': 0x19,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk'},
+
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
+
+    ]},
 
 
     {'name':'NOP','bytecode': 0x20, 'control':
@@ -252,6 +391,8 @@ opcodesOld = [
         {'Cp','nCE','nLb'},
         {'nLa','Eu','Su'}
     ]},
+
+    #
 
     {'name':'NOP','bytecode': 0x9,
     'control':
