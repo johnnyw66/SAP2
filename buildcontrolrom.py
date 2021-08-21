@@ -71,7 +71,7 @@ fetchControlWords = [{'Ep','nLm'},{'Cp'},{'nCE','nLi'}]
 
 opcodes = [
 
-    {'name':'LDA','bytecode': 0x00, 'control':
+    {'name':'LDA','bytecode': 0x06, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -94,10 +94,9 @@ opcodes = [
     ]},
 
 
-    {'name':'ADD','bytecode': 0x2,
+    {'name':'ADD','bytecode': 0x02,
     'control':
     [
-        {'dbg'},
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
         {'Ep','nLm'},
@@ -108,11 +107,20 @@ opcodes = [
         {'nLa','Eu'}
     ]},
 
-    {'name':'OUT','bytecode': 0x3,
-    'control':
-    [
-        {'Ea','nLo'},
+    {'name':'SUB','bytecode': 0x03,
+        'control':
+        [
+            {'Ep','nLm'},
+            {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+            {'Ep','nLm'},
+            {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+            {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+            {'nCE','nLb'},        #
+            {'nLa','Eu','Su'}
     ]},
+
+
 
 
     {'name':'JMP','bytecode': 0x4,
@@ -125,15 +133,34 @@ opcodes = [
         {'E16','Lp','f0','f1'},        # Enable both bytes of 2 address reg Write to PC if condition true
     ]},
 
-    {'name':'LDI','bytecode': 0x5,
+
+    {'name':'JPNZ','bytecode': 0x5,
     'control':
     [
         {'Ep','nLm'},
-        {'Cp','nCE','nLa'}
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
+    ]},
+
+    {'name':'LDI','bytecode': 0x00,
+    'control':
+    [
+        {'dbg'},
+        {'Ep','nLm'},
+        {'Cp','nCE','nLa'},
+        {'dbg'}
+
     ]},
 
 
 
+    {'name':'OUT','bytecode': 0x07,
+    'control':
+    [
+        {'Ea','nLo'},
+    ]},
 
 
 
