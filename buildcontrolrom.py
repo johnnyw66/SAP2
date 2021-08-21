@@ -45,16 +45,13 @@ clLines = [
 
     {'key':"f2",  'bit':7, 'active': ACTIVEHIGH,'desc':"Select bit for Constant Bank/ALU Function"},
     {'key':"Ec",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Place Constant (from Constant Bank) defined by {f2,f1,f0} on the DBUS"},
-    {'key':"Ex",  'bit':5, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"Xx",  'bit':5, 'active': ACTIVEHIGH, 'desc':"Swap over reg banks (EXX instruction)"},
+    {'key':"dbg",  'bit':4, 'active': ACTIVEHIGH, 'desc':"Debug"},
 
-#    {'key':"Ds",  'bit':7, 'active': ACTIVEHIGH,'desc':"Some Decription"},
-#    {'key':"Is",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"Es",  'bit':4, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-
-    {'key':"U12",  'bit':3, 'active': ACTIVEHIGH,'desc':"Some Decription"},
-    {'key':"U13",  'bit':2, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U14",  'bit':1, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"dbg",  'bit':0, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"Us",  'bit':3, 'active': ACTIVEHIGH,'desc':"Increment if 1 or Decrement if 0 - used with Cs"},
+    {'key':"Es",  'bit':2, 'active': ACTIVEHIGH, 'desc':"Place Stack Address on Address Bus"},
+    {'key':"Cs",  'bit':1, 'active': ACTIVEHIGH, 'desc':"Enable Counting"},
+    {'key':"nLs",  'bit':0, 'active': ACTIVELOW, 'desc':"Load StackPointer with contents on ABUS"},
 ]
 # Every microprocessor opcode instruction will have the
 # same three controlwords for T1,T2 and T3,
@@ -156,7 +153,6 @@ opcodes = [
     {'name':'SUBI','bytecode': 0x07,
     'control':
     [
-        {'dbg'},
         {'Ep','nLm'},
         {'Cp','nCE','nLb'},
         {'nLa','Eu','Su','Lf'}
@@ -250,7 +246,7 @@ opcodes = [
     {'name':'OUT R0','bytecode': 0x12,
     'control':
     [
-        {'dbg','Ek','nLo'},
+        {'Ek','nLo'},
     ]},
     {'name':'OUT R1','bytecode': 0x13,
     'control':
@@ -271,7 +267,7 @@ opcodes = [
     {'name':'EXX','bytecode': 0x16,
     'control':
     [
-        {'Ex'},
+        {'Xx'},
     ]},
 
 
@@ -309,9 +305,49 @@ opcodes = [
     ]},
 
 
-    {'name':'NOP','bytecode': 0x20, 'control':
+    {'name':'DEC SP','bytecode': 0x1a, 'control':
     [
+        {'Cs'}
     ]},
+
+
+    {'name':'INC SP','bytecode': 0x1b, 'control':
+    [
+        {'Cs','Us'}
+    ]},
+
+
+    {'name':'LDI SP','bytecode': 0x1c, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLs'},        # Enable both bytes of 2 address reg and Write to Stack Reg.
+
+    ]},
+
+    {'name':'PUSH R0R1','bytecode': 0x1d, 'control':
+    [
+        {'Cs'}, #DEC SP
+        {'Es','nLm'}, # Place Stack address in MAR
+        {'Ek','Lr','Cs'}, #Place Contents of R0 into RAM location pointing by MAR. also DEC SP
+        {'Es','nLm'}, #  Load SP adress into MAR
+        {'Ek','f0','Lr'} # Place contents of R1 into RAM location pointed by MAR
+
+
+    ]},
+
+    {'name':'POP R0R1','bytecode': 0x1e, 'control':
+    [
+        {'Es','nLm'},
+        {'nCE','nLk','k0'},
+        {'Cs','Us'},
+        {'Es','nLm'},
+        {'nCE','nLk','Cs','Us'}
+
+    ]},
+
 
     {'name':'HLT','bytecode': 0xff,
     'control':
