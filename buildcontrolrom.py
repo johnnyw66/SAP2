@@ -49,7 +49,7 @@ clLines = [
     {'key':"U12",  'bit':3, 'active': ACTIVEHIGH,'desc':"Some Decription"},
     {'key':"U13",  'bit':2, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
     {'key':"U14",  'bit':1, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U15",  'bit':0, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"dbg",  'bit':0, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
 ]
 # Every microprocessor opcode instruction will have the
 # same three controlwords for T1,T2 and T3,
@@ -89,8 +89,52 @@ opcodes = [
         {'Ep','nLm'},
         {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
         {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
-        {'Ea','Lr'}         # Finally Write the contents of the current address in MAR to A reg
+
+        {'Ea','Lr'}         # Finally Write the contents of A reg to the current address in MAR.
     ]},
+
+
+    {'name':'ADD','bytecode': 0x2,
+    'control':
+    [
+        {'dbg'},
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'nCE','nLb'},        #
+        {'nLa','Eu'}
+    ]},
+
+    {'name':'OUT','bytecode': 0x3,
+    'control':
+    [
+        {'Ea','nLo'},
+    ]},
+
+
+    {'name':'JMP','bytecode': 0x4,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0','f1'},        # Enable both bytes of 2 address reg Write to PC if condition true
+    ]},
+
+    {'name':'LDI','bytecode': 0x5,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLa'}
+    ]},
+
+
+
+
 
 
     {'name':'NOP','bytecode': 0x20, 'control':
@@ -327,20 +371,22 @@ def produce32BitROM(romName, raw = True):
             file.write(f"{address:02x}: ")
 
         bytecode = op['bytecode']
-        gap = bytecode - lastbytecode - 1
-        print(f"Filling in gap of {gap} opcodes")
-        if (gap > 0):
-            for n in range(gap):
-                for word in fetchWords:
-                    file.write(f"{word:08x} ")
-
-                remaining =  32 - len(fetchWords)
-
-                for i in range(remaining):
-                    file.write(f"{nopCntWord:08x} ")
+        #gap = bytecode - lastbytecode - 1
+        #print(f"Filling in gap of {gap} opcodes")
+        #if (gap > 0):
+        #    for n in range(gap):
+        #        file.write(f"Op Code {(lastbytecode + n + 1):02x}\n")
+        #        for word in fetchWords:
+        #            file.write(f"{word:08x} ")
+#
+#                remaining =  32 - len(fetchWords)
+#
+#                for i in range(remaining):
+#                    file.write(f"{nopCntWord:08x} ")
             #print(f"{nopCntWord:06x} ", end = '')
-                address += 32
+#                address += 32
 
+        #file.write(f"Op Code {op['bytecode']:02x}\n")
         for word in fetchWords:
             file.write(f"{word:08x} ")
             #print(f"{word:06x} ", end = '')
