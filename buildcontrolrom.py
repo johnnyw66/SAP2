@@ -31,10 +31,10 @@ clLines = [
 
 #
     # Free control lines for use later
-    {'key':"nLal",  'bit':15, 'active': ACTIVELOW,'desc':"Some Decription"},
-    {'key':"nLah",  'bit':14, 'active': ACTIVELOW, 'desc':"Some Decription"},
-    {'key':"E16",  'bit':13, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
-    {'key':"U3",  'bit':12, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
+    {'key':"nLal",  'bit':15, 'active': ACTIVELOW,'desc':"Load low byte of address with contents on DBUS"},
+    {'key':"nLah",  'bit':14, 'active': ACTIVELOW, 'desc':"Load high byte of address with contents on DBUS"},
+    {'key':"E16",  'bit':13, 'active': ACTIVEHIGH, 'desc':"Show DBUS<->ABUS regsiters (two) on Address Bus"},
+    {'key':"Lf",  'bit':12, 'active': ACTIVEHIGH, 'desc':"Latch Flag Register"},
 
     {'key':"U4",  'bit':11, 'active': ACTIVEHIGH,'desc':"Some Decription"},
     {'key':"U5",  'bit':10, 'active': ACTIVEHIGH, 'desc':"Some Decription"},
@@ -71,7 +71,7 @@ fetchControlWords = [{'Ep','nLm'},{'Cp'},{'nCE','nLi'}]
 
 opcodes = [
 
-    {'name':'LDA','bytecode': 0x06, 'control':
+    {'name':'LDA','bytecode': 0x00, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -104,7 +104,7 @@ opcodes = [
         {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
 
         {'nCE','nLb'},        #
-        {'nLa','Eu'}
+        {'nLa','Eu','Lf'}
     ]},
 
     {'name':'SUB','bytecode': 0x03,
@@ -117,13 +117,13 @@ opcodes = [
             {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
 
             {'nCE','nLb'},        #
-            {'nLa','Eu','Su'}
+            {'nLa','Eu','Su','Lf'}
     ]},
 
 
 
 
-    {'name':'JMP','bytecode': 0x4,
+    {'name':'JMP','bytecode': 0x04,
     'control':
     [
         {'Ep','nLm'},
@@ -134,7 +134,7 @@ opcodes = [
     ]},
 
 
-    {'name':'JPNZ','bytecode': 0x5,
+    {'name':'JPNZ','bytecode': 0x05,
     'control':
     [
         {'Ep','nLm'},
@@ -144,19 +144,25 @@ opcodes = [
         {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
     ]},
 
-    {'name':'LDI','bytecode': 0x00,
+    {'name':'LDI','bytecode': 0x06,
     'control':
     [
-        {'dbg'},
         {'Ep','nLm'},
         {'Cp','nCE','nLa'},
-        {'dbg'}
 
     ]},
 
 
+    {'name':'SUBI','bytecode': 0x07,
+    'control':
+    [
+        {'dbg'},
+        {'Ep','nLm'},
+        {'Cp','nCE','nLb'},
+        {'nLa','Eu','Su','Lf'}
+    ]},
 
-    {'name':'OUT','bytecode': 0x07,
+    {'name':'OUT','bytecode': 0x08,
     'control':
     [
         {'Ea','nLo'},
