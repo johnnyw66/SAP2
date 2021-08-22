@@ -6,6 +6,7 @@ ACTIVELOW = 0
 # Definition for each of our control lines. We define which bit in the
 # control word they occupy and if that control bit is active low or active high.
 
+opcodeTable = {}
 
 clLines = [
     {'key':"Cp", 'bit':31, 'active': ACTIVEHIGH, 'desc':"Enable PC count (inc PC)"},
@@ -451,6 +452,8 @@ def buildMicrocode():
         opSize = len(op['control'])
         op['tsize'] = opSize
         op['controlwords'] = []
+        opcodeTable[op['bytecode']] = op
+
         #print()
         for tStateIndex,tStateCtrlst in enumerate(op['control']):
             op['controlwords'].append(buildControlWord(tStateCtrlst, NOPWord))
@@ -477,6 +480,48 @@ def produce32BitNOPROM(romName, raw = True):
         file.write(f"{nopCntWord:08x} ")
         if (n % 8 == 7):
             file.write("\n")
+
+    file.close()
+
+# Produce LogiSim memory file ROM/RAM  files
+# from opcodes control word arrays.
+# In this version - the 'Execute' control words proceed
+# after the generic 'Fetch' control words
+def produce32BitROMNEW(romName, raw = True):
+
+
+    # Build up a couple of 'constants'
+
+    nopCntWord = buildNOPControlWord()
+
+    fetchWords = []
+    for fmicrocode in fetchControlWords:
+        fetchWords.append(buildControlWord(fmicrocode, nopCntWord))
+
+    print(f"Producing 32bit Rom NOP {nopCntWord:08x}")
+
+    file = open(romName, "w+")
+    file.write("v2.0 raw\n")
+
+    for bcode in range(256):
+        bcodeExists = bcode in opcodeTable
+
+        for word in fetchWords:
+            file.write(f"{word:08x} ")
+
+        remaining =  32 - len(fetchWords) -   (0 if not bcodeExists else len(opcodeTable[bcode]['controlwords']))
+
+        if (bcode in opcodeTable):
+            op = opcodeTable[bcode]
+
+            for word in op['controlwords']:
+                file.write(f"{word:08x} ")
+
+        # Finish off trailing opcodes with NOPs
+        for i in range(remaining):
+            file.write(f"{nopCntWord:08x} ")
+
+        file.write("\n")
 
     file.close()
 
@@ -587,13 +632,13 @@ def produce8BitROM(romName, shift, raw = True):
 
 def produceROMs(romType = 0, raw = True):
     #
-    produce32BitROM('microcode32bit.rom', raw)
-    produce32BitNOPROM('microcodeNOPs32bit.rom', raw)
+    produce32BitROMNEW('microcode32bit.rom', raw)
+    #produce32BitNOPROM('microcodeNOPs32bit.rom', raw)
 
-    produce8BitROM('microcode32bit-8bitrom-rom1.rom', 24,raw) # upper 8-bits
-    produce8BitROM('microcode32bit-8bitrom-rom2.rom', 16,raw) #middle 8-bits
-    produce8BitROM('microcode32bit-8bitrom-rom3.rom', 8,raw) #bottom 8-bits
-    produce8BitROM('microcode32bit-8bitrom-rom4.rom', 0,raw) #bottom 8-bits
+    #produce8BitROM('microcode32bit-8bitrom-rom1.rom', 24,raw) # upper 8-bits
+    #produce8BitROM('microcode32bit-8bitrom-rom2.rom', 16,raw) #middle 8-bits
+    ##produce8BitROM('microcode32bit-8bitrom-rom3.rom', 8,raw) #bottom 8-bits
+    #produce8BitROM('microcode32bit-8bitrom-rom4.rom', 0,raw) #bottom 8-bits
 
 
 
@@ -602,16 +647,20 @@ def sortKey(e):
 
     return e['bytecode']
 
+# Info only - does no real work
 def listMicrocode():
 
-    opcodes.sort(key=sortKey)
-    accum = len(fetchControlWords)
+    #opcodes.sort(key=sortKey)
+    #accum = len(fetchControlWords)
 
-    for op in opcodes:
-        op['wordoffset'] = accum
-        accum += op['tsize']
-        print(op)
-
+    #for op in opcodes:
+    #    op['wordoffset'] = accum
+    #    accum += op['tsize']
+    #    print(op)
+    for bcode in range(256):
+        if (bcode in opcodeTable):
+            op = opcodeTable[bcode]
+            print(op)
 
 
 
