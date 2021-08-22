@@ -163,17 +163,29 @@ class Parser:
             return None
 
 class AssemblerParser(Parser):
+
     def start(self):
         return self.testme()
 
     def testme(self):
-        #print("*******",self.maybe_keyword('hello'))
-        #print("testme")
         rv = self.match('instruction','label','metaop')
         return rv
 
     def instruction(self):
-        return self.match('alu','movi','mov','ldi','call','singlebyte')
+        return self.match('alu','movi','mov','ldi','call','singlebyte','singleop','out')
+
+    def singleop(self):
+        op = self.keyword('exx','pushall','popall')
+        if (op is not None):
+            return {'op': op, 'size':1, 'code': [0]}
+        return None
+
+    def out(self):
+        op = self.keyword('out','push','shl','shr')
+        if (op is not None):
+            reg = self.match('registers')
+            return {'op': op, 'reg':reg, 'size':1, 'code': [0]}
+        return None
 
     def singlebyte(self):
         op = self.keyword('inc','dec')
@@ -226,7 +238,7 @@ class AssemblerParser(Parser):
                 regl = self.match('registers')
                 self.char(',')
                 regr = self.match('registers')
-                return {'mov':{'rl':regl, 'rr': regr},'size':1,'code':[0]}
+                return {'op': 'mov', 'data': {'rl':regl, 'rr': regr},'size':1,'code':[0]}
         return None
 
     def registers(self):
@@ -241,7 +253,7 @@ class AssemblerParser(Parser):
                 regl = self.match('registers')
                 self.char(',')
                 data = self.match('number')
-                return {'movi':{'rl':regl, 'data': data},'size':1,'code':[0]}
+                return {'movi':{'rl':regl, 'data': data},'size':2,'code':[0]}
         return None
 
     def labelstr(self):
@@ -257,24 +269,25 @@ class AssemblerParser(Parser):
 
     def label(self):
         self.char(':')
-        return self.labelstr()
+        return {'op':'label', 'data': self.labelstr(), 'size' : 0}
 
 
 
     def metaop(self):
         op = self.maybe_char('.')
         if (op is not None):
-            return self.match('definedata','origin')
+            return self.match('definedata','origin','end')
         return None
 
     def number(self):
         rv = self.match('binarynumber','hexnumber','octalnumber','decnumber')
         return rv
 
+
     def definedata(self):
         op = self.match('db','dw')
         if (op is not None):
-            return {'data': self.match('number'),'op':op}
+            return {'data': self.match('number'),'op':op, 'size': 1 if op == 'db' else 2}
         return None
 
     def db(self):
@@ -286,9 +299,15 @@ class AssemblerParser(Parser):
     def origin(self):
         op = self.keyword('org')
         if (op is not None):
-            return {'org':self.match('number')}
+            return {'op':'org', 'data':self.match('number'), 'size':0}
         return None
 
+
+    def end(self):
+        op = self.keyword('end')
+        if (op is not None):
+            return {'op':'end', 'size':0}
+        return None
 
 
 
@@ -356,14 +375,29 @@ class AssemblerParser(Parser):
 
 if __name__ == '__main__':
     parser = AssemblerParser()
+    pc = 0
+    code = []
+    asm = open("test.asm", "r")
 
     while True:
         try:
-            print(parser.parse(input('> ')))
+            text = asm.readline()
+            print("<<<<",text)
+            op = parser.parse(text)
+            #op = parser.parse(input('> '))
+            code.append(op)
+            op['pc'] = pc
+            pc += op['size']
+            if (op['op'] == 'end'):
+                # completed  - resolve labels
+                for op in code:
+                    print(op)
+                break
+
         except KeyboardInterrupt:
-            print()
+            pass
         except (EOFError, SystemExit):
-            print()
             break
-        except (ParseError, ZeroDivisionError) as e:
-            print('Error: %s' % e)
+        except (ParseError, ZeroDivisionError, IndexError) as e:
+            #print('Error: %s' % e)
+            pass
