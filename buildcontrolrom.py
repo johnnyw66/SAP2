@@ -18,7 +18,7 @@ clLines = [
     {'key':"nLa", 'bit':25, 'active': ACTIVELOW, 'desc':"Load contents of the Bus into the A Reg"},
     {'key':"Ea",  'bit':24, 'active': ACTIVEHIGH, 'desc':"Place contents of the A Reg onto the BUS"},
 
-    {'key':"Su",  'bit':23, 'active': ACTIVEHIGH, 'desc':"set ALU function to Subtract (otherwise it will be 'ADD')"},
+    {'key':"Eb",  'bit':23, 'active': ACTIVEHIGH, 'desc':"Place contents of the B Reg onto the BUS"},
     {'key':"Eu",  'bit':22, 'active': ACTIVEHIGH, 'desc':"Enable ALU (output directly to B Reg)"},
     {'key':"nLb", 'bit':21, 'active': ACTIVELOW, 'desc':"Load contents of B reg 'bus' into B Reg"},
     {'key':"nLo", 'bit':20, 'active': ACTIVELOW, 'desc':"Load contents of Bus into Output Reg"},
@@ -42,11 +42,11 @@ clLines = [
     {'key':"k1",  'bit':9, 'active': ACTIVEHIGH, 'desc':"Bank Register Write Select bit 1"},
     {'key':"k0",  'bit':8, 'active': ACTIVEHIGH, 'desc':"Bank Register Write select bit 0"},
 
-
-    {'key':"f2",  'bit':7, 'active': ACTIVEHIGH,'desc':"Select bit for Constant Bank/ALU Function"},
+    # 'alias' allows us to refer to the same pins as different names - useful for shared select function pins
+    {'key':"f2",  'alias':{'Su'}, 'bit':7, 'active': ACTIVEHIGH,'desc':"Select bit for Constant Bank/ALU Function"},
     {'key':"Ec",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Place Constant (from Constant Bank) defined by {f2,f1,f0} on the DBUS"},
     {'key':"Xx",  'bit':5, 'active': ACTIVEHIGH, 'desc':"Swap over reg banks (EXX instruction)"},
-    {'key':"dbg",  'bit':4, 'active': ACTIVEHIGH, 'desc':"Debug"},
+    {'key':"Sa",  'bit':4, 'active': ACTIVEHIGH, 'desc':"Source for A B Reg pair can come from DBUS or Address BUS (0 is DBUS)"},
 
     {'key':"Us",  'bit':3, 'active': ACTIVEHIGH,'desc':"Increment if 1 or Decrement if 0 - used with Cs"},
     {'key':"Es",  'bit':2, 'active': ACTIVEHIGH, 'desc':"Place Stack Address on Address Bus"},
@@ -348,6 +348,45 @@ opcodes = [
 
     ]},
 
+    {'name':'CALL ','bytecode': 0x1f, 'control':
+    [
+
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        # ASBUSLReg and ASBUSHReg contain place to jump -
+        # all we do now is push the current value of PC onto the stack
+        {'Ep','nLm','Sa','nLa','nLb'}, # Low byte of PC in A REG - High byte of PC in B REG
+
+        # Now save A REG and B REG onto the Stack
+        # A PUSH AB instruction!
+        {'Cs'}, #DEC SP
+        {'Es','nLm'}, # Place Stack address in MAR
+        {'Ea','Lr','Cs'}, #Place Contents of R0 into RAM location pointing by MAR. also DEC SP
+        {'Es','nLm'}, #  Load SP adress into MAR
+        {'Eb','Lr'}, # Place contents of R1 into RAM location pointed by MAR
+
+        # finally do the 'jump'
+
+        {'E16','Lp','f0','f1'},        # Enable both bytes of 2 address reg Write to PC f0,f1 = 11 means it will JUMP
+
+
+    ]},
+
+
+    {'name':'RET ','bytecode': 0x20, 'control':
+    [
+
+        {'Es','nLm'},
+        {'nCE','nLah'},
+        {'Cs','Us'},
+        {'Es','nLm'},
+        {'nCE','nLal','Cs','Us'},
+
+        {'E16','Lp','f0','f1'}
+
+    ]},
 
     {'name':'HLT','bytecode': 0xff,
     'control':
@@ -357,117 +396,6 @@ opcodes = [
 
 ]
 
-opcodesOld = [
-
-    {'name':'LDA','bytecode': 0, 'control':
-    [
-        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
-        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
-        {'nLm','E16'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
-        {'nCE','nLa'}
-    ]},
-
-    {'name':'ADD','bytecode': 0x1,
-    'control':
-    [
-        {'nLm','nEi'},
-        {'nCE','nLb'},
-        {'nLa','Eu'}
-    ]},
-
-    {'name':'SUB','bytecode': 0x2,
-    'control':
-    [
-        {'nLm','nEi'},
-        {'nCE','nLb'},
-        {'nLa','Eu','Su'}
-    ]},
-
-
-
-    {'name':'STA','bytecode': 0x3,
-    'control':
-    [
-        {'nLm','nEi'},
-        {'Ea','Lr'}
-    ]},
-
-    {'name':'JMP','bytecode': 0x4,
-    'control':
-    [
-        {'Lp','f0','f1'}
-    ]},
-
-    {'name':'JPNZ','bytecode': 0x5,
-    'control':
-    [
-        {'Lp','f0'}
-    ]},
-
-    {'name':'LDI','bytecode': 0x6,
-    'control':
-    [
-        {'Ep','nLm'},
-        {'Cp','nCE','nLa'}
-    ]},
-
-    {'name':'ADDI','bytecode': 0x7,
-    'control':
-    [
-        {'Ep','nLm'},
-        {'Cp','nCE','nLb'},
-        {'nLa','Eu'}
-
-    ]},
-
-    {'name':'SUBI','bytecode': 0x8,
-    'control':
-    [
-        {'Ep','nLm'},
-        {'Cp','nCE','nLb'},
-        {'nLa','Eu','Su'}
-    ]},
-
-    #
-
-    {'name':'NOP','bytecode': 0x9,
-    'control':
-    [
-    ]},
-
-    {'name':'NOP1','bytecode': 0xa,
-    'control':
-    [
-    ]},
-
-    {'name':'NOP2','bytecode': 0xb,
-    'control':
-    [
-    ]},
-
-    {'name':'NOP3','bytecode': 0xc,
-    'control':
-    [
-    ]},
-
-    {'name':'NOP4','bytecode': 0xd,
-    'control':
-    [
-    ]},
-
-    {'name':'OUT','bytecode': 0xe,
-    'control':
-    [
-        {'Ea','nLo'},
-    ]},
-
-    {'name':'HLT','bytecode': 0xf,
-    'control':
-    [
-
-    ]},
-
-]
 
 # Calculate the NOP microcode control word
 
@@ -482,7 +410,7 @@ def buildNOPControlWord():
 def getControlLine(controlLineName):
 
     for cl in clLines:
-        if (cl['key'] == controlLineName):
+        if (cl['key'] == controlLineName) or ('alias' in cl and controlLineName in cl['alias']):
             return cl
     raise Exception(f"Can not find defn for control line {controlLineName}")
 
