@@ -172,10 +172,10 @@ class AssemblerParser(Parser):
         return rv
 
     def instruction(self):
-        return self.match('alu','movi','mov','ldi','call','singlebyte','singleop','out')
+        return self.match('alu','movi','mov','ldi','call','singlebyte','singleop','out','djnz')
 
     def singleop(self):
-        op = self.keyword('exx','pushall','popall')
+        op = self.keyword('exx','pushall','popall','ret')
         if (op is not None):
             return {'op': op, 'size':1, 'code': [0]}
         return None
@@ -194,6 +194,15 @@ class AssemblerParser(Parser):
             return {'op': op, 'reg':reg, 'size':1, 'code': [0]}
         return None
 
+
+    def djnz(self):
+        op = self.keyword('djnz')
+        if (op is not None):
+            reg = self.match('registers')
+            self.char(',')
+            data = self.match('number','labelstr')
+            return {'op': op, 'reg': reg,'addr':data, 'size':3, 'code': [0]}
+        return None
 
     def call(self):
         op = self.keyword('call','jmp','jpz','jpnz','jpc','jpnc')
@@ -253,7 +262,7 @@ class AssemblerParser(Parser):
                 regl = self.match('registers')
                 self.char(',')
                 data = self.match('number')
-                return {'movi':{'rl':regl, 'data': data},'size':2,'code':[0]}
+                return {'op':'movi','date':{'rl':regl, 'data': data},'size':2,'code':[0]}
         return None
 
     def labelstr(self):
@@ -382,7 +391,7 @@ if __name__ == '__main__':
     while True:
         try:
             text = asm.readline()
-            print("<<<<",text)
+            #print("<<<<",text)
             op = parser.parse(text)
             #op = parser.parse(input('> '))
             code.append(op)
