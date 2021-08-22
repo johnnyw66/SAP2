@@ -391,15 +391,15 @@ if __name__ == '__main__':
     while True:
         try:
             text = asm.readline()
-            #print("<<<<",text)
             op = parser.parse(text)
-            #op = parser.parse(input('> '))
             code.append(op)
-            op['pc'] = pc
-            pc += op['size']
             if (op['op'] == 'end'):
                 # completed  - resolve labels
                 for op in code:
+                    if (op['op'] == 'org'):
+                        pc = op['data']
+                    op['pc'] = pc
+                    pc += op['size']
                     print(op)
                 break
 
