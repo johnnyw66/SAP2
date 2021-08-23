@@ -310,6 +310,35 @@ opcodes = [
 
     ]},
 
+    {'name':'INC R1','bytecode': 0x89,
+    'control':
+    [
+        {'Ek','nLa','f0'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Lf','nLk','k0'},
+
+    ]},
+
+    {'name':'INC R2','bytecode': 0x8a,
+    'control':
+    [
+        {'Ek','nLa','f1'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Lf','nLk','k1'},
+
+    ]},
+
+    {'name':'INC R3','bytecode': 0x8b,
+    'control':
+    [
+        {'Ek','nLa','f1','f0'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Lf','nLk','k0','k1'},
+
+    ]},
+
+    #
+
     {'name':'DEC R0','bytecode': 0x8c,
     'control':
     [
@@ -318,6 +347,29 @@ opcodes = [
         {'Eu','Su','Lf','nLk'}
     ]},
 
+    {'name':'DEC R1','bytecode': 0x8d,
+    'control':
+    [
+        {'Ek','nLa','f0'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk','k0'}
+    ]},
+
+    {'name':'DEC R2','bytecode': 0x8e,
+    'control':
+    [
+        {'Ek','nLa','f1'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk','k1'}
+    ]},
+
+    {'name':'DEC R3','bytecode': 0x8f,
+    'control':
+    [
+        {'Ek','nLa','f1','f0'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk','k1','k0'}
+    ]},
 
     # Jumping and conditional Jumping
 

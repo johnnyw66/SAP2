@@ -1,6 +1,28 @@
 .org 0
-  call test5
+  jmp testincdec
   hlt
+
+:testincdec1reg
+    inc r0
+    inc r1
+    inc r2
+    inc r3
+    hlt
+
+
+:testincdec
+  inc r0
+  inc r1
+  inc r2
+  inc r3
+  exx
+  dec r0
+  dec r1
+  dec r2
+  dec r3
+  exx
+  hlt
+
 
 
 
