@@ -1,13 +1,66 @@
 .org 0
-  call testdjnz
+  call testmov1
   hlt
+
+:testmov
+  call testmov0
+  call testmov1
+  call testmov2
+  call testmov3
+  ret
+
+:teststack
+  inc sp
+  inc sp
+  dec sp
+  dec sp
+  ret
+
+:testmov0
+  call inittestmov
+  mov r0,r0
+  mov r0,r1
+  mov r0,r2
+  mov r0,r3
+  ret
+
+:testmov1
+  call inittestmov
+  mov r1,r0
+  mov r1,r1
+  mov r1,r2
+  mov r1,r3
+  ret
+
+:testmov2
+  call inittestmov
+  mov r2,r0
+  mov r2,r1
+  mov r2,r2
+  mov r2,r3
+  ret
+
+:testmov3
+  call inittestmov
+  mov r3,r0
+  mov r3,r1
+  mov r3,r2
+  mov r3,r3
+  ret
+
+:inittestmov
+  movi r0,0xaa
+  movi r1,0xbb
+  movi r2,0xcc
+  movi r3,0xdd
+  ret
 
 
 :testdjnz
   movi r0,10
-  movi r1,10
-  movi r2,10
-  movi r3,10
+  movi r1,12
+  movi r2,13
+  movi r3,14
 :tdjnz0
   djnz r0,tdjnz0
 :tdjnz1

@@ -604,6 +604,7 @@ opcodes = [
     # {f1,f0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
     # {k1,k0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
 
+    # R0 base 0x90
     {'name':'TOTEST MOV R0,R0','bytecode': 0x90,
     'control':
     [
@@ -628,7 +629,7 @@ opcodes = [
         {'Ek','f1','f0','nLk'},
     ]},
 
-
+    # R1 dest base 0x94
     {'name':'MOV R1,R0','bytecode': 0x94,
     'control':
     [
@@ -654,6 +655,66 @@ opcodes = [
     ]},
 
 
+    # R2 dest
+    {'name':'TODO MOV R2,R0','bytecode': 0x98,
+    'control':
+    [
+        {'Ek','nLk','k1'},
+    ]},
+
+    {'name':'TODO MOV R2,R1','bytecode': 0x99,
+    'control':
+    [
+        {'Ek','nLk','k1','f0'},
+    ]},
+
+    {'name':'TODO MOV R2,R2','bytecode': 0x9a,
+    'control':
+    [
+        {'Ek','nLk','k1','f1'},
+    ]},
+
+    {'name':'TODO MOV R2,R3','bytecode': 0x9b,
+    'control':
+    [
+        {'Ek','nLk','k1','f1','f0'},
+    ]},
+
+    # R3 dest base 0x9c
+    {'name':'TODO MOV R3,R0','bytecode': 0x9c,
+    'control':
+    [
+        {'Ek','nLk','k1','k0'},
+    ]},
+
+    {'name':'TODO MOV R3,R1','bytecode': 0x9d,
+    'control':
+    [
+        {'Ek','nLk','k1','k0','f0'},
+    ]},
+
+    {'name':'TODO MOV R3,R2','bytecode': 0x9e,
+    'control':
+    [
+        {'Ek','nLk','k1','k0','f1'},
+    ]},
+
+    {'name':'TODO MOV R3,R3','bytecode': 0x9f,
+    'control':
+    [
+        {'Ek','nLk','k1','k0','f1','f0'},
+    ]},
+
+    # R0 dest
+
+    {'name':'TOTEST ADD R0,R0','bytecode': 0xa0,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ek','nLb'},
+        {'nLk','Eu','Lf'}
+    ]},
+
     {'name':'ADD R0,R1','bytecode': 0xa1,
     'control':
     [
@@ -662,12 +723,128 @@ opcodes = [
         {'nLk','Eu','Lf'}
     ]},
 
-    {'name':'ADD R1,R0','bytecode': 0xa4,
+    {'name':'TODO ADD R0,R2','bytecode': 0xa2,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ek','f0','nLb'},
+        {'nLk','Eu','Lf'}
+    ]},
+
+    {'name':'TODO ADD R0,R3','bytecode': 0xa3,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ek','f0','nLb'},
+        {'nLk','Eu','Lf'}
+    ]},
+
+    # R1 dest base 0xa4
+    {'name':'TOTEST ADD R1,R0','bytecode': 0xa4,
     'control':
     [
         {'Ek','f0','nLa'},
         {'Ek','nLb'},
         {'nLk','k0','Eu','Lf'}
+    ]},
+
+    {'name':'TOTEST ADD R1,R1','bytecode': 0xa5,
+    'control':
+    [
+        {'Ek','f0','nLa'},
+        {'Ek','f0','nLb'},
+        {'nLk','k0','Eu','Lf'}
+    ]},
+    {'name':'TOTEST ADD R1,R2','bytecode': 0xa6,
+    'control':
+    [
+        {'Ek','f0','nLa'},
+        {'Ek','f1','nLb'},
+        {'nLk','k0','Eu','Lf'}
+    ]},
+    {'name':'TOTEST ADD R1,R3','bytecode': 0xa7,
+    'control':
+    [
+        {'Ek','f0','nLa'},
+        {'Ek','f1','f0','nLb'},
+        {'nLk','k0','Eu','Lf'}
+    ]},
+
+
+    # R2 dest
+    {'name':'TODO ADD R2,R0','bytecode': 0xa8,
+    'control':
+    [
+        {'Ek','f1','nLa'},
+        {'Ek','nLb'},
+        {'nLk','k1','Eu','Lf'}
+    ]},
+
+    {'name':'TODO ADD R2,R1','bytecode': 0xa9,
+    'control':
+    [
+        {'Ek','f1','nLa'},
+        {'Ek','f0','nLb'},
+        {'nLk','k1','Eu','Lf'}
+    ]},
+    {'name':'TODO ADD R2,R2','bytecode': 0xaa,
+    'control':
+    [
+        {'Ek','f1','nLa'},
+        {'Ek','f1','nLb'},
+        {'nLk','k1','Eu','Lf'}
+    ]},
+    {'name':'TODO ADD R2,R3','bytecode': 0xab,
+    'control':
+    [
+        {'Ek','f1','nLa'},
+        {'Ek','f1','f0','nLb'},
+        {'nLk','k1','Eu','Lf'}
+    ]},
+
+
+
+    # R3 dest base 0xac
+
+    {'name':'TODO ADD R3,R0','bytecode': 0xac,
+    'control':
+    [
+        {'Ek','f1','f0','nLa'},
+        {'Ek','nLb'},
+        {'nLk','k1','k0','Eu','Lf'}
+    ]},
+
+    {'name':'TODO ADD R3,R1','bytecode': 0xad,
+    'control':
+    [
+        {'Ek','f1','f0','nLa'},
+        {'Ek','f0','nLb'},
+        {'nLk','k1','k0','Eu','Lf'}
+    ]},
+    {'name':'TODO ADD R3,R2','bytecode': 0xae,
+    'control':
+    [
+        {'Ek','f1','f0','nLa'},
+        {'Ek','f1','nLb'},
+        {'nLk','k1','k0','Eu','Lf'}
+    ]},
+    {'name':'TODO ADD R3,R3','bytecode': 0xaf,
+    'control':
+    [
+        {'Ek','f1','f0','nLa'},
+        {'Ek','f1','f0','nLb'},
+        {'nLk','k1','k0','Eu','Lf'}
+    ]},
+
+
+
+    # Sub R0 dest base 0xb0
+    {'name':'TODO SUB R0,R0','bytecode': 0xb0,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ek','f0','nLb'},
+        {'nLk','Su','Eu','Lf'}
     ]},
 
     {'name':'SUB R0,R1','bytecode': 0xb1,
