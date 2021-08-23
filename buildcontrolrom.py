@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 controlWordSize = 32
 ACTIVEHIGH = 1
