@@ -16,7 +16,12 @@ codeBuilder = {
     'dec' : {'build':'singleRegSingleByteBuilder','bytecode':0x8c},
     'decsp' : {'build':'singleByteBuilder','bytecode':0x1e},
     'incsp' : {'build':'singleByteBuilder', 'bytecode':0x1d},
+
+    'pushr0' : {'build':'singleByteBuilder','bytecode':0x1f},
+    'pushr2' : {'build':'singleByteBuilder','bytecode':0x20},
     'pushall' : {'build':'singleByteBuilder','bytecode':0x21},
+    'popr0' : {'build':'singleByteBuilder','bytecode':0x22},
+    'popr2' : {'build':'singleByteBuilder','bytecode':0x23},
     'popall' : {'build':'singleByteBuilder', 'bytecode':0x24},
 
     'shr' : {'build':'singleRegSingleByteBuilder','bytecode':0x80},
@@ -361,7 +366,7 @@ class AssemblerParser(Parser):
         return rv
 
     def instruction(self):
-        return self.match('alu','movwi','movi','mov','ld','call','singlebyte','singleop','out','djnz')
+        return self.match('alu','movwi','movi','mov','ld','call','singlebyte','singleop','out','pushpop','djnz')
 
     def singleop(self):
         op = self.keyword('exx','pushall','popall','ret','nop','hlt','clc','setc')
@@ -370,10 +375,17 @@ class AssemblerParser(Parser):
         return None
 
     def out(self):
-        op = self.keyword('out','push','shl','shr')
+        op = self.keyword('out','shl','shr')
         if (op is not None):
             reg = self.match('registers')
             return {'op': op, 'reg':reg, 'size':1}
+        return None
+
+    def pushpop(self):
+        op = self.keyword('pop','push')
+        if (op is not None):
+            reg = self.match('registers')
+            return {'op': op+'r'+str(reg), 'reg':reg, 'size':1}
         return None
 
     def singlebyte(self):
