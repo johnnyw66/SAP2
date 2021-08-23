@@ -3197,6 +3197,12 @@ end TCL_Generic;
       <a name="label" val="uRESET"/>
       <a name="labelfont" val="SansSerif bold 10"/>
     </comp>
+    <comp lib="0" loc="(840,3210)" name="Probe"/>
+    <comp lib="0" loc="(840,3300)" name="Splitter">
+      <a name="appear" val="right"/>
+      <a name="fanout" val="4"/>
+      <a name="incoming" val="4"/>
+    </comp>
     <comp lib="0" loc="(850,2320)" name="Tunnel">
       <a name="facing" val="east"/>
       <a name="label" val="bkrdsel"/>
@@ -3208,6 +3214,18 @@ end TCL_Generic;
       <a name="label" val="bkwrsel"/>
       <a name="labelfont" val="SansSerif bold 8"/>
       <a name="width" val="2"/>
+    </comp>
+    <comp lib="0" loc="(850,3280)" name="Splitter">
+      <a name="appear" val="right"/>
+      <a name="bit1" val="0"/>
+      <a name="bit2" val="0"/>
+      <a name="bit3" val="0"/>
+      <a name="bit4" val="1"/>
+      <a name="bit5" val="1"/>
+      <a name="bit6" val="1"/>
+      <a name="bit7" val="1"/>
+      <a name="facing" val="south"/>
+      <a name="incoming" val="8"/>
     </comp>
     <comp lib="0" loc="(850,3520)" name="Tunnel">
       <a name="facing" val="south"/>
@@ -3242,12 +3260,6 @@ end TCL_Generic;
       <a name="label" val="f1"/>
       <a name="labelfont" val="SansSerif bold 10"/>
     </comp>
-    <comp lib="0" loc="(860,3250)" name="Probe"/>
-    <comp lib="0" loc="(870,3300)" name="Splitter">
-      <a name="appear" val="right"/>
-      <a name="fanout" val="4"/>
-      <a name="incoming" val="4"/>
-    </comp>
     <comp lib="0" loc="(870,3520)" name="Tunnel">
       <a name="facing" val="south"/>
       <a name="label" val="nLa"/>
@@ -3260,18 +3272,6 @@ end TCL_Generic;
       <a name="facing" val="east"/>
       <a name="label" val="clPCcount"/>
       <a name="labelfont" val="SansSerif bold 10"/>
-    </comp>
-    <comp lib="0" loc="(880,3280)" name="Splitter">
-      <a name="appear" val="right"/>
-      <a name="bit1" val="0"/>
-      <a name="bit2" val="0"/>
-      <a name="bit3" val="0"/>
-      <a name="bit4" val="1"/>
-      <a name="bit5" val="1"/>
-      <a name="bit6" val="1"/>
-      <a name="bit7" val="1"/>
-      <a name="facing" val="south"/>
-      <a name="incoming" val="8"/>
     </comp>
     <comp lib="0" loc="(880,3980)" name="Tunnel">
       <a name="label" val="DBGREGBANK0"/>
@@ -3900,6 +3900,7 @@ end TCL_Generic;
     <comp lib="1" loc="(840,4830)" name="Controlled Buffer">
       <a name="facing" val="south"/>
     </comp>
+    <comp lib="1" loc="(920,3330)" name="NOT Gate"/>
     <comp lib="1" loc="(930,3320)" name="NOT Gate"/>
     <comp lib="1" loc="(930,4800)" name="AND Gate">
       <a name="facing" val="south"/>
@@ -4063,7 +4064,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(1040,2840)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@118e5420"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4b04005a"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4073,7 +4074,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(1070,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5ebc44a0"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5d963039"/>
       <a name="bg" val="#030303"/>
       <a name="label" val="digit4"/>
       <a name="labelloc" val="south"/>
@@ -4099,7 +4100,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(1120,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@deda8c0"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@36d8cf4"/>
       <a name="bg" val="#030303"/>
       <a name="label" val="digit3"/>
       <a name="labelloc" val="south"/>
@@ -4114,13 +4115,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(1170,2840)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6b979598"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@79a541df"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
     </comp>
     <comp lib="5" loc="(1170,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@8dbe39e"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@12489861"/>
       <a name="bg" val="#030303"/>
       <a name="label" val="digit2"/>
       <a name="labelloc" val="south"/>
@@ -4131,7 +4132,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(1220,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@34fe3f61"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7eb365e9"/>
       <a name="bg" val="#030303"/>
       <a name="label" val="digit1"/>
       <a name="labelloc" val="south"/>
@@ -4141,44 +4142,44 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="label" val="WRITE"/>
     </comp>
     <comp lib="5" loc="(1320,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@54b52a96"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@11d64ce7"/>
       <a name="bg" val="#030303"/>
       <a name="labelloc" val="south"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(1350,2850)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3594ecd"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@422e5cbb"/>
       <a name="bg" val="#ffffff"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#ffffff"/>
     </comp>
     <comp lib="5" loc="(1370,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@54498a2b"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@14734f0f"/>
       <a name="bg" val="#030303"/>
       <a name="labelloc" val="south"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(1420,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1109b2f4"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@710aec45"/>
       <a name="bg" val="#030303"/>
       <a name="labelloc" val="south"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(1470,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6c15cbd9"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@521827f7"/>
       <a name="bg" val="#030303"/>
       <a name="labelloc" val="south"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(1480,2850)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2573dfb0"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@62e3728b"/>
       <a name="bg" val="#ffffff"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#ffffff"/>
     </comp>
     <comp lib="5" loc="(1610,2850)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3d7301e7"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6ce652ef"/>
       <a name="bg" val="#ffffff"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#ffffff"/>
@@ -4187,32 +4188,32 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="label" val="RESET"/>
     </comp>
     <comp lib="5" loc="(1740,2850)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@61b19aaf"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4aa8e3f2"/>
       <a name="bg" val="#ffffff"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#ffffff"/>
     </comp>
     <comp lib="5" loc="(1870,2720)" name="LED"/>
     <comp lib="5" loc="(190,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@23b8ce43"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@599c42cf"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(190,4440)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@180d0bdb"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2012045d"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
     </comp>
     <comp lib="5" loc="(1950,2840)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3d545d04"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7ebd5b9a"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
     </comp>
     <comp lib="5" loc="(2080,2840)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@505dcce3"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@738780cc"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4222,13 +4223,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(290,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@35f2ca7d"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@48363e49"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(290,4440)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@45515ccb"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@78b6ebfe"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4246,13 +4247,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(390,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5af29518"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6cc31ef9"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(390,4440)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@64f67071"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@230d624d"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4374,13 +4375,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(600,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4774ffb0"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5a30c413"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(600,4370)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@80c4491"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@15963db0"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4407,13 +4408,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(700,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@46985add"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6156dd2d"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(700,4370)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@113adf87"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2981d440"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4446,7 +4447,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
     </comp>
     <comp lib="5" loc="(800,5750)" name="Button"/>
     <comp lib="5" loc="(820,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@71533b6f"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@754d9d3f"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
@@ -4456,7 +4457,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(840,4370)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1b91d118"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5192459b"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4469,13 +4470,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(90,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1f5b3e05"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@67a4531"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(90,4440)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@58da1c8e"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@217eb26a"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4485,7 +4486,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(920,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@30badcb9"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3843771f"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
@@ -4498,7 +4499,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="north"/>
     </comp>
     <comp lib="5" loc="(940,4370)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@25b6c2a7"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7b3e4311"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -6112,6 +6113,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
     <wire from="(830,4840)" to="(920,4840)"/>
     <wire from="(830,5180)" to="(830,5200)"/>
     <wire from="(830,5820)" to="(850,5820)"/>
+    <wire from="(840,3210)" to="(850,3210)"/>
     <wire from="(840,3580)" to="(840,3820)"/>
     <wire from="(840,3580)" to="(920,3580)"/>
     <wire from="(840,4070)" to="(840,4090)"/>
@@ -6124,6 +6126,9 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
     <wire from="(840,4830)" to="(840,4850)"/>
     <wire from="(850,2320)" to="(860,2320)"/>
     <wire from="(850,2370)" to="(860,2370)"/>
+    <wire from="(850,3210)" to="(850,3280)"/>
+    <wire from="(850,3280)" to="(850,3290)"/>
+    <wire from="(850,3290)" to="(920,3290)"/>
     <wire from="(850,3520)" to="(850,3550)"/>
     <wire from="(850,3590)" to="(850,3820)"/>
     <wire from="(850,3590)" to="(940,3590)"/>
@@ -6144,7 +6149,8 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
     <wire from="(860,2350)" to="(930,2350)"/>
     <wire from="(860,2470)" to="(900,2470)"/>
     <wire from="(860,2490)" to="(900,2490)"/>
-    <wire from="(860,3250)" to="(880,3250)"/>
+    <wire from="(860,3310)" to="(880,3310)"/>
+    <wire from="(860,3320)" to="(900,3320)"/>
     <wire from="(860,3600)" to="(860,3820)"/>
     <wire from="(860,3600)" to="(960,3600)"/>
     <wire from="(860,4350)" to="(860,4370)"/>
@@ -6165,9 +6171,9 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
     <wire from="(870,4740)" to="(870,4750)"/>
     <wire from="(870,5040)" to="(890,5040)"/>
     <wire from="(880,1790)" to="(990,1790)"/>
-    <wire from="(880,3250)" to="(880,3280)"/>
-    <wire from="(880,3280)" to="(880,3290)"/>
-    <wire from="(880,3290)" to="(920,3290)"/>
+    <wire from="(880,3310)" to="(880,3330)"/>
+    <wire from="(880,3310)" to="(960,3310)"/>
+    <wire from="(880,3330)" to="(890,3330)"/>
     <wire from="(880,3620)" to="(1020,3620)"/>
     <wire from="(880,3620)" to="(880,3820)"/>
     <wire from="(880,4060)" to="(880,4160)"/>
@@ -6177,9 +6183,6 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
     <wire from="(880,4980)" to="(930,4980)"/>
     <wire from="(880,5160)" to="(880,5170)"/>
     <wire from="(880,5170)" to="(890,5170)"/>
-    <wire from="(890,3310)" to="(960,3310)"/>
-    <wire from="(890,3320)" to="(900,3320)"/>
-    <wire from="(890,3330)" to="(960,3330)"/>
     <wire from="(890,3520)" to="(890,3570)"/>
     <wire from="(890,3630)" to="(1040,3630)"/>
     <wire from="(890,3630)" to="(890,3820)"/>
@@ -6249,6 +6252,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
     <wire from="(910,4350)" to="(910,4440)"/>
     <wire from="(910,4350)" to="(960,4350)"/>
     <wire from="(910,4720)" to="(910,4750)"/>
+    <wire from="(920,3330)" to="(960,3330)"/>
     <wire from="(920,3520)" to="(920,3580)"/>
     <wire from="(920,3660)" to="(1110,3660)"/>
     <wire from="(920,3660)" to="(920,3820)"/>
@@ -7039,38 +7043,165 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="addrWidth" val="13"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="contents">addr/data: 13 32
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 5e30c401
+ae304401 5e30c401 ae308401 1e30e401 3f38c401 23*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae304401 5e30c401 ae308401 1e30e401 2e10c401 3c70d401
+22*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae304401 5e30c401 ae308401
+1e30e401 2e10c401 3c70d481 22*3e30c401 5e30c401 be30c401 2630c401 5e30c401
+ae304401 5e30c401 ae308401 3e37e401 24*3e30c401 5e30c401 be30c401 2630c401
+5e30c401 ae304401 5e30c401 ae308401 3e35e401 24*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ac30c401 27*3e30c401 5e30c401 be30c401 2630c401 5e30c401
+ae10c401 3c70d481 26*3e30c401 5e30c401 be30c401 2630c401 3f20c401 28*3e30c401
 5e30c401 be30c401 2630c401 5e30c401 ae304401 5e30c401 ae308401 1e30e401
-2c30c401 23*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae304401 5e30c401
-ae308401 1e30e401 3f38c401 23*3e30c401 5e30c401 be30c401 2630c401 5e30c401
-ae304401 5e30c401 ae308401 1e30e401 2e10c401 3c70d401 22*3e30c401 5e30c401
-be30c401 2630c401 5e30c401 ae304401 5e30c401 ae308401 1e30e401 2e10c401
-3c71d401 22*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae304401 5e30c401
-ae308401 3e37e401 24*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae304401
+2c30c401 23*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 3e20cc01 28*3e30c401 5e30c401
+be30c401 2630c401 3e21cc01 28*3e30c401 5e30c401 be30c401 2630c401 3e22cc01
+28*3e30c401 5e30c401 be30c401 2630c401 3e23cc01 28*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae304401 5e30c401 ae308401 1e30e401 2e30c001 23*3e30c401
+5e30c401 be30c401 2630c401 5e30c401 ae304401 5e30c401 ae308401 1e30e401
+2e31c001 23*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae304401 5e30c401
+ae308401 1e30e401 2e32c001 23*3e30c401 5e30c401 be30c401 2630c401 5e30c401
+ae304401 5e30c401 ae308401 1e30e401 2e33c001 23*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae304401 5e30c401 ae308401 1e30e401 3e38cc01 23*3e30c401
+5e30c401 be30c401 2630c401 5e30c401 ae304401 5e30c401 ae308401 1e30e401
+3e39cc01 23*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae304401 5e30c401
+ae308401 1e30e401 3e3acc01 23*3e30c401 5e30c401 be30c401 2630c401 5e30c401
+ae304401 5e30c401 ae308401 1e30e401 3e3bcc01 23*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae304401 5e30c401 ae308401 3e30e400 24*3e30c401 5e30c401
+be30c401 2630c401 3e30c40b 28*3e30c401 5e30c401 be30c401 2630c401 3e30c403
+28*3e30c401 5e30c401 be30c401 2630c401 3e30c403 1e30c405 3e38cc03 1e30c405
+3e39cc01 24*3e30c401 5e30c401 be30c401 2630c401 3e30c403 1e30c405 3e3acc03
+1e30c405 3e3bcc01 24*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401
+be30c401 2630c401 1e30c405 2e30c101 3e30c40b 1e30c405 2e30c00b 24*3e30c401
+5e30c401 be30c401 2630c401 1e30c405 2e30c301 3e30c40b 1e30c405 2e30c20b
+24*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+3e30c421 28*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae30c001 27*3e30c401
+5e30c401 be30c401 2630c401 5e30c401 ae30c101 27*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae30c201 27*3e30c401 5e30c401 be30c401 2630c401 5e30c401
+ae30c301 27*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 3c30cc01 3e11c441 3e70d081
+5e30c401 ae304401 5e30c401 ae308401 3e35e401 21*3e30c401 5e30c401 be30c401
+2630c401 3c31cc01 3e11c441 3e70d181 5e30c401 ae304401 5e30c401 ae308401
+3e35e401 21*3e30c401 5e30c401 be30c401 2630c401 3c32cc01 3e11c441 3e70d281
+5e30c401 ae304401 5e30c401 ae308401 3e35e401 21*3e30c401 5e30c401 be30c401
+2630c401 3c33cc01 3e11c441 3e70d381 5e30c401 ae304401 5e30c401 ae308401
+3e35e401 21*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae304401 5e30c401
+ae308401 3e34e401 24*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae304401
 5e30c401 ae308401 3e35e401 24*3e30c401 5e30c401 be30c401 2630c401 5e30c401
-ac30c401 27*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae10c401 3c71d401
-26*3e30c401 5e30c401 be30c401 2630c401 3f20c401 28*3e30c401 5e30c401 be30c401
-2630c401 5e30c401 ae30c001 27*3e30c401 5e30c401 be30c401 2630c401 5e30c401
-ae30c101 27*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae30c201 27*3e30c401
-5e30c401 be30c401 2630c401 5e30c401 ae30c301 27*3e30c401 5e30c401 be30c401
-2630c401 3e31c801 28*3e30c401 5e30c401 be30c401 2630c401 3e30c901 28*3e30c401
+ae304401 5e30c401 ae308401 3e34e401 24*3e30c401 5e30c401 be30c401 2630c401
+5e30c401 ae304401 5e30c401 ae308401 3e36e401 24*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae304401 5e30c401 ae308401 3e37e401 24*3e30c401 5e30c401
+be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae304401
+5e30c401 ae308401 5c10c411 3e30c403 1e30c405 3f38c403 1e30c405 3eb8c401
+3e37e401 18*3e30c401 5e30c401 be30c401 2630c401 1e30c405 2e308401 3e30c40b
+1e30c405 2e30440b 3e37e401 23*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 3c30cc01
+3e11c441 3e70d001 26*3e30c401 5e30c401 be30c401 2630c401 3c31cc01 3e11c441
+3e70d101 26*3e30c401 5e30c401 be30c401 2630c401 3c32cc01 3e11c441 3e70d201
+26*3e30c401 5e30c401 be30c401 2630c401 3c33cc01 3e11c441 3e70d301 26*3e30c401
+5e30c401 be30c401 2630c401 3c30cc01 3e11c441 3e70d081 26*3e30c401 5e30c401
+be30c401 2630c401 3c31cc01 3e11c441 3e70d181 26*3e30c401 5e30c401 be30c401
+2630c401 3c32cc01 3e11c441 3e70d281 26*3e30c401 5e30c401 be30c401 2630c401
+3c33cc01 3e11c441 3e70d381 26*3e30c401 5e30c401 be30c401 2630c401 3e30c801
+28*3e30c401 5e30c401 be30c401 2630c401 3e31c801 28*3e30c401 5e30c401 be30c401
+2630c401 3e32c801 28*3e30c401 5e30c401 be30c401 2630c401 3e33c801 28*3e30c401
+5e30c401 be30c401 2630c401 3e30c901 28*3e30c401 5e30c401 be30c401 2630c401
+3e31c901 28*3e30c401 5e30c401 be30c401 2630c401 3e32c901 28*3e30c401 5e30c401
+be30c401 2630c401 3e33c901 28*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
+5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
 5e30c401 be30c401 2630c401 3c30cc01 3e11cc01 3e70d001 26*3e30c401 5e30c401
+be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401
 be30c401 2630c401 3c31cc01 3e10cc01 3e70d101 26*3e30c401 5e30c401 be30c401
-2630c401 3c30cc01 3e11cc01 3e71d001 26*3e30c401 5e30c401 be30c401 2630c401
-3e20cc01 28*3e30c401 5e30c401 be30c401 2630c401 3e21cc01 28*3e30c401 5e30c401
-be30c401 2630c401 3e22cc01 28*3e30c401 5e30c401 be30c401 2630c401 3e23cc01
-28*3e30c401 5e30c401 be30c401 2630c401 3e30c421 28*3e30c401 5e30c401 be30c401
-2630c401 3c30cc01 3e11c441 3c70d401 26*3e30c401 5e30c401 be30c401 2630c401
-3c30cc01 3e11c441 3e71d001 26*3e30c401 5e30c401 be30c401 2630c401 3c30cc01
-3e11c441 3e71d001 5e30c401 ae304401 5e30c401 ae308401 3e35e401 21*3e30c401
-5e30c401 be30c401 2630c401 3e30c403 28*3e30c401 5e30c401 be30c401 2630c401
-3e30c40b 28*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae304401 5e30c401
-ae308401 3e30e400 24*3e30c401 5e30c401 be30c401 2630c401 3e30c403 1e30c405
-3e38cc03 1e30c405 3e39cc01 24*3e30c401 5e30c401 be30c401 2630c401 1e30c405
-2e30c101 3e30c40b 1e30c405 2e30c00b 24*3e30c401 5e30c401 be30c401 2630c401
-5e30c401 ae304401 5e30c401 ae308401 5c10c411 3e30c403 1e30c405 3f38c403
-1e30c405 3eb8c401 3e37e401 18*3e30c401 5e30c401 be30c401 2630c401 1e30c405
-2e304401 3e30c40b 3e308405 3e37e401 24*3e30c401 5e30c401 be30c401 2630c401
-29*3e30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 3c30cc01 3e11cc01 3e70d081 26*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401
+29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401
 </a>
       <a name="dataWidth" val="32"/>
     </comp>
@@ -17534,19 +17665,19 @@ f 1e e0 2d e0 2d e0 f0
       <a name="width" val="4"/>
     </comp>
     <comp lib="5" loc="(140,150)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@63db6b02"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2fb9d28a"/>
       <a name="labelvisible" val="true"/>
     </comp>
     <comp lib="5" loc="(190,150)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6b6d359b"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7b80c8f5"/>
       <a name="labelvisible" val="true"/>
     </comp>
     <comp lib="5" loc="(240,150)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@d54635b"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@58d8b315"/>
       <a name="labelvisible" val="true"/>
     </comp>
     <comp lib="5" loc="(290,150)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1ee42bac"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@517745d4"/>
       <a name="labelvisible" val="true"/>
     </comp>
     <comp loc="(420,390)" name="seg16hdisplay"/>

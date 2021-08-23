@@ -174,7 +174,29 @@ opcodes = [
     # {k1,k0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
     # {f1,f0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
 
-    {'name':'LD','bytecode': 0x14, 'control':
+    {'name':'OUT R0','bytecode': 0x10,
+    'control':
+    [
+        {'Ek','nLo'},
+    ]},
+    {'name':'OUT R1','bytecode': 0x11,
+    'control':
+    [
+        {'Ek','f0','nLo'},
+    ]},
+    {'name':'OUT R2','bytecode': 0x12,
+    'control':
+    [
+        {'Ek','f1','nLo'},
+    ]},
+    {'name':'OUT R3','bytecode': 0x13,
+    'control':
+    [
+        {'Ek','f0','f1','nLo'},
+    ]},
+
+
+    {'name':'LD R0','bytecode': 0x14, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -186,7 +208,40 @@ opcodes = [
     ]},
 
 
-    {'name':'ST','bytecode': 0x18, 'control':
+    {'name':'TOTEST LD R1','bytecode': 0x15, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'nCE','nLk','f0'}         # Finally Write the contents of the current address in MAR to R0 reg
+    ]},
+
+    {'name':'TOTEST LD R2','bytecode': 0x16, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'nCE','nLk','f1'}         # Finally Write the contents of the current address in MAR to R0 reg
+    ]},
+
+    {'name':'TOTEST LD R3','bytecode': 0x17, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'nCE','nLk','f1','f0'}         # Finally Write the contents of the current address in MAR to R0 reg
+    ]},
+
+    {'name':'ST R0','bytecode': 0x18, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -196,6 +251,120 @@ opcodes = [
 
         {'Ek','Lr'}         # Finally Write the contents of REG0 reg to the current address in MAR.
     ]},
+
+    {'name':'TOTEST ST R1','bytecode': 0x19, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'Ek','Lr','f0'}         # Finally Write the contents of REG0 reg to the current address in MAR.
+    ]},
+
+    {'name':'TOTEST ST R2','bytecode': 0x1a, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'Ek','Lr','f1'}         # Finally Write the contents of REG0 reg to the current address in MAR.
+    ]},
+
+    {'name':'TOTEST ST R3','bytecode': 0x1b, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'Ek','Lr','f1','f0'}         # Finally Write the contents of REG0 reg to the current address in MAR.
+    ]},
+
+
+    {'name':'LDI SP','bytecode': 0x1c, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLs'},        # Enable both bytes of 2 address reg and Write to Stack Reg.
+
+    ]},
+
+    {'name':'INC SP','bytecode': 0x1d, 'control':
+    [
+        {'Cs','Us'}
+    ]},
+
+    {'name':'DEC SP','bytecode': 0x1e, 'control':
+    [
+        {'Cs'}
+    ]},
+
+    {'name':'PUSH R0R1','bytecode': 0x1f, 'control':
+    [
+        {'Cs'}, #DEC SP
+        {'Es','nLm'}, # Place Stack address in MAR
+        {'Ek','Lr','Cs'}, #Place Contents of R0 into RAM location pointing by MAR. also DEC SP
+        {'Es','nLm'}, #  Load SP adress into MAR
+        {'Ek','f0','Lr'} # Place contents of R1 into RAM location pointed by MAR
+
+
+    ]},
+
+    {'name':'PUSH R2R3','bytecode': 0x20, 'control':
+    [
+        {'Cs'}, #DEC SP
+        {'Es','nLm'}, # Place Stack address in MAR
+        {'Ek','f1','Lr','Cs'}, #Place Contents of R2 into RAM location pointing by MAR. also DEC SP
+        {'Es','nLm'}, #  Load SP adress into MAR
+        {'Ek','f0','f1','Lr'} # Place contents of R3 into RAM location pointed by MAR
+
+
+    ]},
+
+    {'name':'TODO PUSHALL','bytecode': 0x21, 'control':
+    [
+    ]},
+
+    {'name':'POP R0R1','bytecode': 0x22, 'control':
+    [
+        {'Es','nLm'},
+        {'nCE','nLk','k0'},
+        {'Cs','Us'},
+        {'Es','nLm'},
+        {'nCE','nLk','Cs','Us'}
+
+    ]},
+
+    {'name':'POP R2R3','bytecode': 0x23, 'control':
+    [
+        {'Es','nLm'},
+        {'nCE','nLk','k0','k1'}, #R3
+        {'Cs','Us'},
+        {'Es','nLm'},
+        {'nCE','nLk','k1','Cs','Us'} #R2
+
+    ]},
+
+    {'name':'TODO POPALL','bytecode': 0x24, 'control':
+    [
+    ]},
+
+    {'name':'EXX','bytecode': 0x25,
+    'control':
+    [
+        {'Xx'},
+    ]},
+
+    # OPCODES 0x26 to 0x3f are unused
+
+    # OPCODES 0x26 to 0x3f are unused
 
     {'name':'MOVIR0','bytecode': 0x40,
     'control':
@@ -225,16 +394,238 @@ opcodes = [
         {'Cp','nCE','nLk','k0','k1'},
     ]},
 
+
+
+    # XORI TODO
+
+    {'name':'TODO XORIR0','bytecode': 0x44,
+    'control':
+    [
+    ]},
+    {'name':'TODO XORIR1','bytecode': 0x45,
+    'control':
+    [
+    ]},
+    {'name':'TODO XORIR2','bytecode': 0x46,
+    'control':
+    [
+    ]},
+    {'name':'TODO XORIR3','bytecode': 0x47,
+    'control':
+    [
+    ]},
+
+    # OPCODES 0x48 to 0x4f are unused
+
+
+
+    # 0x50 othe Logic immediate functions
+
+
+
+
+
+
+    # Jumping and conditional Jumping
+
+    {'name':'DJNZ R0','bytecode': 0x60,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk'},
+
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
+                                #f0 = 1 means NZ check on condition
+    ]},
+
+    {'name':'DJNZ R1','bytecode': 0x61,
+    'control':
+    [
+        {'Ek','nLa','f0'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk','k0'},
+
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
+                                #f0 = 1 means NZ check on condition
+    ]},
+
+    {'name':'DJNZ R2','bytecode': 0x62,
+    'control':
+    [
+        {'Ek','nLa','f1'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk','k1'},
+
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
+                                #f0 = 1 means NZ check on condition
+    ]},
+
+    {'name':'DJNZ R3','bytecode': 0x63,
+    'control':
+    [
+        {'Ek','nLa','f1','f0'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk','k1','k0'},
+
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
+                                #f0 = 1 means NZ check on condition
+    ]},
+
+
+
+
+    {'name':'JPZ NOT SUPPORTED!!','bytecode': 0x64,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp'},        # Enable both bytes of 2 address reg Write to PC if condition true
+                            # f0,f1 bits select the condition
+                            # f0,f1 = 00 current set to JPC
+    ]},
+
+
+    {'name':'JPNZ','bytecode': 0x65,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
+        #f1f0 = 01 JPNZ  1
+    ]},
+
+    {'name':'JPC','bytecode': 0x66,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp'},        # Enable both bytes of 2 address reg Write to PC if condition true
+                            # f0,f1 bits select the condition
+        #f1f0 = 00 JPC  0
+
+    ]},
+
+    {'name':'JPNC','bytecode': 0x67,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f1'},    # Enable both bytes of 2 address reg Write to PC if condition true
+                              # f0,f1 bits select the condition
+        #f1f0 = 10 JPC  2
+
+    ]},
+    # JPS(0x68),JPNS(0x69), JPO(0x6a), JPNO(0x6b) not currently SUPPORTED
+
+    {'name':'JMP','bytecode': 0x6c,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0','f1'},        # Enable both bytes of 2 address reg Write to PC if condition true
+        #f1f0 = 11 JMP  3
+    ]},
+
+    #OP 0x6e is reserved (unused)
+
+    {'name':'CALL ','bytecode': 0x6e, 'control':
+    [
+
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        # ASBUSLReg and ASBUSHReg contain place to jump -
+        # all we do now is push the current value of PC onto the stack
+        {'Ep','nLm','Sa','nLa','nLb'}, # Low byte of PC in A REG - High byte of PC in B REG
+
+        # Now save A REG and B REG onto the Stack
+        # A PUSH AB instruction!
+        {'Cs'}, #DEC SP
+        {'Es','nLm'}, # Place Stack address in MAR
+        {'Ea','Lr','Cs'}, #Place Contents of R0 into RAM location pointing by MAR. also DEC SP
+        {'Es','nLm'}, #  Load SP adress into MAR
+        {'Eb','Lr'}, # Place contents of R1 into RAM location pointed by MAR
+
+        # finally do the 'jump'
+
+        {'E16','Lp','f0','f1'},        # Enable both bytes of 2 address reg Write to PC f0,f1 = 11 means it will JUMP
+
+
+    ]},
+
+
+    {'name':'RET ','bytecode': 0x6f, 'control':
+    [
+
+        {'Es','nLm'},
+        {'nCE','nLah'},
+        {'Cs','Us'},
+        {'Es','nLm'},
+        {'nCE','nLal','Cs','Us'},
+
+        {'E16','Lp','f0','f1'}
+
+    ]},
+
+
+
+
     # 'MOV Rx, Ry' -  Move into REGx the contents of REGy
     # Use Ek and f0,f1 combinations for the register you are reading
     # and 'nLk' with k0,k1 combinations for the register you are writing to.
     # {f1,f0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
     # {k1,k0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
 
+    {'name':'TOTEST MOV R0,R0','bytecode': 0x90,
+    'control':
+    [
+        {'Ek','nLk'},
+    ]},
+
     {'name':'MOV R0,R1','bytecode': 0x91,
     'control':
     [
         {'Ek','f0','nLk'},
+    ]},
+
+    {'name':'TOTEST MOV R0,R2','bytecode': 0x92,
+    'control':
+    [
+        {'Ek','f1','nLk'},
+    ]},
+
+    {'name':'TOTEST MOV R0,R3','bytecode': 0x93,
+    'control':
+    [
+        {'Ek','f1','f0','nLk'},
     ]},
 
 
@@ -244,6 +635,23 @@ opcodes = [
         {'Ek','nLk','k0'},
     ]},
 
+    {'name':'TOTEST MOV R1,R1','bytecode': 0x95,
+    'control':
+    [
+        {'Ek','nLk','k0','f0'},
+    ]},
+
+    {'name':'TOTEST MOV R1,R2','bytecode': 0x96,
+    'control':
+    [
+        {'Ek','nLk','k0','f1'},
+    ]},
+
+    {'name':'TOTEST MOV R1,R3','bytecode': 0x97,
+    'control':
+    [
+        {'Ek','nLk','k0','f1','f0'},
+    ]},
 
 
     {'name':'ADD R0,R1','bytecode': 0xa1,
@@ -271,32 +679,9 @@ opcodes = [
     ]},
 
 
-    {'name':'OUT R0','bytecode': 0x10,
-    'control':
-    [
-        {'Ek','nLo'},
-    ]},
-    {'name':'OUT R1','bytecode': 0x11,
-    'control':
-    [
-        {'Ek','f0','nLo'},
-    ]},
-    {'name':'OUT R2','bytecode': 0x12,
-    'control':
-    [
-        {'Ek','f1','nLo'},
-    ]},
-    {'name':'OUT R3','bytecode': 0x13,
-    'control':
-    [
-        {'Ek','f0','f1','nLo'},
-    ]},
 
-    {'name':'EXX','bytecode': 0x25,
-    'control':
-    [
-        {'Xx'},
-    ]},
+
+
 
 
     # inc
@@ -371,152 +756,7 @@ opcodes = [
         {'Eu','Su','Lf','nLk','k1','k0'}
     ]},
 
-    # Jumping and conditional Jumping
 
-    {'name':'DJNZ R0','bytecode': 0x60,
-    'control':
-    [
-        {'Ek','nLa'},
-        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
-        {'Eu','Su','Lf','nLk'},
-
-        {'Ep','nLm'},
-        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
-        {'Ep','nLm'},
-        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
-        {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
-
-    ]},
-
-
-
-    {'name':'JMP','bytecode': 0x6c,
-    'control':
-    [
-        {'Ep','nLm'},
-        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
-        {'Ep','nLm'},
-        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
-        {'E16','Lp','f0','f1'},        # Enable both bytes of 2 address reg Write to PC if condition true
-    ]},
-
-
-    {'name':'JPNZ','bytecode': 0x65,
-    'control':
-    [
-        {'Ep','nLm'},
-        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
-        {'Ep','nLm'},
-        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
-        {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
-    ]},
-
-
-
-
-
-    {'name':'INC SP','bytecode': 0x1d, 'control':
-    [
-        {'Cs','Us'}
-    ]},
-
-    {'name':'DEC SP','bytecode': 0x1e, 'control':
-    [
-        {'Cs'}
-    ]},
-
-
-    {'name':'LDI SP','bytecode': 0x1c, 'control':
-    [
-        {'Ep','nLm'},
-        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
-        {'Ep','nLm'},
-        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
-        {'E16','nLs'},        # Enable both bytes of 2 address reg and Write to Stack Reg.
-
-    ]},
-
-    {'name':'PUSH R0R1','bytecode': 0x1f, 'control':
-    [
-        {'Cs'}, #DEC SP
-        {'Es','nLm'}, # Place Stack address in MAR
-        {'Ek','Lr','Cs'}, #Place Contents of R0 into RAM location pointing by MAR. also DEC SP
-        {'Es','nLm'}, #  Load SP adress into MAR
-        {'Ek','f0','Lr'} # Place contents of R1 into RAM location pointed by MAR
-
-
-    ]},
-
-    {'name':'PUSH R2R3','bytecode': 0x20, 'control':
-    [
-        {'Cs'}, #DEC SP
-        {'Es','nLm'}, # Place Stack address in MAR
-        {'Ek','f1','Lr','Cs'}, #Place Contents of R2 into RAM location pointing by MAR. also DEC SP
-        {'Es','nLm'}, #  Load SP adress into MAR
-        {'Ek','f0','f1','Lr'} # Place contents of R3 into RAM location pointed by MAR
-
-
-    ]},
-
-    {'name':'POP R0R1','bytecode': 0x22, 'control':
-    [
-        {'Es','nLm'},
-        {'nCE','nLk','k0'},
-        {'Cs','Us'},
-        {'Es','nLm'},
-        {'nCE','nLk','Cs','Us'}
-
-    ]},
-
-    {'name':'POP R2R3','bytecode': 0x23, 'control':
-    [
-        {'Es','nLm'},
-        {'nCE','nLk','k0','k1'}, #R3
-        {'Cs','Us'},
-        {'Es','nLm'},
-        {'nCE','nLk','k1','Cs','Us'} #R2
-
-    ]},
-
-    {'name':'CALL ','bytecode': 0x6e, 'control':
-    [
-
-        {'Ep','nLm'},
-        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
-        {'Ep','nLm'},
-        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
-        # ASBUSLReg and ASBUSHReg contain place to jump -
-        # all we do now is push the current value of PC onto the stack
-        {'Ep','nLm','Sa','nLa','nLb'}, # Low byte of PC in A REG - High byte of PC in B REG
-
-        # Now save A REG and B REG onto the Stack
-        # A PUSH AB instruction!
-        {'Cs'}, #DEC SP
-        {'Es','nLm'}, # Place Stack address in MAR
-        {'Ea','Lr','Cs'}, #Place Contents of R0 into RAM location pointing by MAR. also DEC SP
-        {'Es','nLm'}, #  Load SP adress into MAR
-        {'Eb','Lr'}, # Place contents of R1 into RAM location pointed by MAR
-
-        # finally do the 'jump'
-
-        {'E16','Lp','f0','f1'},        # Enable both bytes of 2 address reg Write to PC f0,f1 = 11 means it will JUMP
-
-
-    ]},
-
-
-    {'name':'RET ','bytecode': 0x6f, 'control':
-    [
-
-        {'Es','nLm'},
-        {'nCE','nLah'},
-        {'Cs','Us'},
-        {'Es','nLm'},
-        {'nCE','nLal','Cs','Us'},
-
-        {'E16','Lp','f0','f1'}
-
-    ]},
 
     {'name':'HLT','bytecode': 0xff,
     'control':

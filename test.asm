@@ -1,6 +1,22 @@
 .org 0
-  jmp testincdec
+  call testdjnz
   hlt
+
+
+:testdjnz
+  movi r0,10
+  movi r1,10
+  movi r2,10
+  movi r3,10
+:tdjnz0
+  djnz r0,tdjnz0
+:tdjnz1
+  djnz r1,tdjnz1
+:tdjnz2
+  djnz r2,tdjnz2
+:tdjnz3
+  djnz r3,tdjnz3
+  ret
 
 :testincdec1reg
     inc r0
