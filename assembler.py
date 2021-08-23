@@ -17,9 +17,12 @@ class Parser:
         self.text = text
         self.pos = -1
         self.len = len(text) - 1
-        rv = self.start()
-        self.assert_end()
-        return rv
+        if (self.len > 0):
+            rv = self.start()
+            self.eat_comment()
+            self.assert_end()
+            return rv
+        return None
 
     def assert_end(self):
         if self.pos < self.len:
@@ -28,6 +31,10 @@ class Parser:
                 'Expected end of string but got %s',
                 self.text[self.pos + 1]
             )
+    def eat_comment(self):
+       if ( self.pos < self.len and self.text[self.pos + 1] in ";#"):
+            self.pos = self.len
+
 
     def eat_whitespace(self):
         while self.pos < self.len and self.text[self.pos + 1] in " \f\v\r\t\n":
@@ -172,10 +179,10 @@ class AssemblerParser(Parser):
         return rv
 
     def instruction(self):
-        return self.match('alu','movi','mov','ldi','call','singlebyte','singleop','out','djnz')
+        return self.match('alu','movwi','movi','mov','ld','call','singlebyte','singleop','out','djnz')
 
     def singleop(self):
-        op = self.keyword('exx','pushall','popall','ret')
+        op = self.keyword('exx','pushall','popall','ret','nop','hlt')
         if (op is not None):
             return {'op': op, 'size':1, 'code': [0]}
         return None
@@ -211,20 +218,27 @@ class AssemblerParser(Parser):
             return {'op': op, 'addr':data, 'size':3, 'code': [0]}
         return None
 
-
-    def ldi(self):
-        op = self.keyword('ldi','st')
+    def ld(self):
+        op = self.keyword('ld','st')
         if (op is not None):
-            regl = self.match('registers','registers16')
+            regl = self.match('registers')
             self.char(',')
             data = self.match('number','labelstr')
             return {'op': op, 'regl': regl, 'data':data, 'size':3, 'code': [0]}
         return None
 
+    def movwi(self):
+        op = self.keyword('movwi',)
+        if (op is not None):
+            regl = self.match('registers16')
+            self.char(',')
+            data = self.match('number','labelstr')
+            return {'op': op, 'regl': regl, 'data':data, 'size':3, 'code': [0]}
+        return None
 
     def alu(self):
 
-        logic = self.keyword('andi','ori','xori','addi','subi')
+        logic = self.maybe_keyword('andi','ori','xori','addi','subi')
         if (logic is not None):
             regl = self.match('registers')
             self.char(',')
@@ -237,6 +251,8 @@ class AssemblerParser(Parser):
             self.char(',')
             regr = self.match('registers')
             return {'op': logic, 'regl': regl, 'regr':regr, 'size':1, 'code': [0]}
+
+
 
 
         return None
@@ -294,10 +310,14 @@ class AssemblerParser(Parser):
 
 
     def definedata(self):
-        op = self.match('db','dw')
+        op = self.match('db','dw','ds')
         if (op is not None):
-            return {'data': self.match('number'),'op':op, 'size': 1 if op == 'db' else 2}
+            v = self.match('number')
+            return {'data': v,'op':op, 'size': 1 if op == 'db' else 2 if op == 'dw' else v}
         return None
+
+    def ds(self):
+        return self.keyword('ds')
 
     def db(self):
         return self.keyword('db')
@@ -322,7 +342,9 @@ class AssemblerParser(Parser):
 
     def octalnumber(self):
         chars = []
-        self.char('o')
+        chars.append(self.char('0'))
+        chars.append(self.char('o'))
+        chars.append(self.char('0-7'))
 
         while True:
             char = self.maybe_char('0-7')
@@ -334,7 +356,10 @@ class AssemblerParser(Parser):
 
     def binarynumber(self):
         chars = []
-        self.char('b')
+
+        chars.append(self.char('0'))
+        chars.append(self.char('b'))
+        chars.append(self.char('0-1'))
 
         while True:
             char = self.maybe_char('0-1')
@@ -383,30 +408,71 @@ class AssemblerParser(Parser):
 
 
 if __name__ == '__main__':
+
+    class SyntaxError(Exception):
+        def __init__(self, msg, pos):
+            self.msg = msg
+            self.pos = pos
+
+        def __str__(self):
+            return f'{self.msg} at line {self.pos}'
+
+
+    def processlabels(ops,labels):
+        if (op['op'] == 'label'):
+            labelnm = op['data']
+            addr = op['pc']
+            if (labelnm in labels):
+                raise SyntaxError('Replicated label',op['line'])
+            labels[labelnm] = addr
+
     parser = AssemblerParser()
     pc = 0
+    line = 0
     code = []
-    asm = open("test.asm", "r")
+    labels = {}
 
+    asm = open("test.asm", "r")
     while True:
         try:
-            text = asm.readline()
-            op = parser.parse(text)
-            code.append(op)
-            if (op['op'] == 'end'):
-                # completed  - resolve labels
-                for op in code:
-                    if (op['op'] == 'org'):
-                        pc = op['data']
-                    op['pc'] = pc
-                    pc += op['size']
-                    print(op)
-                break
 
+            text = asm.readline()
+            if len(text) == 0:
+                break
+            line = line + 1
+            op = parser.parse(text)
+            if (op is not None):
+                op['line'] = line
+                code.append(op)
+                if (op['op'] == 'end'):
+                    break
         except KeyboardInterrupt:
             pass
         except (EOFError, SystemExit):
             break
-        except (ParseError, ZeroDivisionError, IndexError) as e:
-            #print('Error: %s' % e)
-            pass
+        except IndexError as e:
+            print(f'Error: {e} Line {line}')
+            break
+        except (ParseError, ZeroDivisionError) as e:
+            print(f'Error: {e} Line {line}')
+
+
+    # Parsing complete
+
+    try:
+
+        # Pre-process any code to produce 'bin' file
+        # build a symbol address table
+        for op in code:
+            if (op['op'] == 'org'):
+                pc = op['data']
+            op['pc'] = pc
+            pc += op['size']
+            print(op)
+            processlabels(op,labels)
+
+        for lbl in labels:
+            print(lbl,labels[lbl])
+
+    except (SyntaxError) as e:
+        print(f"{e}")
