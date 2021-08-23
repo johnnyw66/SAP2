@@ -1,4 +1,162 @@
 #!/usr/bin/env python3
+codeBuilder = {
+    'mov' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0x90},
+    'movi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x40},
+    'movwi' : {'build':'threeByteBuilder', 'bytecode':0x1c},
+
+    'ld' : {'build':'threeByteBuilderWithReg', 'bytecode':0x14},
+    'st' : {'build':'threeByteBuilderWithReg', 'bytecode':0x18},
+
+    'out' : {'build':'singleRegSingleByteBuilder','bytecode':0x10},
+    'inc' : {'build':'singleRegSingleByteBuilder', 'bytecode':0x88},
+    'dec' : {'build':'singleRegSingleByteBuilder','bytecode':0x8c},
+    'decsp' : {'build':'singleByteBuilder','bytecode':0x1e},
+    'incsp' : {'build':'singleByteBuilder', 'bytecode':0x1d},
+    'pushall' : {'build':'singleByteBuilder','bytecode':0x21},
+    'popall' : {'build':'singleByteBuilder', 'bytecode':0x24},
+
+    'shr' : {'build':'singleRegSingleByteBuilder','bytecode':0x80},
+    'shl' : {'build':'singleRegSingleByteBuilder','bytecode':0x84},
+
+    'add' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xa0},
+    'sub' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xb0},
+    'and' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xc0},
+    'or' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xd0},
+    'xor' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xe0},
+
+    'addi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x50},
+    'subi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x54},
+    'andi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x58},
+    'ori' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x5c},
+    'xori' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x44},
+
+
+    'call' : {'build':'threeByteBuilder', 'bytecode':0x6e},
+    'djnz' : {'build':'threeByteBuilderWithReg', 'bytecode':0x60},
+    'jpz' : {'build':'threeByteBuilder', 'bytecode':0x64},
+    'jpnz' : {'build':'threeByteBuilder', 'bytecode':0x65},
+    'jpc' : {'build':'threeByteBuilder', 'bytecode':0x66},
+    'jpnc' : {'build':'threeByteBuilder', 'bytecode':0x67},
+    'jmp' : {'build':'threeByteBuilder', 'bytecode':0x6c},
+
+    'ret' : {'build':'singleByteBuilder','bytecode':0x6f},
+
+
+    'nop' : {'build':'singleByteBuilder','bytecode':0x00},
+    'exx' : {'build':'singleByteBuilder','bytecode':0x25},
+    'hlt' : {'build':'singleByteBuilder','bytecode':0xff},
+
+
+    'org' : {'build':'nullBuilder'},
+    'label' : {'build':'nullBuilder'},
+    'db' : {'build':'dataBuilder','size':1},
+    'dw' : {'build':'dataBuilder','size':2},
+    'ds' : {'build':'dataBuilder','size':-1},
+    'end' : {'build':'nullBuilder'},
+}
+
+class Builder:
+    def __init__(self,symtable):
+        self.symtable =  symtable
+        self.cachewarning = set()
+
+
+    def build(self, op):
+        #print("BUILD ",op)
+        return self.opCodeBuilder(op)
+
+    def warning(self, str, nm):
+        if (nm not in self.cachewarning):
+            print("**WARNING** "+str,nm)
+            self.cachewarning.add(nm)
+
+    def opCodeBuilder(self, op):
+
+        nm = op['op']
+        if (nm in codeBuilder):
+            builderfnc = codeBuilder[nm]['build']
+            try:
+                return getattr(self,builderfnc)(op,codeBuilder[nm])
+            except KeyError as e:
+                self.warning(f"FAILED TO INFO FOR OPCODE {e}",nm)
+                return  self.initByteArray(op)
+            except AttributeError as e:
+                self.warning(f"FAILED TO FIND BUILDER FOR OPCODE {e}",nm)
+                return  self.initByteArray(op)
+        self.warning("BUILDER NOT FOUND FOR ",nm)
+        return  self.initByteArray(op)
+
+    def dataBuilder(self, op, buildinfo):
+        bincode = self.initByteArray(op)
+        nm = op['op']
+        if (nm == 'db'):
+            bincode[0] = op['data'] & 0xff
+        if (nm == 'dw'):
+            bincode[0] = op['data'] & 0xff
+            bincode[1] = op['data']>>8 & 0xff
+        print("databuilder",op,bincode)
+        return bincode
+
+    def singleByteBuilder(self, op, buildinfo):
+        print("singleByteBuilder",op)
+        bincode = self.initByteArray(op)
+        bincode[0] = buildinfo['bytecode']
+        return bincode
+
+    def singleRegSingleByteBuilder(self, op, buildinfo):
+        print("singleRegSingleByteBuilder",op)
+        bincode = self.initByteArray(op)
+        bincode[0] = buildinfo['bytecode'] | op['reg']
+        return bincode
+
+    def doubleRegSingleByteBuilder(self, op, buildinfo):
+        print("doubleRegSingleByteBuilder",op)
+        bincode = self.initByteArray(op)
+        bincode[0] = buildinfo['bytecode'] | (op['reg']<<2) | (op['regr']<<0)
+        print(f"{bincode[0]:02x}")
+        return bincode
+
+
+    def singleRegDoubleByteBuilder(self, op, buildinfo):
+        print("singleRegDoubleByteBuilder",op)
+        bincode = self.initByteArray(op)
+        bincode[0] = buildinfo['bytecode'] | op['reg']
+        bincode[1] = op['data']
+        return bincode
+
+
+    def threeByteBuilder(self, op, buildinfo):
+        print("threeByteBuilder",op)
+        bincode = self.initByteArray(op)
+        bincode[0] = buildinfo['bytecode']
+        # check if data is a 'symbol'
+        #op['data']
+        dValue = 0
+
+        bincode[1] = (dValue) & 0xff
+        bincode[2] = (dValue>>8) & 0xff
+        print("threeByteBuilder",op,bincode)
+        return bincode
+
+    def threeByteBuilderWithReg(self, op, buildinfo):
+        print("<><><><><>threeByteBuilder",op)
+        bincode = self.initByteArray(op)
+        bincode[0] = buildinfo['bytecode'] | op['reg']
+        dValue = 0
+
+        bincode[1] = (dValue) & 0xff
+        bincode[2] = (dValue>>8) & 0xff
+
+        print("========threeByteBuilder",op,bincode)
+        return bincode
+
+
+    def nullBuilder(self, op, buildinfo):
+        return [0] * 0
+
+    def initByteArray(self, op):
+        return [0] *  op['size']
+
 
 class ParseError(Exception):
     def __init__(self, pos, msg, *args):
@@ -198,7 +356,7 @@ class AssemblerParser(Parser):
         op = self.keyword('inc','dec')
         if (op is not None):
             reg = self.match('registers','registers16')
-            return {'op': op, 'reg':reg, 'size':1, 'code': [0]}
+            return {'op': op if isinstance(reg,int) else op+reg, 'reg':reg, 'size':1, 'code': [0]}
         return None
 
 
@@ -224,7 +382,7 @@ class AssemblerParser(Parser):
             regl = self.match('registers')
             self.char(',')
             data = self.match('number','labelstr')
-            return {'op': op, 'regl': regl, 'data':data, 'size':3, 'code': [0]}
+            return {'op': op, 'reg': regl, 'data':data, 'size':3, 'code': [0]}
         return None
 
     def movwi(self):
@@ -233,7 +391,7 @@ class AssemblerParser(Parser):
             regl = self.match('registers16')
             self.char(',')
             data = self.match('number','labelstr')
-            return {'op': op, 'regl': regl, 'data':data, 'size':3, 'code': [0]}
+            return {'op': op, 'reg': regl, 'data':data, 'size':3, 'code': [0]}
         return None
 
     def alu(self):
@@ -243,14 +401,14 @@ class AssemblerParser(Parser):
             regl = self.match('registers')
             self.char(',')
             data = self.match('number','label')
-            return {'op': logic, 'regl': regl, 'data':data, 'size':2, 'code': [0]}
+            return {'op': logic, 'reg': regl, 'data':data, 'size':2, 'code': [0]}
 
         logic = self.keyword('and','or','xor','add','sub')
         if (logic is not None):
             regl = self.match('registers')
             self.char(',')
             regr = self.match('registers')
-            return {'op': logic, 'regl': regl, 'regr':regr, 'size':1, 'code': [0]}
+            return {'op': logic, 'reg': regl, 'regr':regr, 'size':1}
 
 
 
@@ -263,7 +421,7 @@ class AssemblerParser(Parser):
                 regl = self.match('registers')
                 self.char(',')
                 regr = self.match('registers')
-                return {'op': 'mov', 'data': {'rl':regl, 'rr': regr},'size':1,'code':[0]}
+                return {'op': 'mov', 'reg':regl, 'regr': regr,'size':1}
         return None
 
     def registers(self):
@@ -278,7 +436,7 @@ class AssemblerParser(Parser):
                 regl = self.match('registers')
                 self.char(',')
                 data = self.match('number')
-                return {'op':'movi','date':{'rl':regl, 'data': data},'size':2,'code':[0]}
+                return {'op':'movi','reg':regl, 'data': data,'size':2}
         return None
 
     def labelstr(self):
@@ -461,8 +619,7 @@ if __name__ == '__main__':
 
     try:
 
-        # Pre-process any code to produce 'bin' file
-        # build a symbol address table
+        # Pre-process build a symbol address table
         for op in code:
             if (op['op'] == 'org'):
                 pc = op['data']
@@ -473,6 +630,16 @@ if __name__ == '__main__':
 
         for lbl in labels:
             print(lbl,labels[lbl])
+
+        # now build up binary version of our code
+        builder = Builder(labels)
+        binarray = []
+        for op in code:
+            bytearray = builder.build(op)
+            binarray+=bytearray
+
+        print("final size ",len(binarray))
+
 
     except (SyntaxError) as e:
         print(f"{e}")
