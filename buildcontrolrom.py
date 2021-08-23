@@ -69,8 +69,9 @@ fetchControlWords = [{'Ep','nLm'},{'Cp'},{'nCE','nLi'}]
 
 opcodes = [
     # Legacy OPCODES TBDeprecated
+   {'name':'NOP','bytecode': 0x00, 'control':[]},
 
-    {'name':'LDA','bytecode': 0x00, 'control':
+    {'name':'LDA','bytecode': 0x09, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -168,10 +169,35 @@ opcodes = [
 
     # NEW BANK REG instructions
     # k1,k0 used to determin which register to write to.
+    # f1,f0 used to determin which register to read from.
 
     # {k1,k0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
+    # {f1,f0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
 
-    {'name':'MOVIR0','bytecode': 0x09,
+    {'name':'LD','bytecode': 0x14, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'nCE','nLk'}         # Finally Write the contents of the current address in MAR to R0 reg
+    ]},
+
+
+    {'name':'ST','bytecode': 0x18, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'Ek','Lr'}         # Finally Write the contents of REG0 reg to the current address in MAR.
+    ]},
+
+    {'name':'MOVIR0','bytecode': 0x40,
     'control':
     [
         {'Ep','nLm'},
@@ -179,20 +205,20 @@ opcodes = [
 
     ]},
 
-    {'name':'MOVIR1','bytecode': 0x0a,
+    {'name':'MOVIR1','bytecode': 0x41,
     'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLk','k0'},
     ]},
 
-    {'name':'MOVIR2','bytecode': 0x0b,
+    {'name':'MOVIR2','bytecode': 0x42,
     'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLk','k1'},
     ]},
-    {'name':'MOVIR3','bytecode': 0x0c,
+    {'name':'MOVIR3','bytecode': 0x43,
     'control':
     [
         {'Ep','nLm'},
@@ -205,14 +231,14 @@ opcodes = [
     # {f1,f0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
     # {k1,k0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
 
-    {'name':'MOV R0,R1','bytecode': 0x0d,
+    {'name':'MOV R0,R1','bytecode': 0x91,
     'control':
     [
         {'Ek','f0','nLk'},
     ]},
 
 
-    {'name':'MOV R1,R0','bytecode': 0x0e,
+    {'name':'MOV R1,R0','bytecode': 0x94,
     'control':
     [
         {'Ek','nLk','k0'},
@@ -220,7 +246,7 @@ opcodes = [
 
 
 
-    {'name':'ADD R0,R1','bytecode': 0x0f,
+    {'name':'ADD R0,R1','bytecode': 0xa1,
     'control':
     [
         {'Ek','nLa'},
@@ -228,7 +254,7 @@ opcodes = [
         {'nLk','Eu','Lf'}
     ]},
 
-    {'name':'ADD R1,R0','bytecode': 0x10,
+    {'name':'ADD R1,R0','bytecode': 0xa4,
     'control':
     [
         {'Ek','f0','nLa'},
@@ -236,7 +262,7 @@ opcodes = [
         {'nLk','k0','Eu','Lf'}
     ]},
 
-    {'name':'SUB R0,R1','bytecode': 0x11,
+    {'name':'SUB R0,R1','bytecode': 0xb1,
     'control':
     [
         {'Ek','nLa'},
@@ -245,28 +271,28 @@ opcodes = [
     ]},
 
 
-    {'name':'OUT R0','bytecode': 0x12,
+    {'name':'OUT R0','bytecode': 0x10,
     'control':
     [
         {'Ek','nLo'},
     ]},
-    {'name':'OUT R1','bytecode': 0x13,
+    {'name':'OUT R1','bytecode': 0x11,
     'control':
     [
         {'Ek','f0','nLo'},
     ]},
-    {'name':'OUT R2','bytecode': 0x14,
+    {'name':'OUT R2','bytecode': 0x12,
     'control':
     [
         {'Ek','f1','nLo'},
     ]},
-    {'name':'OUT R3','bytecode': 0x15,
+    {'name':'OUT R3','bytecode': 0x13,
     'control':
     [
         {'Ek','f0','f1','nLo'},
     ]},
 
-    {'name':'EXX','bytecode': 0x16,
+    {'name':'EXX','bytecode': 0x25,
     'control':
     [
         {'Xx'},
@@ -275,15 +301,16 @@ opcodes = [
 
     # inc
 
-    {'name':'INC R0','bytecode': 0x17,
+    {'name':'INC R0','bytecode': 0x88,
     'control':
     [
         {'Ek','nLa'},
         {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
-        {'Eu','Lf','nLa'}
+        {'Eu','Lf','nLk'},
+
     ]},
 
-    {'name':'DEC R0','bytecode': 0x18,
+    {'name':'DEC R0','bytecode': 0x8c,
     'control':
     [
         {'Ek','nLa'},
@@ -291,7 +318,10 @@ opcodes = [
         {'Eu','Su','Lf','nLk'}
     ]},
 
-    {'name':'DJNZ R0','bytecode': 0x19,
+
+    # Jumping and conditional Jumping
+
+    {'name':'DJNZ R0','bytecode': 0x60,
     'control':
     [
         {'Ek','nLa'},
@@ -307,15 +337,40 @@ opcodes = [
     ]},
 
 
-    {'name':'DEC SP','bytecode': 0x1a, 'control':
+
+    {'name':'JMP','bytecode': 0x6c,
+    'control':
     [
-        {'Cs'}
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0','f1'},        # Enable both bytes of 2 address reg Write to PC if condition true
     ]},
 
 
-    {'name':'INC SP','bytecode': 0x1b, 'control':
+    {'name':'JPNZ','bytecode': 0x65,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
+    ]},
+
+
+
+
+
+    {'name':'INC SP','bytecode': 0x1d, 'control':
     [
         {'Cs','Us'}
+    ]},
+
+    {'name':'DEC SP','bytecode': 0x1e, 'control':
+    [
+        {'Cs'}
     ]},
 
 
@@ -329,7 +384,7 @@ opcodes = [
 
     ]},
 
-    {'name':'PUSH R0R1','bytecode': 0x1d, 'control':
+    {'name':'PUSH R0R1','bytecode': 0x1f, 'control':
     [
         {'Cs'}, #DEC SP
         {'Es','nLm'}, # Place Stack address in MAR
@@ -340,7 +395,18 @@ opcodes = [
 
     ]},
 
-    {'name':'POP R0R1','bytecode': 0x1e, 'control':
+    {'name':'PUSH R2R3','bytecode': 0x20, 'control':
+    [
+        {'Cs'}, #DEC SP
+        {'Es','nLm'}, # Place Stack address in MAR
+        {'Ek','f1','Lr','Cs'}, #Place Contents of R2 into RAM location pointing by MAR. also DEC SP
+        {'Es','nLm'}, #  Load SP adress into MAR
+        {'Ek','f0','f1','Lr'} # Place contents of R3 into RAM location pointed by MAR
+
+
+    ]},
+
+    {'name':'POP R0R1','bytecode': 0x22, 'control':
     [
         {'Es','nLm'},
         {'nCE','nLk','k0'},
@@ -350,7 +416,17 @@ opcodes = [
 
     ]},
 
-    {'name':'CALL ','bytecode': 0x1f, 'control':
+    {'name':'POP R2R3','bytecode': 0x23, 'control':
+    [
+        {'Es','nLm'},
+        {'nCE','nLk','k0','k1'}, #R3
+        {'Cs','Us'},
+        {'Es','nLm'},
+        {'nCE','nLk','k1','Cs','Us'} #R2
+
+    ]},
+
+    {'name':'CALL ','bytecode': 0x6e, 'control':
     [
 
         {'Ep','nLm'},
@@ -377,7 +453,7 @@ opcodes = [
     ]},
 
 
-    {'name':'RET ','bytecode': 0x20, 'control':
+    {'name':'RET ','bytecode': 0x6f, 'control':
     [
 
         {'Es','nLm'},

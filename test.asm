@@ -1,232 +1,80 @@
-  nop
-  clc
-  setc
-  nop
+.org 0
+  call test5
+  hlt
 
-  nop
-  nop
-  nop
-  nop
 
-  nop
-  nop
-  nop
-  nop
 
-  nop
-  nop
-  nop
-  nop
+:test1
+  call init
+  call display
+  exx
+  call display
+  exx
+  ret
 
+:test2
+  call init
+  call flip
+  call display
+  ret
+
+:test3
+  movi r0,255
+:loopdisp
+  out r0
+  djnz r0, loopdisp
+  ret
+
+
+:startpoint
+  .db 10
+
+:test4
+  ld r0,startpoint
+:loopdisp4
+  out r0
+  djnz r0, loopdisp4
+  ret
+
+
+:writepoint
+    .db 0xaa
+:test5
+  movi r0,0
+:ltest5
+  inc r0
+  out r0
+  st r0,writepoint
+  jmp ltest5
+
+
+:flip
+  push r0
+  push r2
+  pop r0
+  pop r2
+  ret
+
+
+
+:display
   out r0
   out r1
   out r2
   out r3
-
-
-  ld r0,0
-  ld r1,0
-  ld r2,0
-  ld r3,0
-
-  st r0,0x0000
-  st r1,0x0000
-  st r2,0x0000
-  st r3,0x0000
-
-
-  movwi sp,0x0000
-  inc sp
-  dec sp
-  nop
-  nop
-  pushall
-  nop
-  nop
-  popall
-  exx
-
-  movi r0,0x01
-  movi r1,0xf0
-  movi r2,0x0f
-  movi r3,0xee
-
-  xori r0,0xef
-  xori r1,0xef
-  xori r2,0xef
-  xori r3,0xef
-
-
-  addi r0,0xef
-  addi r1,0xef
-  addi r2,0xef
-  addi r3,0xef
-
-  subi r0,0xef
-  subi r1,0xef
-  subi r2,0xef
-  subi r3,0xef
-
-  andi r0,0xef
-  andi r1,0xef
-  andi r2,0xef
-  andi r3,0xef
-
-  ori r0,0xef
-  ori r1,0xef
-  ori r2,0xef
-  ori r3,0xef
-
-  djnz r0,0x0000
-  djnz r1,0x0000
-  djnz r2,0x0000
-  djnz r3,0x0000
-
-  jpz 0x0000
-  jpnz 0x0000
-  jpc 0x0000
-  jpnc 0x0000
-  jps 0x0000
-  jpns 0x0000
-  jpo 0x0000
-  jpno 0x0000
-  jmp 0x0000
-  nop
-  call 0x0000
   ret
 
-  shr r0
-  shr r1
-  shr r2
-  shr r3
-
-  shl r0
-  shl r1
-  shl r2
-  shl r3
-
-  inc r0
-  inc r1
-  inc r2
-  inc r3
-
-  dec r0
-  dec r1
-  dec r2
-  dec r3
-
-  mov r0,r0
-  mov r0,r1
-  mov r0,r2
-  mov r0,r3
-  mov r1,r0
-  mov r1,r1
-  mov r1,r2
-  mov r1,r3
-  mov r2,r0
-  mov r2,r1
-  mov r2,r2
-  mov r2,r3
-  mov r3,r0
-  mov r3,r1
-  mov r3,r2
-  mov r3,r3
-
-  add r0,r0
-  add r0,r1
-  add r0,r2
-  add r0,r3
-  add r1,r0
-  add r1,r1
-  add r1,r2
-  add r1,r3
-  add r2,r0
-  add r2,r1
-  add r2,r2
-  add r2,r3
-  add r3,r0
-  add r3,r1
-  add r3,r2
-  add r3,r3
-
-  sub r0,r0
-  sub r0,r1
-  sub r0,r2
-  sub r0,r3
-  sub r1,r0
-  sub r1,r1
-  sub r1,r2
-  sub r1,r3
-  sub r2,r0
-  sub r2,r1
-  sub r2,r2
-  sub r2,r3
-  sub r3,r0
-  sub r3,r1
-  sub r3,r2
-  sub r3,r3
-
-  and r0,r0
-  and r0,r1
-  and r0,r2
-  and r0,r3
-  and r1,r0
-  and r1,r1
-  and r1,r2
-  and r1,r3
-  and r2,r0
-  and r2,r1
-  and r2,r2
-  and r2,r3
-  and r3,r0
-  and r3,r1
-  and r3,r2
-  and r3,r3
-
-  or r0,r0
-  or r0,r1
-  or r0,r2
-  or r0,r3
-  or r1,r0
-  or r1,r1
-  or r1,r2
-  or r1,r3
-  or r2,r0
-  or r2,r1
-  or r2,r2
-  or r2,r3
-  or r3,r0
-  or r3,r1
-  or r3,r2
-  or r3,r3
-
-  xor r0,r0
-  xor r0,r1
-  xor r0,r2
-  xor r0,r3
-  xor r1,r0
-  xor r1,r1
-  xor r1,r2
-  xor r1,r3
-  xor r2,r0
-  xor r2,r1
-  xor r2,r2
-  xor r2,r3
-  xor r3,r0
-  xor r3,r1
-  xor r3,r2
-  xor r3,r3
-
-
-  hlt
-
-
-  :label2
-  .db 0
-  .ds 20
-  :label1
-  .db 0
-  .ds 20
-
+:init
+  movi r0,0xa1
+  movi r1,0xb2
+  movi r2,0xc3
+  movi r3,0xd4
+  exx
+  movi r0,0x4f
+  movi r1,0x3e
+  movi r2,0x2d
+  movi r3,0x1c
+  exx
+  ret
 
 .end
