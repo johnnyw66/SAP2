@@ -2,10 +2,11 @@
 codeBuilder = {
     'mov' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0x90},
     'movi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x40},
-    'movwi' : {'build':'threeByteBuilder', 'bytecode':0x1c},
+    'movwi' : {'build':'threeByteBuilder', 'bytecode':0x1c},    # set SP to address -  instruction
 
-    'ld' : {'build':'threeByteBuilderWithReg', 'bytecode':0x14},
-    'st' : {'build':'threeByteBuilderWithReg', 'bytecode':0x18},
+    # Load/Store from/to Memory
+    'ld' : {'build':'singleRegTripleByteBuilder', 'bytecode':0x14},
+    'st' : {'build':'singleRegTripleByteBuilder', 'bytecode':0x18},
 
     'out' : {'build':'singleRegSingleByteBuilder','bytecode':0x10},
     'inc' : {'build':'singleRegSingleByteBuilder', 'bytecode':0x88},
@@ -31,16 +32,23 @@ codeBuilder = {
     'xori' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x44},
 
 
-    'call' : {'build':'threeByteBuilder', 'bytecode':0x6e},
-    'djnz' : {'build':'threeByteBuilderWithReg', 'bytecode':0x60},
+    'djnz' : {'build':'singleRegTripleByteBuilder', 'bytecode':0x60},
     'jpz' : {'build':'threeByteBuilder', 'bytecode':0x64},
     'jpnz' : {'build':'threeByteBuilder', 'bytecode':0x65},
     'jpc' : {'build':'threeByteBuilder', 'bytecode':0x66},
     'jpnc' : {'build':'threeByteBuilder', 'bytecode':0x67},
+
+    'jps' : {'build':'threeByteBuilder', 'bytecode':0x68},
+    'jpns' : {'build':'threeByteBuilder', 'bytecode':0x69},
+    'jpo' : {'build':'threeByteBuilder', 'bytecode':0x6a},
+    'jpno' : {'build':'threeByteBuilder', 'bytecode':0x6b},
     'jmp' : {'build':'threeByteBuilder', 'bytecode':0x6c},
 
+    'call' : {'build':'threeByteBuilder', 'bytecode':0x6e},
     'ret' : {'build':'singleByteBuilder','bytecode':0x6f},
 
+    'clc' : {'build':'singleByteBuilder','bytecode':0x01},
+    'setc' : {'build':'singleByteBuilder','bytecode':0x02},
 
     'nop' : {'build':'singleByteBuilder','bytecode':0x00},
     'exx' : {'build':'singleByteBuilder','bytecode':0x25},
@@ -65,6 +73,9 @@ class Builder:
         #print("BUILD ",op)
         return self.opCodeBuilder(op)
 
+    def info(self,str,op):
+            pass
+
     def warning(self, str, nm):
         if (nm not in self.cachewarning):
             print("**WARNING** "+str,nm)
@@ -78,15 +89,16 @@ class Builder:
             try:
                 return getattr(self,builderfnc)(op,codeBuilder[nm])
             except KeyError as e:
-                self.warning(f"FAILED TO INFO FOR OPCODE {e}",nm)
+                self.warning(f"FAILED TO FIND INFO FOR OPCODE {nm}: {e}",nm)
                 return  self.initByteArray(op)
             except AttributeError as e:
-                self.warning(f"FAILED TO FIND BUILDER FOR OPCODE {e}",nm)
+                self.warning(f"FAILED TO FIND BUILDER FOR OPCODE {nm} {e}",nm)
                 return  self.initByteArray(op)
         self.warning("BUILDER NOT FOUND FOR ",nm)
         return  self.initByteArray(op)
 
     def dataBuilder(self, op, buildinfo):
+        self.info("databuilder",op)
         bincode = self.initByteArray(op)
         nm = op['op']
         if (nm == 'db'):
@@ -94,60 +106,64 @@ class Builder:
         if (nm == 'dw'):
             bincode[0] = op['data'] & 0xff
             bincode[1] = op['data']>>8 & 0xff
-        print("databuilder",op,bincode)
         return bincode
 
     def singleByteBuilder(self, op, buildinfo):
-        print("singleByteBuilder",op)
+        self.info("singleByteBuilder",op)
         bincode = self.initByteArray(op)
         bincode[0] = buildinfo['bytecode']
         return bincode
 
     def singleRegSingleByteBuilder(self, op, buildinfo):
-        print("singleRegSingleByteBuilder",op)
+        self.info("singleRegSingleByteBuilder",op)
         bincode = self.initByteArray(op)
         bincode[0] = buildinfo['bytecode'] | op['reg']
         return bincode
 
-    def doubleRegSingleByteBuilder(self, op, buildinfo):
-        print("doubleRegSingleByteBuilder",op)
-        bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode'] | (op['reg']<<2) | (op['regr']<<0)
-        print(f"{bincode[0]:02x}")
-        return bincode
-
 
     def singleRegDoubleByteBuilder(self, op, buildinfo):
-        print("singleRegDoubleByteBuilder",op)
+        self.info("singleRegDoubleByteBuilder",op)
         bincode = self.initByteArray(op)
         bincode[0] = buildinfo['bytecode'] | op['reg']
         bincode[1] = op['data']
         return bincode
 
 
-    def threeByteBuilder(self, op, buildinfo):
-        print("threeByteBuilder",op)
-        bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode']
-        # check if data is a 'symbol'
-        #op['data']
-        dValue = 0
-
-        bincode[1] = (dValue) & 0xff
-        bincode[2] = (dValue>>8) & 0xff
-        print("threeByteBuilder",op,bincode)
-        return bincode
-
-    def threeByteBuilderWithReg(self, op, buildinfo):
-        print("<><><><><>threeByteBuilder",op)
+    def singleRegTripleByteBuilder(self, op, buildinfo):
+        self.info("singleRegTripleByteBuilder",op)
         bincode = self.initByteArray(op)
         bincode[0] = buildinfo['bytecode'] | op['reg']
-        dValue = 0
+        # check if data is a 'symbol' - look up if needed
+        dValue = op['data'] if isinstance(op['data'],int) else self.symtable[op['data']]
+
+        bincode[1] = (dValue) & 0xff
+        bincode[2] = (dValue>>8) & 0xff
+        #print("singleRegTripleByteBuilder",op,bincode)
+        return bincode
+
+
+    def doubleRegSingleByteBuilder(self, op, buildinfo):
+        self.info("doubleRegSingleByteBuilder",op)
+        bincode = self.initByteArray(op)
+        bincode[0] = buildinfo['bytecode'] | (op['reg']<<2) | (op['regr']<<0)
+        #print(f"{bincode[0]:02x}")
+        return bincode
+
+
+#   This probably needs to be rewritten - it's here just to handle
+#   movwi sp,_16bitaddress instruction
+    def threeByteBuilder(self, op, buildinfo):
+        self.info("threeByteBuilder",op)
+
+        bincode = self.initByteArray(op)
+        bincode[0] = buildinfo['bytecode']
+
+        dValue = op['data'] if isinstance(op['data'],int) else self.symtable[op['data']]
 
         bincode[1] = (dValue) & 0xff
         bincode[2] = (dValue>>8) & 0xff
 
-        print("========threeByteBuilder",op,bincode)
+        #print("threeByteBuilder",op,bincode)
         return bincode
 
 
@@ -330,6 +346,11 @@ class Parser:
 class AssemblerParser(Parser):
 
     def start(self):
+        #print("start")
+        ###print(self.text)
+        ##print(self.pos)
+        #print(self.len)
+
         return self.testme()
 
     def testme(self):
@@ -340,23 +361,23 @@ class AssemblerParser(Parser):
         return self.match('alu','movwi','movi','mov','ld','call','singlebyte','singleop','out','djnz')
 
     def singleop(self):
-        op = self.keyword('exx','pushall','popall','ret','nop','hlt')
+        op = self.keyword('exx','pushall','popall','ret','nop','hlt','clc','setc')
         if (op is not None):
-            return {'op': op, 'size':1, 'code': [0]}
+            return {'op': op, 'size':1}
         return None
 
     def out(self):
         op = self.keyword('out','push','shl','shr')
         if (op is not None):
             reg = self.match('registers')
-            return {'op': op, 'reg':reg, 'size':1, 'code': [0]}
+            return {'op': op, 'reg':reg, 'size':1}
         return None
 
     def singlebyte(self):
         op = self.keyword('inc','dec')
         if (op is not None):
             reg = self.match('registers','registers16')
-            return {'op': op if isinstance(reg,int) else op+reg, 'reg':reg, 'size':1, 'code': [0]}
+            return {'op': op if isinstance(reg,int) else op+reg, 'reg':reg, 'size':1}
         return None
 
 
@@ -366,14 +387,14 @@ class AssemblerParser(Parser):
             reg = self.match('registers')
             self.char(',')
             data = self.match('number','labelstr')
-            return {'op': op, 'reg': reg,'addr':data, 'size':3, 'code': [0]}
+            return {'op': op, 'reg': reg,'data':data, 'size':3}
         return None
 
     def call(self):
-        op = self.keyword('call','jmp','jpz','jpnz','jpc','jpnc')
+        op = self.keyword('call','jmp','jpz','jpnz','jpc','jpnc','jps','jpns','jpo','jpno')
         if (op is not None):
             data = self.match('number','labelstr')
-            return {'op': op, 'addr':data, 'size':3, 'code': [0]}
+            return {'op': op, 'data':data, 'size':3}
         return None
 
     def ld(self):
@@ -382,7 +403,7 @@ class AssemblerParser(Parser):
             regl = self.match('registers')
             self.char(',')
             data = self.match('number','labelstr')
-            return {'op': op, 'reg': regl, 'data':data, 'size':3, 'code': [0]}
+            return {'op': op, 'reg': regl, 'data':data, 'size':3}
         return None
 
     def movwi(self):
@@ -391,7 +412,7 @@ class AssemblerParser(Parser):
             regl = self.match('registers16')
             self.char(',')
             data = self.match('number','labelstr')
-            return {'op': op, 'reg': regl, 'data':data, 'size':3, 'code': [0]}
+            return {'op': op, 'reg': regl, 'data':data, 'size':3}
         return None
 
     def alu(self):
@@ -401,7 +422,7 @@ class AssemblerParser(Parser):
             regl = self.match('registers')
             self.char(',')
             data = self.match('number','label')
-            return {'op': logic, 'reg': regl, 'data':data, 'size':2, 'code': [0]}
+            return {'op': logic, 'reg': regl, 'data':data, 'size':2}
 
         logic = self.keyword('and','or','xor','add','sub')
         if (logic is not None):
@@ -441,9 +462,9 @@ class AssemblerParser(Parser):
 
     def labelstr(self):
         chars=[]
-        chars.append(self.char('A-Za-z'))
+        chars.append(self.char('A-Za-z0-9_'))
         while True:
-            char = self.maybe_char('A-Za-z_')
+            char = self.maybe_char('A-Za-z0-9_')
             if char is None:
                     break
             chars.append(char)
@@ -584,6 +605,11 @@ if __name__ == '__main__':
                 raise SyntaxError('Replicated label',op['line'])
             labels[labelnm] = addr
 
+
+    def info(str,end=None):
+        print(str,end='')
+
+    # ** Main Process Starts here ***
     parser = AssemblerParser()
     pc = 0
     line = 0
@@ -598,7 +624,7 @@ if __name__ == '__main__':
             if len(text) == 0:
                 break
             line = line + 1
-            op = parser.parse(text)
+            op = parser.parse(text.strip())
             if (op is not None):
                 op['line'] = line
                 code.append(op)
@@ -610,7 +636,6 @@ if __name__ == '__main__':
             break
         except IndexError as e:
             print(f'Error: {e} Line {line}')
-            break
         except (ParseError, ZeroDivisionError) as e:
             print(f'Error: {e} Line {line}')
 
@@ -625,11 +650,11 @@ if __name__ == '__main__':
                 pc = op['data']
             op['pc'] = pc
             pc += op['size']
-            print(op)
+#info(op,"\n")
             processlabels(op,labels)
 
         for lbl in labels:
-            print(lbl,labels[lbl])
+            info(f"'{lbl}': 0x{labels[lbl]:04x}\n")
 
         # now build up binary version of our code
         builder = Builder(labels)
@@ -638,8 +663,13 @@ if __name__ == '__main__':
             bytearray = builder.build(op)
             binarray+=bytearray
 
-        print("final size ",len(binarray))
+        for index,op in enumerate(binarray):
+            info(f"{op:02x}",end='')
+            if (index % 8 == 7):
+                info("\n")
+        info("\n")
 
+        info(f"final size {len(binarray)} bytes\n")
 
     except (SyntaxError) as e:
         print(f"{e}")
