@@ -47,7 +47,7 @@ clLines = [
     {'key':"f2",  'alias':{'Su'}, 'bit':7, 'active': ACTIVEHIGH,'desc':"Select bit for Constant Bank/ALU Function"},
     {'key':"Ec",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Place Constant (from Constant Bank) defined by {f2,f1,f0} on the DBUS"},
     {'key':"Xx",  'bit':5, 'active': ACTIVEHIGH, 'desc':"Swap over reg banks (EXX instruction)"},
-    {'key':"Sa",  'bit':4, 'active': ACTIVEHIGH, 'desc':"Source for A B Reg pair can come from DBUS or Address BUS (0 is DBUS)"},
+    {'key':"Sa",  'bit':4, 'active': ACTIVEHIGH, 'desc':"'Source Address' Source for A B Reg pair can come from DBUS or Address BUS (0 is DBUS)"},
 
     {'key':"Us",  'bit':3, 'active': ACTIVEHIGH,'desc':"Increment if 1 or Decrement if 0 - used with Cs"},
     {'key':"Es",  'bit':2, 'active': ACTIVEHIGH, 'desc':"Place Stack Address on Address Bus"},
