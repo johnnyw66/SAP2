@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+import sys
+import os.path
+
 codeBuilder = {
     'mov' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0x90},
     'movi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x40},
@@ -597,7 +600,22 @@ if __name__ == '__main__':
             return f'{self.msg} at line {self.pos}'
 
 
-    def processlabels(ops,labels):
+
+    def produceHexFile(binName,binarray):
+
+
+        file = open(binName, "w+")
+        file.write("v2.0 raw\n")
+        for index,op in enumerate(binarray):
+            file.write(f"{op:02x} ")
+            if (index % 8 == 7):
+                file.write("\n")
+
+        file.write("\n")
+        file.close()
+
+
+    def processLabels(ops,labels):
         if (op['op'] == 'label'):
             labelnm = op['data']
             addr = op['pc']
@@ -610,13 +628,34 @@ if __name__ == '__main__':
         print(str,end='')
 
     # ** Main Process Starts here ***
+
+    #print(f"Arguments count: {len(sys.argv)}")
+    #for i, arg in enumerate(sys.argv):
+    #    print(f"Argument {i:>6}: {arg}")
+
+    try:
+
+        if (len(sys.argv) < 2):
+            raise Exception(f"At least one argument is needed for the .asm file! Example: '{sys.argv[0]} example.asm'")
+
+        sourceFilename = sys.argv[1]
+
+        if (not os.path.isfile(sourceFilename)):
+            raise Exception(f"Sourcefile '{sourceFilename}' does not exist.")
+
+    except Exception as e:
+        print(e)
+        sys.exit(-1)
+
     parser = AssemblerParser()
     pc = 0
     line = 0
     code = []
     labels = {}
 
-    asm = open("test.asm", "r")
+    print(f"Trying to assemble '{sourceFilename}'...\n")
+    asm = open(sourceFilename, "r")
+
     while True:
         try:
 
@@ -650,26 +689,27 @@ if __name__ == '__main__':
                 pc = op['data']
             op['pc'] = pc
             pc += op['size']
-#info(op,"\n")
-            processlabels(op,labels)
+            #info(op,"\n")
+            processLabels(op,labels)
 
+        info("Symbol Table:\n")
         for lbl in labels:
-            info(f"'{lbl}': 0x{labels[lbl]:04x}\n")
+            info(f"\t'{lbl}': 0x{labels[lbl]:04x}\n")
 
-        # now build up binary version of our code
+        # Now build up binary version of our code
         builder = Builder(labels)
         binarray = []
+
         for op in code:
             bytearray = builder.build(op)
             binarray+=bytearray
 
-        for index,op in enumerate(binarray):
-            info(f"{op:02x}",end='')
-            if (index % 8 == 7):
-                info("\n")
-        info("\n")
+        info(f"\nSize: {len(binarray)} bytes\n\n")
 
-        info(f"final size {len(binarray)} bytes\n")
+        binName = sourceFilename.split(".")[0] + ".hex"
+        info(f"Producing LogiSym bin file '{binName}'")
+        produceHexFile(binName, binarray)
+        info("\n\ncomplete.\n")
 
     except (SyntaxError) as e:
         print(f"{e}")
