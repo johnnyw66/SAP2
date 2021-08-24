@@ -1,7 +1,26 @@
 .org 0
 :start
-  call testaddi
+  call testsubi
   hlt
+
+
+  :testsubi
+    clc
+    ld r0,addstuff0
+    subi r0,0x32 ;  0x04
+
+    clc
+    ld r1,addstuff1
+    subi r1,0x12 ; 0x00
+
+    clc
+    ld r2,addstuff2
+    subi r2,0x20  ; 0x12
+
+    clc
+    ld r3,addstuff3
+    subi r3,0x24 ; 0x23
+    ret
 
 :testaddi
   clc

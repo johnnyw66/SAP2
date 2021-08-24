@@ -440,7 +440,7 @@ opcodes = [
 
     # 0x50 other Logic immediate functions
 
-    {'name':'TOTEST ADDI R0,','bytecode': 0x50,
+    {'name':'ADDI R0,','bytecode': 0x50,
     'control':
     [
         {'Ep','nLm'},       # Place PC into MAR
@@ -449,7 +449,7 @@ opcodes = [
         {'nLk','Eu','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
     ]},
 
-    {'name':'TOTEST ADDI R1,','bytecode': 0x51,
+    {'name':'ADDI R1,','bytecode': 0x51,
     'control':
     [
         {'Ep','nLm'},       # Place PC into MAR
@@ -458,7 +458,7 @@ opcodes = [
         {'nLk','k0','Eu','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
     ]},
 
-    {'name':'TOTEST ADDI R2,','bytecode': 0x52,
+    {'name':'ADDI R2,','bytecode': 0x52,
     'control':
     [
         {'Ep','nLm'},       # Place PC into MAR
@@ -467,7 +467,7 @@ opcodes = [
         {'nLk','k1','Eu','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
     ]},
 
-    {'name':'TOTEST ADDI R3,','bytecode': 0x53,
+    {'name':'ADDI R3,','bytecode': 0x53,
     'control':
     [
         {'Ep','nLm'},       # Place PC into MAR
@@ -475,6 +475,58 @@ opcodes = [
         {'Ek','nLa','f1','f0'},       # R3-->A
         {'nLk','k1','k0','Eu','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
     ]},
+
+
+    # Subtract - Same as Add but with 'Su' line set when using ALU
+
+
+    {'name':'SUBI R0,','bytecode': 0x54,
+    'control':
+    [
+        {'Ep','nLm'},       # Place PC into MAR
+        {'Cp','nCE','nLb'}, # inc PC next memory byte into B
+        {'Ek','nLa'},       # R0-->A
+        {'nLk','Eu','Su','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
+    ]},
+
+    {'name':'SUBI R1,','bytecode': 0x55,
+    'control':
+    [
+        {'Ep','nLm'},       # Place PC into MAR
+        {'Cp','nCE','nLb'}, # inc PC next memory byte into B
+        {'Ek','nLa','f0'},       # R1-->A
+        {'nLk','k0','Eu','Su','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
+    ]},
+
+    {'name':'SUBI R2,','bytecode': 0x56,
+    'control':
+    [
+        {'Ep','nLm'},       # Place PC into MAR
+        {'Cp','nCE','nLb'}, # inc PC next memory byte into B
+        {'Ek','nLa','f1'},       # R2-->A
+        {'nLk','k1','Eu','Su','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
+    ]},
+
+    {'name':'SUBI R3,','bytecode': 0x57,
+    'control':
+    [
+        {'Ep','nLm'},       # Place PC into MAR
+        {'Cp','nCE','nLb'}, # inc PC next memory byte into B
+        {'Ek','nLa','f1','f0'},       # R3-->A
+        {'nLk','k1','k0','Eu','Su','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
+    ]},
+
+
+    # ANDI base 0x58 (0x58, 0x59, 0x5a, 0x5b)
+
+
+    # ORI base 0x5C (0x5c, 0x5d, 0x5e, 0x5f)
+
+
+
+    # XORI is found at base 0x44!
+
+
 
 
     # Jumping and conditional Jumping
