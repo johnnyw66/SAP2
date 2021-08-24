@@ -5,7 +5,7 @@
 
 # Instructions
 
-*User Register instructions 2 Banks of 4 registers R0, R1, R2 and R3 plus PC,SP and Flag Register*
+*User Register instructions 2 Banks of 4 registers R0, R1, R2, R3 plus PC,SP and Flag Register*
 
 
 
@@ -21,7 +21,7 @@ INC Rx | Rx + 1 -> Rx | Z S V O|5
 DEC Rx | Rx - 1 -> Rx | Z S V O|5
 INC SP | SP + 1 -> SP |None|5
 DEC SP | SP - 1 -> SP |None|5
-OUT Rx| Rx sent to Display Unit|4
+OUT Rx| Rx sent to Display Unit|None|4
 *38 Opcodes in total*
 
 Opcode|Action|Flags|Tstates
@@ -74,9 +74,19 @@ HLT| Stop uProc|None|4
 
 24 August 2021
 ---
+
 This microprocessor written for the LogiSim Evolution CAD can be built with standard TTL/CMOS logic chips.
+Fed up with soldering - I wanted to 'build' the microprocessor before my attempt to describe this in *Verilog
+HDL* and placing the design on one of my Altera FPGAs. It will support 80 instructions which are listed below.
+
+At some point I will add in I/O instructions and have it drive a VGA/Video Composite output
+along with a Serial UART. I will also split the current 64k RAM into a 32k ROM with 32k RAM
+using the same 16 bit address bus. Coding some simple monitor program to load software over an
+RS232 serial port. Perhaps look at retargeting a C Compiler?
+
+
 For what it's worth - I've included the circuit for a programmer unit so the user can enter byte code by hand.
-I prefer to use the LogicSim GUI and my simple assembler utility.
+I prefer to use a combination of the LogicSim GUI and my simple assembler utility.
 
 Assemble your machine code from a 'asm' text file using the python utility - and load the program into the RAM memory unit (right click and select 'Load Image' - then select an assembled hex file )
 
