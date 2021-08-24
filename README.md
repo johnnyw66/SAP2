@@ -3,6 +3,67 @@
 
 ![SAP2 Inspired Project](/images/alusub.jpg)
 
+
+24 August 2021
+---
+
+This microprocessor written for the LogiSim Evolution CAD can be built with standard TTL/CMOS logic chips.
+Fed up with soldering - I wanted to 'build' the microprocessor before my attempt to describe this in *Verilog
+HDL* and placing the design on one of my Altera FPGAs. It will support 80 instructions which are listed below.
+
+
+At some point I will add in I/O instructions and have it drive a VGA/Video Composite output
+along with a Serial UART. I will also split the current 64k RAM into a 32k ROM with 32k RAM.
+If my interest still holds - the ROM could contain some simple monitor program to load software over an RS232 serial port.
+Perhaps look at retargeting a C Compiler?
+
+
+For what it's worth - I've included the circuit for a programmer unit so the user can enter byte code by hand.
+I prefer to use a combination of the LogicSim GUI and my simple assembler utility.
+
+Assemble your machine code from a 'asm' text file using the python utility - and load the program into the RAM memory unit (right click and select 'Load Image' - then select an assembled hex file )
+
+
+To assemble code - simple run './assembler.py test.asm' - this will produce a 'binary' version with the same
+base name - but appended with '.hex' (i.e 'assembler.py mycode.asm' produces 'mycode.hex')
+
+Example code:
+
+
+````
+.org 0
+:start
+    movwi sp,0xffff   ; since SP is set to 0 on  reset - we don't really need this!
+                      ; A push or call will decrement SP before placing the low byte
+                      ; of the return address on the stack
+    ld r0,count
+    call display
+    hlt
+
+:display    
+    out r0
+    djnz r0,display
+    ret
+
+:count
+  .db 255
+  .ds 20 ; reserve 20 bytes ('zeroised')
+  .dw 0xfffe ; 2-byte word
+
+.end
+`````
+
+**Issues**
+
+I am currently using **32** (!!!!) control lines. Way too much. Although the current design uses a 32-bit data output -
+you can easily swap this for 4 conventional ROMs with 8-bit data buses. The utility *buildcontrolrom.py* can be modified
+to build 4 microcode ROMs if you're inclined to build a real processor.
+
+
+Perhaps I can get some inspiration from looking at the design of **Gigatron TTL computer** - which I built in 2018.
+Using 32 control lines seems like a bit of an overkill.
+
+
 # Instructions
 
 *User Register instructions 2 Banks of 4 registers R0, R1, R2, R3 plus PC,SP and Flag Register*
@@ -70,63 +131,3 @@ HLT| Stop uProc|None|4
 *5 Ocodes in total*
 
 **CLC and SETC are currently 'fudged' as they affect the sign and overflow FLAGS**
-
-
-24 August 2021
----
-
-This microprocessor written for the LogiSim Evolution CAD can be built with standard TTL/CMOS logic chips.
-Fed up with soldering - I wanted to 'build' the microprocessor before my attempt to describe this in *Verilog
-HDL* and placing the design on one of my Altera FPGAs. It will support 80 instructions which are listed below.
-
-
-At some point I will add in I/O instructions and have it drive a VGA/Video Composite output
-along with a Serial UART. I will also split the current 64k RAM into a 32k ROM with 32k RAM.
-If my interest still holds - the ROM could contain some simple monitor program to load software over an RS232 serial port.
-Perhaps look at retargeting a C Compiler?
-
-
-For what it's worth - I've included the circuit for a programmer unit so the user can enter byte code by hand.
-I prefer to use a combination of the LogicSim GUI and my simple assembler utility.
-
-Assemble your machine code from a 'asm' text file using the python utility - and load the program into the RAM memory unit (right click and select 'Load Image' - then select an assembled hex file )
-
-
-To assemble code - simple run './assembler.py test.asm' - this will produce a 'binary' version with the same
-base name - but appended with '.hex' (i.e 'assembler.py mycode.asm' produces 'mycode.hex')
-
-Example code:
-
-
-````
-.org 0
-:start
-    movwi sp,0xffff   ; since SP is set to 0 on  reset - we don't really need this!
-                      ; A push or call will decrement SP before placing the low byte
-                      ; of the return address on the stack
-    ld r0,count
-    call display
-    hlt
-
-:display    
-    out r0
-    djnz r0,display
-    ret
-
-:count
-  .db 255
-  .ds 20 ; reserve 20 bytes ('zeroised')
-  .dw 0xfffe ; 2-byte word
-
-.end
-`````
-
-**Issues**
-
-I am currently using **32** (!!!!) control lines. Way too much. Although the current design uses a 32-bit data output -
-you can easily swap this for 4 conventional ROMs with 8-bit data buses. The utility *buildcontrolrom.py* can be modified
-to build 4 microcode ROMs if you're inclined to build a real processor.
-
-
-Perhaps I can get some inspiration from looking at the design of **Gigatron TTL computer** - which I built in 2018.
-Using 32 control lines seems like a bit of an overkill.
