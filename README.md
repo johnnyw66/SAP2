@@ -31,7 +31,14 @@ LD Rx,16bitaddr |@(addr) -> Rx |None
 ST Rx,16bitaddr |@(addr) <- Rx |None
 MOVI SP,16bitaddr| 16-bit value -> SP| None
 
-
+Opcode|Action|Flags
+------|------|-----
+DJNZ Rx,16bitaddr | Rx - 1 -> Rx, 16bitaddr if NZ ? PC + 1 -> PC| Z S V O
+JPNZ 16bitaddr | PC <- PC + 1 if Z ? 16bitaddr| Z S V O
+JPNC 16bitaddr | PC <- PC + 1 if C ? 16bitaddr| Z S V O
+JMP  16bitaddr | PC <- 16bitaddr | None
+CALL 16bitaddr | @SP <- PC + 1, PC <- 16bitaddr| Z S V O
+ 
 
 24 August 2021
 ---
