@@ -58,11 +58,13 @@ POP R2 | @SP -> R3, @SP+1 -> R2, SP <- SP + 2|None|0
 
 Opcode|Action|Flags|Tstates
 ------|------|-----|-------
-CLC| Cf<-0| C |0|
-SETC|Cf<-1| C|0
+CLC| Cf <- 0| C |0
+SETC|Cf <- 1| C|0
 NOP| no operation| None|0
 EXX| Switch Reg Bank| None|0
 *5 Ocodes in total*
+
+**CLC and SETC are currently 'fudged' as they affect the sign and overflow FLAGS**
 
 
 24 August 2021
