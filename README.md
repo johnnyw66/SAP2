@@ -5,7 +5,7 @@
 
 # Instructions
 
-*Register instructions 2 Banks of 4 registers R0, R1, R2 and R3*
+*User Register instructions 2 Banks of 4 registers R0, R1, R2 and R3 plus PC,SP and Flag Register*
 
 
 
@@ -21,8 +21,9 @@ INC Rx | Rx + 1 -> Rx | Z S V O|5
 DEC Rx | Rx - 1 -> Rx | Z S V O|5
 INC SP | SP + 1 -> SP |None|5
 DEC SP | SP - 1 -> SP |None|5
+OUT Rx| Rx sent to Display Unit|4
 
-*34 Opcodes in total*
+*38 Opcodes in total*
 
 Opcode|Action|Flags|Tstates
 ------|------|-----|-------
@@ -79,3 +80,24 @@ see 'test.asm' for example of our current set of Instructions
 
 To assemble code - simple run './assembler.py test.asm' - this will produce a 'binary' version with the same
 base name - but appended with '.hex' (i.e 'assembler.py mycode.asm' produces 'mycode.hex')
+
+Example code:
+
+
+````
+.org 0
+:start
+    movwi sp,0xffff   ; since SP is set to 0 on  reset - we don't really need this!
+    ld r0,count
+    call display
+    hlt
+
+:display    
+    out r0
+    djnz r0,display
+    ret
+
+:count
+  .db 255
+
+.end
