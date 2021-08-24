@@ -1,6 +1,6 @@
 .org 0
 :start
-  call addregtest
+  call subregtest
   hlt
 
 :res0
@@ -15,6 +15,89 @@
 :res3
   .db 0
 
+:subregtest
+  ;call subregtest0
+  ;call subregtest1
+  ;call subregtest2
+  call subregtest3
+  ret
+
+  :subregtest0
+    call initaddregdata
+    out r0
+    sub r0,r0
+    out r0
+    clc
+    movi r0,255
+    sub r0,r1
+    out r0
+    clc
+    sub r0,r2
+    out r0
+    clc
+    sub r0,r3
+    out r0
+    ret
+
+
+  :subregtest1
+    call initaddregdata
+    out r1
+    clc
+    sub r1,r0
+    out r1
+    clc
+    sub r1,r1
+    out r1
+    movi r1,255
+    out r1
+    clc
+    sub r1,r2
+    out r1
+    clc
+    sub r1,r3
+    out r1
+    ret
+
+:subregtest2
+      call initaddregdata
+      out r2
+      clc
+      sub r2,r0
+      out r2
+      clc
+      sub r2,r1
+      out r2
+      clc
+      sub r2,r2
+      out r2
+      movi r2,255
+      out r2
+      clc
+      sub r2,r3
+      out r2
+      ret
+      
+:subregtest3
+    call initaddregdata
+    out r3
+    clc
+    sub r3,r0
+    out r3
+    clc
+    sub r3,r1
+    out r3
+    clc
+    sub r3,r2
+    out r3
+    movi r2,255
+    out r3
+    clc
+    sub r3,r3
+    out r3
+    ret
+
+
 :addregtest
   call addregtest0
   call addregtest1
@@ -22,7 +105,7 @@
   call addregtest3
   ret
 
-
+; 48
 :addregtest0
   call initaddregdata
   add r0,r0
