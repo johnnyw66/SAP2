@@ -79,10 +79,11 @@ This microprocessor written for the LogiSim Evolution CAD can be built with stan
 Fed up with soldering - I wanted to 'build' the microprocessor before my attempt to describe this in *Verilog
 HDL* and placing the design on one of my Altera FPGAs. It will support 80 instructions which are listed below.
 
+
 At some point I will add in I/O instructions and have it drive a VGA/Video Composite output
-along with a Serial UART. I will also split the current 64k RAM into a 32k ROM with 32k RAM
-using the same 16 bit address bus. Coding some simple monitor program to load software over an
-RS232 serial port. Perhaps look at retargeting a C Compiler?
+along with a Serial UART. I will also split the current 64k RAM into a 32k ROM with 32k RAM.
+If my interest still holds - the ROM could contain some simple monitor program to load software over an RS232 serial port.
+Perhaps look at retargeting a C Compiler?
 
 
 For what it's worth - I've included the circuit for a programmer unit so the user can enter byte code by hand.
@@ -118,3 +119,14 @@ Example code:
   .dw 0xfffe ; 2-byte word
 
 .end
+`````
+
+**Issues**
+
+I am currently using **32** (!!!!) control lines. Way too much. Although the current design uses a 32-bit data output -
+you can easily swap this for 4 conventional ROMs with 8-bit data buses. The utility *buildcontrolrom.py* can be modified
+to build 4 microcode ROMs if you're inclined to build a real processor.
+
+
+Perhaps I can get some inspiration from looking at the design of **Gigatron TTL computer** - which I built in 2018.
+Using 32 control lines seems like a bit of an overkill.
