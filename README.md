@@ -36,8 +36,8 @@ ST Rx,16bitaddr |@(addr) <- Rx |None
 MOVI SP,16bitaddr| 16-bit value -> SP| None
 *4 Opcodes in total*
 
-Opcode|Action|Flags| Tstates
-------|------|-----
+Opcode|Action|Flags|Tstates
+------|------|-----|-------
 DJNZ Rx,16bitaddr | Rx - 1 -> Rx, 16bitaddr if NZ ? PC + 1 -> PC| Z S V O|0
 JPNZ 16bitaddr | PC <- PC + 1 if Z ? 16bitaddr| None|0
 JPNC 16bitaddr | PC <- PC + 1 if C ? 16bitaddr| None|0
@@ -47,7 +47,7 @@ RET| PC <- @SP| None|0
 *9 Opcodes in total*
 
 Opcode|Action|Flags|Tstates
-------|------|-----
+------|------|-----|-------
 PUSH R0| R0 -> @SP, R1-> @SP+1 SP <- SP - 2|None|0
 PUSH R2| R2 -> @SP, R3-> @SP+1 SP <- SP - 2| None|0
 POP R0 | @SP -> R1, @SP+1 -> R0, SP <- SP + 2| None|0
@@ -55,7 +55,7 @@ POP R2 | @SP -> R3, @SP+1 -> R2, SP <- SP + 2|None|0
 
 
 Opcode|Action|Flags|Tstates
-------|------|-----
+------|------|-----|-------
 CLC| Cf<-0| C |0|
 SETC|Cf<-1| C|0
 NOP| no operation| None|0
