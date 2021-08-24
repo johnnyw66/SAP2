@@ -58,6 +58,7 @@ PUSH R0| R0 -> @SP, R1-> @SP+1 SP <- SP - 2|None|9
 PUSH R2| R2 -> @SP, R3-> @SP+1 SP <- SP - 2| None|9
 POP R0 | @SP -> R1, @SP+1 -> R0, SP <- SP + 2| None|9
 POP R2 | @SP -> R3, @SP+1 -> R2, SP <- SP + 2|None|9
+*4 Ocodes in total*
 
 
 Opcode|Action|Flags|Tstates
@@ -67,7 +68,6 @@ SETC|Cf <- 1| C|5
 NOP| no operation| None|4
 EXX| Switch Reg Bank| None|4
 HLT| Stop uProc|None|4
-
 *5 Ocodes in total*
 
 **CLC and SETC are currently 'fudged' as they affect the sign and overflow FLAGS**
@@ -75,10 +75,10 @@ HLT| Stop uProc|None|4
 
 24 August 2021
 ---
+Loosely based on the SAP2, this microprocessor can be built with standard TTL/CMOS logic chips.
+For what it's worth - I've included the circuit for a programmer unit so the user can enter byte code by hand- but I prefer to use the LogicSim GUI and my simple assembler utility.
+Assemble you machine from a text file using the python utility - and load the program into the RAM memory unit (right click and select 'Load Image' - then select an assembled hex file )
 
-Added 'assembler.py' to allow us to produce LogiSim hex files for loading into RAM.
-
-see 'test.asm' for example of our current set of Instructions
 
 To assemble code - simple run './assembler.py test.asm' - this will produce a 'binary' version with the same
 base name - but appended with '.hex' (i.e 'assembler.py mycode.asm' produces 'mycode.hex')
