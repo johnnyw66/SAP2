@@ -4679,6 +4679,10 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="font" val="SansSerif plain 32"/>
       <a name="text" val="DISPLAY MODULE"/>
     </comp>
+    <comp lib="8" loc="(547,1328)" name="Text">
+      <a name="font" val="SansSerif plain 12"/>
+      <a name="text" val="(set by 'Sa' control line pin)"/>
+    </comp>
     <comp lib="8" loc="(557,3256)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="Example: Load 'simpleprog' into RAM before resetting the circuit."/>
