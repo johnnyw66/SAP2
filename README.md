@@ -1,7 +1,7 @@
-# SAP2
+# SAP2 Inspired Project
 
 
-![SAP2 Instructions](/images/SAP2-instructions.jpeg)
+![SAP2 Inspired Project](/images/alusub.jpg)
 
 # Instructions
 
