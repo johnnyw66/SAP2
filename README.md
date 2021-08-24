@@ -91,8 +91,8 @@ Example code:
 .org 0
 :start
     movwi sp,0xffff   ; since SP is set to 0 on  reset - we don't really need this!
-                      ; a push will decrement SP before placing the low byte
-                      ;of the return address on the stack
+                      ; A push or call will decrement SP before placing the low byte
+                      ; of the return address on the stack
     ld r0,count
     call display
     hlt
@@ -104,5 +104,7 @@ Example code:
 
 :count
   .db 255
+  .ds 20 ; reserve 20 bytes ('zeroised')
+  .dw 0xfffe ; 2-byte word
 
 .end
