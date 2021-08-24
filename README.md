@@ -22,7 +22,6 @@ DEC Rx | Rx - 1 -> Rx | Z S V O|5
 INC SP | SP + 1 -> SP |None|5
 DEC SP | SP - 1 -> SP |None|5
 OUT Rx| Rx sent to Display Unit|4
-
 *38 Opcodes in total*
 
 Opcode|Action|Flags|Tstates
