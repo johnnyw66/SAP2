@@ -24,8 +24,8 @@ I prefer to use a combination of the LogicSim GUI and my simple assembler utilit
 Assemble your machine code from a 'asm' text file using the python utility - and load the program into the RAM memory unit (right click and select 'Load Image' - then select an assembled hex file )
 
 
-To assemble code - simple run './assembler.py test.asm' - this will produce a 'binary' version with the same
-base name - but appended with '.hex' (i.e 'assembler.py mycode.asm' produces 'mycode.hex')
+To assemble code - simple run *assembler.py test.asm* - this will produce a 'binary' version with the same
+base name - but appended with '.hex' (i.e *assembler.py mycode.asm* produces *mycode.hex*)
 
 Example code:
 
@@ -64,7 +64,7 @@ Perhaps I can get some inspiration from looking at the design of **Gigatron TTL 
 Using 32 control lines seems like a bit of an overkill.
 
 
-# Instructions
+# Instruction Set
 
 *User Register instructions 2 Banks of 4 registers R0, R1, R2, R3 plus PC,SP and Flag Register*
 
