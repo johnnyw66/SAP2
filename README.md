@@ -21,7 +21,7 @@ Opcode|Action|Flags
 ADDI Rx,8bit| Rx + 8bit -> Rx|Z S V O
 SUBI Rx,8bit| Rx - 8bit -> Rx|Z S V O
 ANDI Rx,8bit| Rx - 8bit -> Rx|Z S V O
-ORI Rx,8bit| Rx | 8bit -> Rx|Z S V O
+ORI Rx,8bit| Rx or 8bit -> Rx|Z S V O
 XORI Rx,8bit| Rx ^ 8bit -> Rx|Z S V O
 
 Opcode|Action|Flags
