@@ -7,6 +7,10 @@ Instructions
 
 *Register instructions 2 Banks of 4 registers R0, R1, R2 and R3*
 
+Opcode | Comment|Flags|Tstates
+-------| -------|-----|-------
+hello|world|yes|go
+
 
 Opcode | Comment|Flags
 -------| -------|------
