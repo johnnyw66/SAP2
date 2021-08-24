@@ -66,6 +66,8 @@ CLC| Cf <- 0| C |5
 SETC|Cf <- 1| C|5
 NOP| no operation| None|4
 EXX| Switch Reg Bank| None|4
+HLT| Stop uProc|None|4
+
 *5 Ocodes in total*
 
 **CLC and SETC are currently 'fudged' as they affect the sign and overflow FLAGS**
