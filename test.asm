@@ -1,6 +1,41 @@
 .org 0
-  call testmov1
-  hlt
+    call writetest
+    call loadldtest
+    hlt
+
+    :data1
+      .db 0xaa
+    :data2
+      .db 0xbb
+    :data3
+      .db 0xcc
+    :data4
+      .db 0xdd
+
+:writetest
+  movi r0,0x01
+  movi r1,0x02
+  movi r2,0x03
+  movi r3,0x04
+  st r0,data1
+  st r1,data2
+  st r2,data3
+  st r3,data4
+  ret 
+
+
+:loadldtest
+    ld r0,data1
+    ld r1,data2
+    ld r2,data3
+    ld r3,data4
+    ret
+
+:stldtest
+ret
+
+
+
 
 :testmov
   call testmov0
@@ -49,10 +84,10 @@
   ret
 
 :inittestmov
-  movi r0,0xaa
-  movi r1,0xbb
-  movi r2,0xcc
-  movi r3,0xdd
+  movi r0,0xad
+  movi r1,0xbe
+  movi r2,0xcf
+  movi r3,0xd0
   ret
 
 

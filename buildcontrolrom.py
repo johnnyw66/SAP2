@@ -208,7 +208,7 @@ opcodes = [
     ]},
 
 
-    {'name':'TOTEST LD R1','bytecode': 0x15, 'control':
+    {'name':'LD R1','bytecode': 0x15, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -216,10 +216,10 @@ opcodes = [
         {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
         {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
 
-        {'nCE','nLk','f0'}         # Finally Write the contents of the current address in MAR to R0 reg
+        {'nCE','nLk','k0'}         # Finally Write the contents of the current address in MAR to R0 reg
     ]},
 
-    {'name':'TOTEST LD R2','bytecode': 0x16, 'control':
+    {'name':'LD R2','bytecode': 0x16, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -227,10 +227,10 @@ opcodes = [
         {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
         {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
 
-        {'nCE','nLk','f1'}         # Finally Write the contents of the current address in MAR to R0 reg
+        {'nCE','nLk','k1'}         # Finally Write the contents of the current address in MAR to R0 reg
     ]},
 
-    {'name':'TOTEST LD R3','bytecode': 0x17, 'control':
+    {'name':'LD R3','bytecode': 0x17, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -238,7 +238,7 @@ opcodes = [
         {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
         {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
 
-        {'nCE','nLk','f1','f0'}         # Finally Write the contents of the current address in MAR to R0 reg
+        {'nCE','nLk','k1','k0'}         # Finally Write the contents of the current address in MAR to R0 reg
     ]},
 
     {'name':'ST R0','bytecode': 0x18, 'control':
@@ -252,7 +252,7 @@ opcodes = [
         {'Ek','Lr'}         # Finally Write the contents of REG0 reg to the current address in MAR.
     ]},
 
-    {'name':'TOTEST ST R1','bytecode': 0x19, 'control':
+    {'name':'ST R1','bytecode': 0x19, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -263,7 +263,7 @@ opcodes = [
         {'Ek','Lr','f0'}         # Finally Write the contents of REG0 reg to the current address in MAR.
     ]},
 
-    {'name':'TOTEST ST R2','bytecode': 0x1a, 'control':
+    {'name':'ST R2','bytecode': 0x1a, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -274,7 +274,7 @@ opcodes = [
         {'Ek','Lr','f1'}         # Finally Write the contents of REG0 reg to the current address in MAR.
     ]},
 
-    {'name':'TOTEST ST R3','bytecode': 0x1b, 'control':
+    {'name':'ST R3','bytecode': 0x1b, 'control':
     [
         {'Ep','nLm'},
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
@@ -419,7 +419,7 @@ opcodes = [
 
 
 
-    # 0x50 othe Logic immediate functions
+    # 0x50 other Logic immediate functions
 
 
 
@@ -605,7 +605,7 @@ opcodes = [
     # {k1,k0}: b00 - R0, b01 - R1, b10 - R2, b11 - R3
 
     # R0 base 0x90
-    {'name':'TOTEST MOV R0,R0','bytecode': 0x90,
+    {'name':'MOV R0,R0','bytecode': 0x90,
     'control':
     [
         {'Ek','nLk'},
@@ -617,13 +617,13 @@ opcodes = [
         {'Ek','f0','nLk'},
     ]},
 
-    {'name':'TOTEST MOV R0,R2','bytecode': 0x92,
+    {'name':'MOV R0,R2','bytecode': 0x92,
     'control':
     [
         {'Ek','f1','nLk'},
     ]},
 
-    {'name':'TOTEST MOV R0,R3','bytecode': 0x93,
+    {'name':'MOV R0,R3','bytecode': 0x93,
     'control':
     [
         {'Ek','f1','f0','nLk'},
@@ -636,19 +636,19 @@ opcodes = [
         {'Ek','nLk','k0'},
     ]},
 
-    {'name':'TOTEST MOV R1,R1','bytecode': 0x95,
+    {'name':'MOV R1,R1','bytecode': 0x95,
     'control':
     [
         {'Ek','nLk','k0','f0'},
     ]},
 
-    {'name':'TOTEST MOV R1,R2','bytecode': 0x96,
+    {'name':'MOV R1,R2','bytecode': 0x96,
     'control':
     [
         {'Ek','nLk','k0','f1'},
     ]},
 
-    {'name':'TOTEST MOV R1,R3','bytecode': 0x97,
+    {'name':'MOV R1,R3','bytecode': 0x97,
     'control':
     [
         {'Ek','nLk','k0','f1','f0'},
@@ -656,50 +656,50 @@ opcodes = [
 
 
     # R2 dest
-    {'name':'TODO MOV R2,R0','bytecode': 0x98,
+    {'name':'MOV R2,R0','bytecode': 0x98,
     'control':
     [
         {'Ek','nLk','k1'},
     ]},
 
-    {'name':'TODO MOV R2,R1','bytecode': 0x99,
+    {'name':'MOV R2,R1','bytecode': 0x99,
     'control':
     [
         {'Ek','nLk','k1','f0'},
     ]},
 
-    {'name':'TODO MOV R2,R2','bytecode': 0x9a,
+    {'name':'MOV R2,R2','bytecode': 0x9a,
     'control':
     [
         {'Ek','nLk','k1','f1'},
     ]},
 
-    {'name':'TODO MOV R2,R3','bytecode': 0x9b,
+    {'name':'MOV R2,R3','bytecode': 0x9b,
     'control':
     [
         {'Ek','nLk','k1','f1','f0'},
     ]},
 
     # R3 dest base 0x9c
-    {'name':'TODO MOV R3,R0','bytecode': 0x9c,
+    {'name':'MOV R3,R0','bytecode': 0x9c,
     'control':
     [
         {'Ek','nLk','k1','k0'},
     ]},
 
-    {'name':'TODO MOV R3,R1','bytecode': 0x9d,
+    {'name':'MOV R3,R1','bytecode': 0x9d,
     'control':
     [
         {'Ek','nLk','k1','k0','f0'},
     ]},
 
-    {'name':'TODO MOV R3,R2','bytecode': 0x9e,
+    {'name':'MOV R3,R2','bytecode': 0x9e,
     'control':
     [
         {'Ek','nLk','k1','k0','f1'},
     ]},
 
-    {'name':'TODO MOV R3,R3','bytecode': 0x9f,
+    {'name':'MOV R3,R3','bytecode': 0x9f,
     'control':
     [
         {'Ek','nLk','k1','k0','f1','f0'},
@@ -707,7 +707,7 @@ opcodes = [
 
     # R0 dest
 
-    {'name':'TOTEST ADD R0,R0','bytecode': 0xa0,
+    {'name':'ADD R0,R0','bytecode': 0xa0,
     'control':
     [
         {'Ek','nLa'},
@@ -723,7 +723,7 @@ opcodes = [
         {'nLk','Eu','Lf'}
     ]},
 
-    {'name':'TODO ADD R0,R2','bytecode': 0xa2,
+    {'name':'ADD R0,R2','bytecode': 0xa2,
     'control':
     [
         {'Ek','nLa'},
@@ -731,7 +731,7 @@ opcodes = [
         {'nLk','Eu','Lf'}
     ]},
 
-    {'name':'TODO ADD R0,R3','bytecode': 0xa3,
+    {'name':'ADD R0,R3','bytecode': 0xa3,
     'control':
     [
         {'Ek','nLa'},
@@ -740,7 +740,7 @@ opcodes = [
     ]},
 
     # R1 dest base 0xa4
-    {'name':'TOTEST ADD R1,R0','bytecode': 0xa4,
+    {'name':'ADD R1,R0','bytecode': 0xa4,
     'control':
     [
         {'Ek','f0','nLa'},
@@ -748,21 +748,21 @@ opcodes = [
         {'nLk','k0','Eu','Lf'}
     ]},
 
-    {'name':'TOTEST ADD R1,R1','bytecode': 0xa5,
+    {'name':'ADD R1,R1','bytecode': 0xa5,
     'control':
     [
         {'Ek','f0','nLa'},
         {'Ek','f0','nLb'},
         {'nLk','k0','Eu','Lf'}
     ]},
-    {'name':'TOTEST ADD R1,R2','bytecode': 0xa6,
+    {'name':'ADD R1,R2','bytecode': 0xa6,
     'control':
     [
         {'Ek','f0','nLa'},
         {'Ek','f1','nLb'},
         {'nLk','k0','Eu','Lf'}
     ]},
-    {'name':'TOTEST ADD R1,R3','bytecode': 0xa7,
+    {'name':'ADD R1,R3','bytecode': 0xa7,
     'control':
     [
         {'Ek','f0','nLa'},
