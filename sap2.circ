@@ -4557,7 +4557,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
     </comp>
     <comp lib="8" loc="(1357,1900)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
-      <a name="text" val="JUMP - {f1,f0} 00 JPC, 01 JPNZ, 10 JPO, 11 JMP (no condition)"/>
+      <a name="text" val="JUMP - {f1,f0} 00 JPC, 01 JPNZ, 10 JPNC, 11 JMP (no condition)"/>
     </comp>
     <comp lib="8" loc="(1368,5487)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
