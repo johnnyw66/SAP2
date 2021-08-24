@@ -3,7 +3,7 @@
 
 ![SAP2 Instructions](/images/SAP2-instructions.jpeg)
 
-Instructions
+#Instructions
 
 *Register instructions 2 Banks of 4 registers R0, R1, R2 and R3*
 
