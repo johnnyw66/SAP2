@@ -1,10 +1,74 @@
 .org 0
 :start
-  call testsubi
+  call addregtest
   hlt
 
+:res0
+  .db 0
 
-  :testsubi
+:res1
+  .db 0
+
+:res2
+  .db 0
+
+:res3
+  .db 0
+
+:addregtest
+  call addregtest0
+  call addregtest1
+  call addregtest2
+  call addregtest3
+  ret
+
+
+:addregtest0
+  call initaddregdata
+  add r0,r0
+  add r0,r1
+  add r0,r2
+  add r0,r3
+  out r0
+  ret
+
+:addregtest1
+  call initaddregdata
+  add r1,r0
+  add r1,r1
+  add r1,r2
+  add r1,r3
+  out r1
+  ret
+
+:addregtest2
+  call initaddregdata
+  add r2,r0
+  add r2,r1
+  add r2,r2
+  add r2,r3
+  out r2
+  ret
+
+;works
+:addregtest3
+  call initaddregdata
+  add r3,r0
+  add r3,r1
+  add r3,r2
+  add r3,r3
+  out r3
+  ret
+
+:initaddregdata
+  movi r0,2
+  movi r1,6
+  movi r2,12
+  movi r3,26
+  ret
+
+
+:testsubi
     clc
     ld r0,addstuff0
     subi r0,0x32 ;  0x04

@@ -699,6 +699,78 @@ opcodes = [
     ]},
 
 
+    # inc
+
+    {'name':'INC R0','bytecode': 0x88,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Lf','nLk'},
+
+    ]},
+
+    {'name':'INC R1','bytecode': 0x89,
+    'control':
+    [
+        {'Ek','nLa','f0'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Lf','nLk','k0'},
+
+    ]},
+
+    {'name':'INC R2','bytecode': 0x8a,
+    'control':
+    [
+        {'Ek','nLa','f1'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Lf','nLk','k1'},
+
+    ]},
+
+    {'name':'INC R3','bytecode': 0x8b,
+    'control':
+    [
+        {'Ek','nLa','f1','f0'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Lf','nLk','k0','k1'},
+
+    ]},
+
+    #
+
+    {'name':'DEC R0','bytecode': 0x8c,
+    'control':
+    [
+        {'Ek','nLa'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk'}
+    ]},
+
+    {'name':'DEC R1','bytecode': 0x8d,
+    'control':
+    [
+        {'Ek','nLa','f0'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk','k0'}
+    ]},
+
+    {'name':'DEC R2','bytecode': 0x8e,
+    'control':
+    [
+        {'Ek','nLa','f1'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk','k1'}
+    ]},
+
+    {'name':'DEC R3','bytecode': 0x8f,
+    'control':
+    [
+        {'Ek','nLa','f1','f0'},
+        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
+        {'Eu','Su','Lf','nLk','k1','k0'}
+    ]},
+
 
 
     # 'MOV Rx, Ry' -  Move into REGx the contents of REGy
@@ -830,7 +902,7 @@ opcodes = [
     'control':
     [
         {'Ek','nLa'},
-        {'Ek','f0','nLb'},
+        {'Ek','f1','nLb'},
         {'nLk','Eu','Lf'}
     ]},
 
@@ -838,7 +910,7 @@ opcodes = [
     'control':
     [
         {'Ek','nLa'},
-        {'Ek','f0','nLb'},
+        {'Ek','f1','f0','nLb'},
         {'nLk','Eu','Lf'}
     ]},
 
@@ -875,7 +947,7 @@ opcodes = [
 
 
     # R2 dest
-    {'name':'TODO ADD R2,R0','bytecode': 0xa8,
+    {'name':'ADD R2,R0','bytecode': 0xa8,
     'control':
     [
         {'Ek','f1','nLa'},
@@ -883,21 +955,21 @@ opcodes = [
         {'nLk','k1','Eu','Lf'}
     ]},
 
-    {'name':'TODO ADD R2,R1','bytecode': 0xa9,
+    {'name':'ADD R2,R1','bytecode': 0xa9,
     'control':
     [
         {'Ek','f1','nLa'},
         {'Ek','f0','nLb'},
         {'nLk','k1','Eu','Lf'}
     ]},
-    {'name':'TODO ADD R2,R2','bytecode': 0xaa,
+    {'name':'ADD R2,R2','bytecode': 0xaa,
     'control':
     [
         {'Ek','f1','nLa'},
         {'Ek','f1','nLb'},
         {'nLk','k1','Eu','Lf'}
     ]},
-    {'name':'TODO ADD R2,R3','bytecode': 0xab,
+    {'name':'ADD R2,R3','bytecode': 0xab,
     'control':
     [
         {'Ek','f1','nLa'},
@@ -909,7 +981,7 @@ opcodes = [
 
     # R3 dest base 0xac
 
-    {'name':'TODO ADD R3,R0','bytecode': 0xac,
+    {'name':'ADD R3,R0','bytecode': 0xac,
     'control':
     [
         {'Ek','f1','f0','nLa'},
@@ -917,21 +989,21 @@ opcodes = [
         {'nLk','k1','k0','Eu','Lf'}
     ]},
 
-    {'name':'TODO ADD R3,R1','bytecode': 0xad,
+    {'name':'ADD R3,R1','bytecode': 0xad,
     'control':
     [
         {'Ek','f1','f0','nLa'},
         {'Ek','f0','nLb'},
         {'nLk','k1','k0','Eu','Lf'}
     ]},
-    {'name':'TODO ADD R3,R2','bytecode': 0xae,
+    {'name':'ADD R3,R2','bytecode': 0xae,
     'control':
     [
         {'Ek','f1','f0','nLa'},
         {'Ek','f1','nLb'},
         {'nLk','k1','k0','Eu','Lf'}
     ]},
-    {'name':'TODO ADD R3,R3','bytecode': 0xaf,
+    {'name':'ADD R3,R3','bytecode': 0xaf,
     'control':
     [
         {'Ek','f1','f0','nLa'},
@@ -941,100 +1013,146 @@ opcodes = [
 
 
 
-    # Sub R0 dest base 0xb0
-    {'name':'TODO SUB R0,R0','bytecode': 0xb0,
-    'control':
-    [
-        {'Ek','nLa'},
-        {'Ek','f0','nLb'},
-        {'nLk','Su','Eu','Lf'}
-    ]},
+        # Sub R0 dest base 0xb0
+        # @TODO TEST
+        # R0 dest
 
-    {'name':'SUB R0,R1','bytecode': 0xb1,
-    'control':
-    [
-        {'Ek','nLa'},
-        {'Ek','f0','nLb'},
-        {'nLk','Su','Eu','Lf'}
-    ]},
+        {'name':'SUB R0,R0','bytecode': 0xb0,
+        'control':
+        [
+            {'Ek','nLa'},
+            {'Ek','nLb'},
+            {'nLk','Eu','Su','Lf'}
+        ]},
+
+        {'name':'SUB R0,R1','bytecode': 0xb1,
+        'control':
+        [
+            {'Ek','nLa'},
+            {'Ek','f0','nLb'},
+            {'nLk','Eu','Su','Lf'}
+        ]},
+
+        {'name':'SUB R0,R2','bytecode': 0xb2,
+        'control':
+        [
+            {'Ek','nLa'},
+            {'Ek','f1','nLb'},
+            {'nLk','Eu','Su','Lf'}
+        ]},
+
+        {'name':'SUB R0,R3','bytecode': 0xb3,
+        'control':
+        [
+            {'Ek','nLa'},
+            {'Ek','f1','f0','nLb'},
+            {'nLk','Eu','Su','Lf'}
+        ]},
+
+        # R1 dest base 0xa4
+        {'name':'SUB R1,R0','bytecode': 0xb4,
+        'control':
+        [
+            {'Ek','f0','nLa'},
+            {'Ek','nLb'},
+            {'nLk','k0','Eu','Su','Lf'}
+        ]},
+
+        {'name':'SUB R1,R1','bytecode': 0xb5,
+        'control':
+        [
+            {'Ek','f0','nLa'},
+            {'Ek','f0','nLb'},
+            {'nLk','k0','Eu','Su','Lf'}
+        ]},
+        {'name':'SUB R1,R2','bytecode': 0xb6,
+        'control':
+        [
+            {'Ek','f0','nLa'},
+            {'Ek','f1','nLb'},
+            {'nLk','k0','Eu','Su','Lf'}
+        ]},
+        {'name':'SUB R1,R3','bytecode': 0xb7,
+        'control':
+        [
+            {'Ek','f0','nLa'},
+            {'Ek','f1','f0','nLb'},
+            {'nLk','k0','Eu','Su','Lf'}
+        ]},
+
+
+        # R2 dest
+        {'name':'SUB R2,R0','bytecode': 0xb8,
+        'control':
+        [
+            {'Ek','f1','nLa'},
+            {'Ek','nLb'},
+            {'nLk','k1','Eu','Su','Lf'}
+        ]},
+
+        {'name':'SUB R2,R1','bytecode': 0xb9,
+        'control':
+        [
+            {'Ek','f1','nLa'},
+            {'Ek','f0','nLb'},
+            {'nLk','k1','Eu','Su','Lf'}
+        ]},
+        {'name':'SUB R2,R2','bytecode': 0xba,
+        'control':
+        [
+            {'Ek','f1','nLa'},
+            {'Ek','f1','nLb'},
+            {'nLk','k1','Eu','Su','Lf'}
+        ]},
+        {'name':'SUB R2,R3','bytecode': 0xbb,
+        'control':
+        [
+            {'Ek','f1','nLa'},
+            {'Ek','f1','f0','nLb'},
+            {'nLk','k1','Eu','Su','Lf'}
+        ]},
+
+
+
+        # R3 dest base 0xac
+
+        {'name':'SUB R3,R0','bytecode': 0xbc,
+        'control':
+        [
+            {'Ek','f1','f0','nLa'},
+            {'Ek','nLb'},
+            {'nLk','k1','k0','Eu','Su','Lf'}
+        ]},
+
+        {'name':'SUB R3,R1','bytecode': 0xbd,
+        'control':
+        [
+            {'Ek','f1','f0','nLa'},
+            {'Ek','f0','nLb'},
+            {'nLk','k1','k0','Eu','Su','Lf'}
+        ]},
+        {'name':'SUB R3,R2','bytecode': 0xbe,
+        'control':
+        [
+            {'Ek','f1','f0','nLa'},
+            {'Ek','f1','nLb'},
+            {'nLk','k1','k0','Eu','Su','Lf'}
+        ]},
+        {'name':'SUB R3,R3','bytecode': 0xbf,
+        'control':
+        [
+            {'Ek','f1','f0','nLa'},
+            {'Ek','f1','f0','nLb'},
+            {'nLk','k1','k0','Eu','Su','Lf'}
+        ]},
+
+
+
+        # Reg Logic
 
 
 
 
-
-
-
-    # inc
-
-    {'name':'INC R0','bytecode': 0x88,
-    'control':
-    [
-        {'Ek','nLa'},
-        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
-        {'Eu','Lf','nLk'},
-
-    ]},
-
-    {'name':'INC R1','bytecode': 0x89,
-    'control':
-    [
-        {'Ek','nLa','f0'},
-        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
-        {'Eu','Lf','nLk','k0'},
-
-    ]},
-
-    {'name':'INC R2','bytecode': 0x8a,
-    'control':
-    [
-        {'Ek','nLa','f1'},
-        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
-        {'Eu','Lf','nLk','k1'},
-
-    ]},
-
-    {'name':'INC R3','bytecode': 0x8b,
-    'control':
-    [
-        {'Ek','nLa','f1','f0'},
-        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
-        {'Eu','Lf','nLk','k0','k1'},
-
-    ]},
-
-    #
-
-    {'name':'DEC R0','bytecode': 0x8c,
-    'control':
-    [
-        {'Ek','nLa'},
-        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
-        {'Eu','Su','Lf','nLk'}
-    ]},
-
-    {'name':'DEC R1','bytecode': 0x8d,
-    'control':
-    [
-        {'Ek','nLa','f0'},
-        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
-        {'Eu','Su','Lf','nLk','k0'}
-    ]},
-
-    {'name':'DEC R2','bytecode': 0x8e,
-    'control':
-    [
-        {'Ek','nLa','f1'},
-        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
-        {'Eu','Su','Lf','nLk','k1'}
-    ]},
-
-    {'name':'DEC R3','bytecode': 0x8f,
-    'control':
-    [
-        {'Ek','nLa','f1','f0'},
-        {'Ec','f0','nLb'},  # Constant 1 (Value is 1) on the bus, Save in B REG
-        {'Eu','Su','Lf','nLk','k1','k0'}
-    ]},
 
 
 
