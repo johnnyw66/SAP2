@@ -13,7 +13,7 @@ MOV Rx,Ry|Copy Ry into Rx| None
 ADD Rx,Ry|Rx + Ry copied into Rx|C Z V S
 SUB Rx,Ry|Rx - Ry -> Rx|C Z V S
 AND Rx,Ry|Rx & Ry -> Rx|Z
-OR Rx,Ry|Rx ^ Rx-> R|Z
+OR Rx,Ry|Rx | Rx-> R|Z
 XOR Rx,Ry| Rx ^ Ry -> Rx| Z S V
 
 Opcode|Action|Flags
