@@ -8,6 +8,7 @@ Instructions
 Register instructions 4 registers (plus alternative reg bank) R0, R1, R2 and R3
 
 Opcode | Comment|Flags
+-------| --------------
 MOV Rx,Ry|Copy Ry into Rx| None
 ADD Rx,Ry|Rx + Ry copied into Rx|C Z V S
 SUB Rx,Ry|Rx - Ry -> Rx|C Z V S
@@ -16,6 +17,7 @@ OR Rx,Ry#Rx | Ry -> Rx#Z
 XOR Rx,Ry| Rx ^ Ry -> Rx| Z S V
 
 Opcode|Action|Flags
+------|------|-----
 MOVI Rx,8bit | 8-bit value -> Rx| None
 LD Rx,16bitaddr |contents @addr -> Rx |yyy
 
