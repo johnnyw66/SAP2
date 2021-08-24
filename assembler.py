@@ -436,7 +436,7 @@ class AssemblerParser(Parser):
         if (logic is not None):
             regl = self.match('registers')
             self.char(',')
-            data = self.match('number','label')
+            data = self.match('number')
             return {'op': logic, 'reg': regl, 'data':data, 'size':2}
 
         logic = self.keyword('and','or','xor','add','sub')
@@ -445,8 +445,6 @@ class AssemblerParser(Parser):
             self.char(',')
             regr = self.match('registers')
             return {'op': logic, 'reg': regl, 'regr':regr, 'size':1}
-
-
 
 
         return None
@@ -664,8 +662,10 @@ if __name__ == '__main__':
     line = 0
     code = []
     labels = {}
+    errors = 0
+    verbose = False if len(sys.argv) < 3 else True
 
-    print(f"Trying to assemble '{sourceFilename}'...\n")
+    print(f"Trying to assemble '{sourceFilename}' verbose: {verbose}...\n")
     asm = open(sourceFilename, "r")
 
     while True:
@@ -686,12 +686,16 @@ if __name__ == '__main__':
         except (EOFError, SystemExit):
             break
         except IndexError as e:
-            print(f'Error: {e} Line {line}')
+            print(f'Index Error: {e} Line {line}')
+            #break
         except (ParseError, ZeroDivisionError) as e:
-            print(f'Error: {e} Line {line}')
-
+            print(f'Parse Error: {e} Line {line} {text}')
+            errors += 1
 
     # Parsing complete
+    if (errors > 0):
+        print("Build Failed! See a Code Doctor. Quick!")
+        sys.exit(-1)
 
     try:
 
@@ -701,7 +705,8 @@ if __name__ == '__main__':
                 pc = op['data']
             op['pc'] = pc
             pc += op['size']
-            #info(op,"\n")
+            if (verbose):
+                print(op)
             processLabels(op,labels)
 
         info("Symbol Table:\n")

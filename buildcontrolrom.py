@@ -68,33 +68,27 @@ fetchControlWords = [{'Ep','nLm'},{'Cp'},{'nCE','nLi'}]
 # are already defined in our 'fetchControlWords' array.
 
 opcodes = [
-    # Legacy OPCODES TBDeprecated
    {'name':'NOP','bytecode': 0x00, 'control':[]},
 
-    {'name':'LDA','bytecode': 0x09, 'control':
-    [
-        {'Ep','nLm'},
-        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
-        {'Ep','nLm'},
-        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
-        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
-        {'nCE','nLa'}         # Finally Write the contents of the current address in MAR to A reg
-    ]},
+   # CLEAR CARRY IS A BODGE! - IT SCREWS UP OTHER FLAGS
+   # SEE A MICROCODE DOCTOR- QUICK!
+   {'name':'CLC','bytecode': 0x01, 'control':[
+        {'Ec','nLb','nLa'},  # Constant 0 (Value is 0) on the bus, Save in A and B REG
+        {'Eu','Lf'} # Doing a 0 + 0 with our ALU Will set Zero flag, maybe affect Sign - Latch new flag state (Lf)
+   ]},
+
+   # SET CARRY IS A BODGE! - IT SCREWS UP OTHER FLAGS
+   # SEE A MICROCODE DOCTOR- QUICK!
+   {'name':'SETC','bytecode': 0x02, 'control':[
+        {'Ec','f0','f1','f2','nLb','nLa'},  # Constant 7 (Value is 0xff) on the bus, Save in A and B REG
+        {'Eu','Lf'} # Will set Zero flag, maybe affect Sign and Overflow - Latch new flag state (Lf)
+   ]},
 
 
-    {'name':'STA','bytecode': 0x01, 'control':
-    [
-        {'Ep','nLm'},
-        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
-        {'Ep','nLm'},
-        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
-        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+   # Legacy instructions - which work on A/B regsiters
+    # Legacy OPCODES TBDeprecated
 
-        {'Ea','Lr'}         # Finally Write the contents of A reg to the current address in MAR.
-    ]},
-
-
-    {'name':'ADD','bytecode': 0x02,
+    {'name':'ADD','bytecode': 0x03,
     'control':
     [
         {'Ep','nLm'},
@@ -107,7 +101,7 @@ opcodes = [
         {'nLa','Eu','Lf'}
     ]},
 
-    {'name':'SUB','bytecode': 0x03,
+    {'name':'SUB','bytecode': 0x04,
         'control':
         [
             {'Ep','nLm'},
@@ -123,7 +117,7 @@ opcodes = [
 
 
 
-    {'name':'JMP','bytecode': 0x04,
+    {'name':'JMP','bytecode': 0x05,
     'control':
     [
         {'Ep','nLm'},
@@ -134,7 +128,7 @@ opcodes = [
     ]},
 
 
-    {'name':'JPNZ','bytecode': 0x05,
+    {'name':'JPNZ','bytecode': 0x06,
     'control':
     [
         {'Ep','nLm'},
@@ -144,7 +138,7 @@ opcodes = [
         {'E16','Lp','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
     ]},
 
-    {'name':'LDI','bytecode': 0x06,
+    {'name':'LDI','bytecode': 0x07,
     'control':
     [
         {'Ep','nLm'},
@@ -153,7 +147,7 @@ opcodes = [
     ]},
 
 
-    {'name':'SUBI','bytecode': 0x07,
+    {'name':'SUBI','bytecode': 0x08,
     'control':
     [
         {'Ep','nLm'},
@@ -161,11 +155,36 @@ opcodes = [
         {'nLa','Eu','Su','Lf'}
     ]},
 
-    {'name':'OUT','bytecode': 0x08,
+    {'name':'OUT','bytecode': 0x09,
     'control':
     [
         {'Ea','nLo'},
     ]},
+
+
+    {'name':'LDA','bytecode': 0x0a, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+        {'nCE','nLa'}         # Finally Write the contents of the current address in MAR to A reg
+    ]},
+
+
+    {'name':'STA','bytecode': 0x0b, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'Ea','Lr'}         # Finally Write the contents of A reg to the current address in MAR.
+    ]},
+
+
 
     # NEW BANK REG instructions
     # k1,k0 used to determin which register to write to.
@@ -421,9 +440,41 @@ opcodes = [
 
     # 0x50 other Logic immediate functions
 
+    {'name':'TOTEST ADDI R0,','bytecode': 0x50,
+    'control':
+    [
+        {'Ep','nLm'},       # Place PC into MAR
+        {'Cp','nCE','nLb'}, # inc PC next memory byte into B
+        {'Ek','nLa'},       # R0-->A
+        {'nLk','Eu','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
+    ]},
 
+    {'name':'TOTEST ADDI R1,','bytecode': 0x51,
+    'control':
+    [
+        {'Ep','nLm'},       # Place PC into MAR
+        {'Cp','nCE','nLb'}, # inc PC next memory byte into B
+        {'Ek','nLa','f0'},       # R1-->A
+        {'nLk','k0','Eu','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
+    ]},
 
+    {'name':'TOTEST ADDI R2,','bytecode': 0x52,
+    'control':
+    [
+        {'Ep','nLm'},       # Place PC into MAR
+        {'Cp','nCE','nLb'}, # inc PC next memory byte into B
+        {'Ek','nLa','f1'},       # R2-->A
+        {'nLk','k1','Eu','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
+    ]},
 
+    {'name':'TOTEST ADDI R3,','bytecode': 0x53,
+    'control':
+    [
+        {'Ep','nLm'},       # Place PC into MAR
+        {'Cp','nCE','nLb'}, # inc PC next memory byte into B
+        {'Ek','nLa','f1','f0'},       # R3-->A
+        {'nLk','k1','k0','Eu','Lf'}   # ALU funcion 0 (add) - Results into R0, latch flag REG
+    ]},
 
 
     # Jumping and conditional Jumping
@@ -976,9 +1027,11 @@ def checkInteg():
 
     bitcheck = 0 ;
     keySet = set()
+    bytecodeSet = set()
 
     for cl in clLines:
         key = cl['key']
+
         if (key in keySet):
             raise Exception(f"Key {key} already defined for control line. Please check!")
         keySet.add(key)
@@ -987,6 +1040,12 @@ def checkInteg():
         if (bitnum & bitcheck != 0):
             raise Exception(f"Bit already defined for control line {cl['key']}. Please check!")
         bitcheck |= bitnum
+
+    for op in opcodes:
+        bytecode = op['bytecode']
+        if (bytecode in bytecodeSet):
+            raise Exception(f"ByteCode {bytecode} for opCode {op['name']} was already defined in the opcodes data. Please check!")
+        bytecodeSet.add(bytecode)
 
 def buildMicrocode():
 

@@ -1,7 +1,40 @@
 .org 0
+:start
+  call testaddi
+  hlt
+
+:testaddi
+  clc
+  ld r0,addstuff0
+  addi r0,0x32 ; 0x68
+
+  ld r1,addstuff1
+  addi r1,0x44 ; 0x56
+
+  ld r2,addstuff2
+  addi r2,0x78  ; 0xaa
+
+  setc
+  ld r3,addstuff3
+  addi r3,0x25 ; 0x6d (0x6c + carry)
+  ret
+
+:addstuff0
+.db 0x36
+:addstuff1
+.db 0x12
+:addstuff2
+.db 0x32
+:addstuff3
+.db 0x47
+
+
+:wrnld
     call writetest
     call loadldtest
-    hlt
+    ret
+
+
 
     :data1
       .db 0xaa
@@ -21,7 +54,7 @@
   st r1,data2
   st r2,data3
   st r3,data4
-  ret 
+  ret
 
 
 :loadldtest
