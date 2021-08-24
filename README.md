@@ -75,8 +75,10 @@ HLT| Stop uProc|None|4
 24 August 2021
 ---
 This microprocessor written for the LogiSim Evolution CAD can be built with standard TTL/CMOS logic chips.
-For what it's worth - I've included the circuit for a programmer unit so the user can enter byte code by hand- but I prefer to use the LogicSim GUI and my simple assembler utility.
-Assemble your machine code from a text file using the python utility - and load the program into the RAM memory unit (right click and select 'Load Image' - then select an assembled hex file )
+For what it's worth - I've included the circuit for a programmer unit so the user can enter byte code by hand.
+I prefer to use the LogicSim GUI and my simple assembler utility.
+
+Assemble your machine code from a 'asm' text file using the python utility - and load the program into the RAM memory unit (right click and select 'Load Image' - then select an assembled hex file )
 
 
 To assemble code - simple run './assembler.py test.asm' - this will produce a 'binary' version with the same
@@ -89,6 +91,8 @@ Example code:
 .org 0
 :start
     movwi sp,0xffff   ; since SP is set to 0 on  reset - we don't really need this!
+                      ; a push will decrement SP before placing the low byte
+                      ;of the return address on the stack
     ld r0,count
     call display
     hlt
