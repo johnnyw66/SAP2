@@ -19,9 +19,10 @@ Perhaps look at retargeting a C Compiler?
 
 
 For what it's worth - I've included the circuit for a programmer unit so the user can enter byte code by hand.
-I prefer to use a combination of the LogicSim GUI and my simple assembler utility.
+I prefer to use a combination of the LogicSim GUI and my simple **assembler utility**.
 
-Assemble your machine code from a 'asm' text file using the python utility - and load the program into the RAM memory unit (right click and select 'Load Image' - then select an assembled hex file )
+Assemble your machine code from an 'asm' text file using the included python utility assembler.py- and load the program into the RAM memory unit (right click the RAM unit and select 'Load Image' - then select an assembled hex file ). You start the LogicSim emulation by using the keys 'CMD/CTRL' + 'R'to reset the processor - followed by 'CMD/CTRL' + 'K' to start the CPU clock. You can change the speed of the processor by selecting
+**simulate** on the GUI and **Auto-Tick Frequency**.
 
 
 To assemble code - simple run *assembler.py test.asm* - this will produce a 'binary' version with the same
@@ -55,13 +56,12 @@ Example code:
 
 **Issues**
 
-I am currently using **32** (!!!!) control lines. Way too much. Although the current design uses a 32-bit data output -
-you can easily swap this for 4 conventional ROMs with 8-bit data buses. The utility *buildcontrolrom.py* can be modified
-to build 4 microcode ROMs if you're inclined to build a real processor.
+I am currently using **32** (!!!!) control lines. Way too much. Although the current design uses a 32-bit data output - you can easily swap this for 4 conventional ROMs with 8-bit data buses. The utility *buildcontrolrom.py* can be modified to build 4 microcode ROMs if you're inclined to build a real processor.
+
+25th August: Currently I don't do anything with the **.org** directive.
 
 
-Perhaps I can get some inspiration from looking at the design of **Gigatron TTL computer** - which I built in 2018.
-Using 32 control lines seems like a bit of an overkill.
+Perhaps I can get some inspiration from looking at the design of **Gigatron TTL computer** - which I built in 2018. Using 32 control lines seems like a bit of an overkill.
 
 
 # Instruction Set
@@ -133,3 +133,8 @@ HLT| Stop uProc|None|4
 *5 Ocodes in total*
 
 **CLC and SETC are currently 'fudged' as they affect the sign and overflow FLAGS**
+
+Software Requirements
+----
+
+Java 8 (I used java version "1.8.0_60" - major version 52) on Mac OS X 10.15 (Catalina)
