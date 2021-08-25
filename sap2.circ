@@ -10159,7 +10159,7 @@ e6 10*0 10*12 10*bc 10*b6 10*d2 10*e6 10*ee
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="SHL  100000"/>
     </comp>
-    <comp lib="8" loc="(1155,210)" name="Text">
+    <comp lib="8" loc="(1158,214)" name="Text">
       <a name="font" val="SansSerif plain 12"/>
       <a name="text" val="IF 'subtracting' output original carry in"/>
     </comp>
