@@ -14,19 +14,16 @@ HDL* and then placing the design on one of my Altera FPGAs. It will support over
 
 At some point I will add in I/O instructions and have it drive a VGA/Video Composite output
 along with a Serial UART. I will also split the current 64k RAM into a 32k ROM with 32k RAM.
-If my interest still holds - the ROM could contain some simple monitor program to load software over an RS232 serial port.
-Perhaps look at retargeting a C Compiler?
+If my interest still holds - the ROM could contain some simple monitor program to load software over an RS232 serial port. Perhaps look at retargeting a C Compiler?
 
 
 For what it's worth - I've included the circuit for a programmer unit so the user can enter byte code by hand.
 I prefer to use a combination of the LogicSim GUI and my simple **assembler utility**.
 
-Assemble your machine code from an 'asm' text file using the included python utility assembler.py- and load the program into the RAM memory unit (right click the RAM unit and select 'Load Image' - then select an assembled hex file ). You start the LogicSim emulation by using the keys 'CMD/CTRL' + 'R'to reset the processor - followed by 'CMD/CTRL' + 'K' to start the CPU clock. You can change the speed of the processor by selecting
-**simulate** on the GUI and **Auto-Tick Frequency**.
+Assemble your machine code from an 'asm' text file using the included python utility **assembler.py** - and load the program into the RAM memory unit (right click the RAM unit and select 'Load Image' - then select an assembled file (.hex)). You start the LogicSim emulation by using the keys 'CMD/CTRL' + 'R'to reset the processor - followed by 'CMD/CTRL' + 'K' to start the CPU clock. You can change the speed of the processor by selecting **simulate** on the GUI and **Auto-Tick Frequency**.
 
 
-To assemble code - simple run *assembler.py test.asm* - this will produce a 'binary' version with the same
-base name - but appended with '.hex' (i.e *assembler.py mycode.asm* produces *mycode.hex*)
+To assemble code - simple run a command like *assembler.py test.asm* - this will produce a 'binary' version with the same base name - but appended with '.hex' (i.e *assembler.py mycode.asm* produces *mycode.hex*)
 
 Example code:
 
@@ -137,4 +134,4 @@ HLT| Stop uProc|None|4
 Software Requirements
 ----
 
-Java 8 (I used java version "1.8.0_60" - major version 52) on Mac OS X 10.15 (Catalina)
+Java 8 (I used java version "1.8.0_60" - major version 52 and 1.11 - major version 55) on Mac OS X 10.15 (Catalina) - August 2021
