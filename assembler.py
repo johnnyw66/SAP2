@@ -369,7 +369,7 @@ class AssemblerParser(Parser):
         meta = self.maybe_match('metaop')
         if (meta is not None):
             rv.append(meta)
-            return rv
+#            return rv
 
         lbl = self.maybe_match('label')
         if (lbl is not None):
@@ -381,7 +381,7 @@ class AssemblerParser(Parser):
             if (ins is not None):
                 rv.append(ins)
         except Exception as e:
-            #print("<><><><>>><><<>",e,self.text,line)
+            #print(e,self.text,line)
             pass
 
         return rv
@@ -659,18 +659,40 @@ if __name__ == '__main__':
     def info(str,end=None):
         print(str,end='')
 
+
+    def buildHelpText():
+        return "SOME HELP TEXT HERE"
+
+
+    def handleCommandArgs(argv):
+        options=set()
+        file = None
+
+        for index,arg in enumerate(argv):
+            if (arg.startswith('-') and len(arg) > 1):
+                options.add(arg[1])
+            else:
+                if (index > 0):
+                    file = arg
+                else:
+                    assembler = arg
+
+        return options,file,assembler
+
+
+
     # ** Main Process Starts here ***
 
     #print(f"Arguments count: {len(sys.argv)}")
     #for i, arg in enumerate(sys.argv):
     #    print(f"Argument {i:>6}: {arg}")
+    options,sourceFilename,assembler = handleCommandArgs(sys.argv)
 
     try:
 
-        if (len(sys.argv) < 2):
-            raise Exception(f"At least one argument is needed for the .asm file! Example: '{sys.argv[0]} example.asm'")
-
-        sourceFilename = sys.argv[1]
+        if (sourceFilename is None):
+            hText = buildHelpText()
+            raise Exception(f"Source file is needed to assemble! Example: '{assembler} example.asm'\n{hText}")
 
         if (not os.path.isfile(sourceFilename)):
             raise Exception(f"Sourcefile '{sourceFilename}' does not exist.")
@@ -679,17 +701,27 @@ if __name__ == '__main__':
         print(e)
         sys.exit(-1)
 
+
     parser = AssemblerParser()
     pc = 0
     line = 0
     code = []
     labels = {}
     errors = 0
-    verbose = False if len(sys.argv) < 3 else True
-    debug = verbose  #TODO pick this up as a separate argument
 
+    verbose ='v' in options
+    debug = 'd' in options
+    quiet = 'q' in options
+    symtable = 's' in options
+    help = 'h' in options
 
-    print(f"Trying to assemble '{sourceFilename}' verbose: {verbose}...\n")
+    if (help):
+        print(buildHelpText())
+        sys.exit(0);
+
+    if (not quiet):
+        print(f"Trying to assemble '{sourceFilename}' verbose:{verbose}... quiet:{quiet} debug:{debug} symtable:{symtable}\n")
+
     asm = open(sourceFilename, "r")
     completed = False
 
@@ -725,7 +757,8 @@ if __name__ == '__main__':
 
     # Parsing complete
     if (errors > 0):
-        print("Build Failed! See a Code Doctor. Quick!")
+        if (not quiet):
+            print("Build Failed! See a Code Doctor. Quick!")
         sys.exit(-1)
 
     try:
@@ -740,9 +773,10 @@ if __name__ == '__main__':
                 print(op)
             processLabels(op,labels)
 
-        info("Symbol Table:\n")
-        for lbl in labels:
-            info(f"\t'{lbl}': 0x{labels[lbl]:04x}\n")
+        if (not quiet and symtable):
+            info("Symbol Table:\n")
+            for lbl in labels:
+                info(f"\t'{lbl}': 0x{labels[lbl]:04x}\n")
 
         # Now build up binary version of our code
         builder = Builder(labels)
@@ -752,12 +786,18 @@ if __name__ == '__main__':
             bytearray = builder.build(op)
             binarray+=bytearray
 
-        info(f"\nSize: {len(binarray)} bytes\n\n")
+        if (not quiet):
+            info(f"\nSize: {len(binarray)} bytes\n\n")
 
         binName = sourceFilename.split(".")[0] + ".hex"
-        info(f"Producing LogiSym bin file '{binName}'")
-        produceHexFile(binName, binarray)
-        info("\n\ncomplete.\n")
+        if (not quiet):
+            print(f"Producing LogiSym bin file '{binName}'")
 
+        produceHexFile(binName, binarray)
+
+        if (not quiet):
+            print("\n\ncomplete.\n")
+
+        sys.exit(0)
     except (SyntaxError) as e:
-        print(f"{e}")
+        print(f"Syntax Error {e}")
