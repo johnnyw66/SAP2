@@ -74,7 +74,7 @@ Opcode | Comment|Flags|Tstates
 -------| -------|-----|-------
 MOV Rx,Ry| Ry -> Rx | None|4
 ADD Rx,Ry|Rx + Ry -> Rx|C Z V S|4
-SUB Rx,Ry|Rx - Ry -> Rx|C Z V S|4
+SUB Rx,Ry|Rx - Ry -> Rx| Z V S|4
 AND Rx,Ry|Rx & Ry -> Rx|Z|4
 OR Rx,Ry|Rx or Rx-> R|Z S V|4
 XOR Rx,Ry| Rx ^ Ry -> Rx| Z S V|4

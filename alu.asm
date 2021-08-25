@@ -7,23 +7,7 @@
 
     shl r0
     out r0 ;2
-
-    shl r0
-    out r0 ;4
-
-    shl r0
-    out r0 ;8
-
-    shl r0
-    out r0 ;16
-
-    shl r0
-    out r0 ;32
-
-    shl r0
-    out r0 ; 64
-
-    ;djnz r1,shft
+    jmp shft
     hlt
 
 :strobe
