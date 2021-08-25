@@ -135,3 +135,5 @@ Software Requirements
 ----
 
 Java 8 (I used java version "1.8.0_60" - major version 52 and 1.11 - major version 55) on Mac OS X 10.15 (Catalina) - August 2021
+
+To run LogiSim - just type the command **java -jar logisim-evolution-3.5.0-all.jar** from a terminal.
