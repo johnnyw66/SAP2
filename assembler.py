@@ -359,8 +359,33 @@ class AssemblerParser(Parser):
         return self.assemble()
 
     def assemble(self):
-        rv = self.match('instruction','label','metaop')
+        #rv = self.match('instruction','label','metaop')
+        #print("assemble",self.text)
+        rv = self.complexins()
         return rv
+
+    def complexins(self):
+        rv = []
+        meta = self.maybe_match('metaop')
+        if (meta is not None):
+            rv.append(meta)
+            return rv
+
+        lbl = self.maybe_match('label')
+        if (lbl is not None):
+            rv.append(lbl)
+
+        # Clearly some issue here!
+        try:
+            ins = self.maybe_match('instruction')
+            if (ins is not None):
+                rv.append(ins)
+        except Exception as e:
+            #print("<><><><>>><><<>",e,self.text,line)
+            pass
+
+        return rv
+
 
     def instruction(self):
         return self.match('alu','movwi','movi','mov','ld','call','singlebyte','singleop','out','pushpop','djnz')
@@ -661,23 +686,32 @@ if __name__ == '__main__':
     labels = {}
     errors = 0
     verbose = False if len(sys.argv) < 3 else True
+    debug = verbose  #TODO pick this up as a separate argument
+
 
     print(f"Trying to assemble '{sourceFilename}' verbose: {verbose}...\n")
     asm = open(sourceFilename, "r")
+    completed = False
 
-    while True:
+    while not completed:
         try:
 
             text = asm.readline()
             if len(text) == 0:
                 break
             line = line + 1
-            op = parser.parse(text.strip())
-            if (op is not None):
-                op['line'] = line
-                code.append(op)
-                if (op['op'] == 'end'):
-                    break
+            ops = parser.parse(text.strip())
+            # ops is an array of operation instructions - (in the case of 'label' followed by opcode instruction)
+            if (ops is not None):
+                for op in ops:
+                    if (op is not None):
+                        op['line'] = line
+                        if (debug):
+                            print(op)
+                        code.append(op)
+                        if (op['op'] == 'end'):
+                            completed = True
+
         except KeyboardInterrupt:
             pass
         except (EOFError, SystemExit):
