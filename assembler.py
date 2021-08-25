@@ -246,7 +246,7 @@ class Parser:
         self.cache[chars] = rv
         return rv
 
-    def char(self, chars=None):
+    def char(self, chars=None, casesense=True):
         if self.pos >= self.len:
             raise ParseError(
                 self.pos + 1,
@@ -261,9 +261,10 @@ class Parser:
 
         for char_range in self.split_char_ranges(chars):
             if len(char_range) == 1:
-                if next_char == char_range:
+                if (next_char == char_range if casesense else next_char.lower() == char_range.lower()):
                     self.pos += 1
                     return next_char
+            # Range checks ignore casesense option
             elif char_range[0] <= next_char <= char_range[2]:
                 self.pos += 1
                 return next_char
@@ -276,6 +277,7 @@ class Parser:
         )
 
     def keyword(self, *keywords):
+
         self.eat_whitespace()
         if self.pos >= self.len:
             raise ParseError(
@@ -287,8 +289,8 @@ class Parser:
         for keyword in keywords:
             low = self.pos + 1
             high = low + len(keyword)
-
-            if self.text[low:high] == keyword:
+            # Currently, keywords are case insensitive
+            if self.text[low:high].lower() == keyword.lower():
                 self.pos += len(keyword)
                 self.eat_whitespace()
                 return keyword
@@ -333,9 +335,9 @@ class Parser:
                 self.text[last_error_pos]
             )
 
-    def maybe_char(self, chars=None):
+    def maybe_char(self, chars=None, casesense=True):
         try:
-            return self.char(chars)
+            return self.char(chars, casesense)
         except ParseError:
             return None
 
@@ -354,14 +356,9 @@ class Parser:
 class AssemblerParser(Parser):
 
     def start(self):
-        #print("start")
-        ###print(self.text)
-        ##print(self.pos)
-        #print(self.len)
+        return self.assemble()
 
-        return self.testme()
-
-    def testme(self):
+    def assemble(self):
         rv = self.match('instruction','label','metaop')
         return rv
 
@@ -459,7 +456,7 @@ class AssemblerParser(Parser):
         return None
 
     def registers(self):
-            self.char('r')
+            self.char('r',False)
             return int(self.char('0-3'))
 
     def registers16(self):
