@@ -3,6 +3,14 @@
 controlWordSize = 32
 ACTIVEHIGH = 1
 ACTIVELOW = 0
+#import sys
+#def fnc(*args,**options):#
+#    print(len(args))
+#    print(options['zippy'])
+
+#fnc(1,2,3,4,5,zippy = True)
+#print("Hello")
+#sys.exit(-1)
 
 # Definition for each of our control lines. We define which bit in the
 # control word they occupy and if that control bit is active low or active high.
@@ -27,8 +35,8 @@ clLines = [
 
     {'key':"Lr",  'bit':19, 'active': ACTIVEHIGH, 'desc':"Load to RAM (STA op)"},
     {'key':"Lp",  'bit':18, 'active': ACTIVEHIGH, 'desc':"Load PC (JUMP instructions) used with f1 and f0"},
-    {'key':"f1",  'bit':17, 'active': ACTIVEHIGH, 'desc':"JUMP condition function bit 1"},
-    {'key':"f0",  'bit':16, 'active': ACTIVEHIGH, 'desc':"JUMP condition Function bit 0 {00 -> Carry, 01 -> Non Zero, 10 -> Parity Odd, 11 --> Always}"},
+    {'key':"f1",  'alias':{'a1'},'bit':17, 'active': ACTIVEHIGH, 'desc':"JUMP condition function bit 1"},
+    {'key':"f0",  'alias':{'a0','Su'},'bit':16, 'active': ACTIVEHIGH, 'desc':"JUMP condition Function bit 0 {00 -> Carry, 01 -> Non Zero, 10 -> Parity Odd, 11 --> Always}"},
 #    {'key':"Cp", 'bit':7, 'active': ACTIVEHIGH, 'desc':"TEST DUP"},
 
 #
@@ -45,7 +53,7 @@ clLines = [
     {'key':"k0",  'bit':8, 'active': ACTIVEHIGH, 'desc':"Bank Register Write select bit 0"},
 
     # 'alias' allows us to refer to the same pins as different names - useful for shared select function pins
-    {'key':"f2",  'alias':{'Su'}, 'bit':7, 'active': ACTIVEHIGH,'desc':"Select bit for Constant Bank/ALU Function"},
+    {'key':"f2",  'alias':{'a2'}, 'bit':7, 'active': ACTIVEHIGH,'desc':"Select bit for Constant Bank/ALU Function"},
     {'key':"Ec",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Place Constant (from Constant Bank) defined by {f2,f1,f0} on the DBUS"},
     {'key':"Xx",  'bit':5, 'active': ACTIVEHIGH, 'desc':"Swap over reg banks (EXX instruction)"},
     {'key':"Sa",  'bit':4, 'active': ACTIVEHIGH, 'desc':"'Source Address' Source for A B Reg pair can come from DBUS or Address BUS (0 is DBUS)"},
@@ -61,6 +69,82 @@ clLines = [
 fetchControlWords = [{'Ep','nLm'},{'Cp'},{'nCE','nLi'}]
 
 
+def decorateRawALUFunction(bSet,rawno):
+    if (rawno & 1 == 1):
+        bSet.add('a0')
+    if (rawno & 2 == 2):
+        bSet.add('a1')
+    if (rawno & 4 == 4):
+        bSet.add('a2')
+
+    return bSet
+
+def decorateReadReg(bSet,regNo):
+    if (regNo & 1 == 1):
+        bSet.add('f0')
+    if (regNo & 2 == 2):
+        bSet.add('f1')
+    return bSet
+
+def decorateWriteReg(bSet,regNo):
+    if (regNo & 1 == 1):
+        bSet.add('k0')
+    if (regNo & 2 == 2):
+        bSet.add('k1')
+    return bSet
+
+def decorateFunction(bSet,function):
+    if (function == 'ADD'):
+        decorateRawALUFunction(bSet,0)
+    elif (function == 'SUB'):
+        decorateRawALUFunction(bSet,1)
+    elif (function == 'AND'):
+        decorateRawALUFunction(bSet,2)
+    elif (function == 'OR'):
+        decorateRawALUFunction(bSet,3)
+    elif (function == 'XOR'):
+        decorateRawALUFunction(bSet,4)
+    elif (function == 'SHR'):
+        decorateRawALUFunction(bSet,5)
+    elif (function == 'SHL'):
+        decorateRawALUFunction(bSet,6)
+
+
+    return bSet
+
+
+def alufunction(*args):
+    posargs = args[0]
+    keywords = args[1]
+    control = []
+
+
+    fnc = keywords['afnc']
+    rx = keywords['rx']
+
+    control.append(decorateReadReg({'Ek','nLa'},rx))
+
+    if ('ry' in keywords):
+        control.append(decorateReadReg({'Ek','nLb'},keywords['ry']))
+
+    control.append(decorateWriteReg(decorateFunction({'nLk','Eu','Lf'},fnc),rx))
+
+    return control
+
+def bankregfunction(*args):
+    control = {}
+    return control
+
+
+macros = {
+            'alumacro': alufunction,
+            'bankreg' : bankregfunction
+}
+
+
+def macro(mname,*posargs,**keywords):
+    fnc = macros[mname]
+    return fnc(posargs,keywords)
 
 # Definition for each opcode in our microprocessor. We need to define
 # those control lines which are active in each cycle.
@@ -68,7 +152,9 @@ fetchControlWords = [{'Ep','nLm'},{'Cp'},{'nCE','nLi'}]
 # are already defined in our 'fetchControlWords' array.
 
 opcodes = [
-   {'name':'NOP','bytecode': 0x00, 'control':[]},
+   {'name':'NOP','bytecode': 0x00, 'control': []
+        #macro('alumacro', rx=3, ry=2, afnc = 'SUB',latchflag = True)
+   },
 
    # CLEAR CARRY IS A BODGE! - IT SCREWS UP OTHER FLAGS
    # SEE A MICROCODE DOCTOR- QUICK!
@@ -698,6 +784,34 @@ opcodes = [
 
     ]},
 
+    # Shift Instructions 0x80
+
+    {'name': 'SHR R0', 'bytecode':0x80,'control' :
+            macro('alumacro', rx=0, afnc = 'SHR',latchflag = True)
+    },
+    {'name': 'SHR R1', 'bytecode':0x81,'control' :
+            macro('alumacro', rx=0, afnc = 'SHR',latchflag = True)
+    },
+    {'name': 'SHR R1', 'bytecode':0x82,'control' :
+            macro('alumacro', rx=0, afnc = 'SHR',latchflag = True)
+    },
+    {'name': 'SHR R2', 'bytecode':0x83,'control' :
+            macro('alumacro', rx=0, afnc = 'SHR',latchflag = True)
+    },
+
+    {'name': 'SHL R0', 'bytecode':0x84,'control' :
+            macro('alumacro', rx=0, afnc = 'SHL',latchflag = True)
+    },
+    {'name': 'SHL R1', 'bytecode':0x85,'control' :
+            macro('alumacro', rx=0, afnc = 'SHL',latchflag = True)
+    },
+    {'name': 'SHL R1', 'bytecode':0x86,'control' :
+            macro('alumacro', rx=0, afnc = 'SHL',latchflag = True)
+    },
+    {'name': 'SHL R2', 'bytecode':0x87,'control' :
+            macro('alumacro', rx=0, afnc = 'SHL',latchflag = True)
+    },
+
 
     # inc
 
@@ -1148,12 +1262,175 @@ opcodes = [
 
 
 
-        # Reg Logic
+        # Reg Logic AND Rx,Ry family base 0xc0
+
+        {'name': 'AND R0,R0', 'bytecode':0xc0,'control' :
+            macro('alumacro', rx=0, ry=0, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R0,R1', 'bytecode':0xc1,'control' :
+            macro('alumacro', rx=0, ry=1, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R0,R2', 'bytecode':0xc2,'control' :
+            macro('alumacro', rx=0, ry=2, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R0,R3', 'bytecode':0xc3,'control' :
+            macro('alumacro', rx=0, ry=3, afnc = 'AND',latchflag = True)
+        },
+
+        {'name': 'AND R1,R0', 'bytecode':0xc4,'control' :
+            macro('alumacro', rx=1, ry=0, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R1,R1', 'bytecode':0xc5,'control' :
+            macro('alumacro', rx=1, ry=1, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R1,R2', 'bytecode':0xc6,'control' :
+            macro('alumacro', rx=1, ry=2, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R1,R3', 'bytecode':0xc7,'control' :
+            macro('alumacro', rx=1, ry=3, afnc = 'AND',latchflag = True)
+        },
+
+
+        {'name': 'AND R2,R0', 'bytecode':0xc8,'control' :
+            macro('alumacro', rx=2, ry=0, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R2,R1', 'bytecode':0xc9,'control' :
+            macro('alumacro', rx=2, ry=1, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R2,R2', 'bytecode':0xca,'control' :
+            macro('alumacro', rx=2, ry=2, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R2,R3', 'bytecode':0xcb,'control' :
+            macro('alumacro', rx=2, ry=3, afnc = 'AND',latchflag = True)
+        },
+
+        {'name': 'AND R3,R0', 'bytecode':0xcc,'control' :
+            macro('alumacro', rx=3, ry=0, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R3,R1', 'bytecode':0xcd,'control' :
+            macro('alumacro', rx=3, ry=1, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R3,R2', 'bytecode':0xce,'control' :
+            macro('alumacro', rx=3, ry=2, afnc = 'AND',latchflag = True)
+        },
+        {'name': 'AND R3,R3', 'bytecode':0xcf,'control' :
+            macro('alumacro', rx=3, ry=3, afnc = 'AND',latchflag = True)
+        },
 
 
 
 
+        # Reg Logic OR Rx,Ry family base 0xd0
 
+        {'name': 'OR R0,R0', 'bytecode':0xd0,'control' :
+            macro('alumacro', rx=0, ry=0, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R0,R1', 'bytecode':0xd1,'control' :
+            macro('alumacro', rx=0, ry=1, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R0,R2', 'bytecode':0xd2,'control' :
+            macro('alumacro', rx=0, ry=2, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R0,R3', 'bytecode':0xd3,'control' :
+            macro('alumacro', rx=0, ry=3, afnc = 'OR',latchflag = True)
+        },
+
+        {'name': 'OR R1,R0', 'bytecode':0xd4,'control' :
+            macro('alumacro', rx=1, ry=0, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R1,R1', 'bytecode':0xd5,'control' :
+            macro('alumacro', rx=1, ry=1, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R1,R2', 'bytecode':0xd6,'control' :
+            macro('alumacro', rx=1, ry=2, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R1,R3', 'bytecode':0xd7,'control' :
+            macro('alumacro', rx=1, ry=3, afnc = 'OR',latchflag = True)
+        },
+
+
+        {'name': 'OR R2,R0', 'bytecode':0xd8,'control' :
+            macro('alumacro', rx=2, ry=0, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R2,R1', 'bytecode':0xd9,'control' :
+            macro('alumacro', rx=2, ry=1, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R2,R2', 'bytecode':0xda,'control' :
+            macro('alumacro', rx=2, ry=2, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R2,R3', 'bytecode':0xdb,'control' :
+            macro('alumacro', rx=2, ry=3, afnc = 'OR',latchflag = True)
+        },
+
+        {'name': 'OR R3,R0', 'bytecode':0xdc,'control' :
+            macro('alumacro', rx=3, ry=0, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R3,R1', 'bytecode':0xdd,'control' :
+            macro('alumacro', rx=3, ry=1, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R3,R2', 'bytecode':0xde,'control' :
+            macro('alumacro', rx=3, ry=2, afnc = 'OR',latchflag = True)
+        },
+        {'name': 'OR R3,R3', 'bytecode':0xdf,'control' :
+            macro('alumacro', rx=3, ry=3, afnc = 'OR',latchflag = True)
+        },
+
+
+        # Reg Logic XOR Rx,Ry family base 0xe0
+
+
+        {'name': 'XOR R0,R0', 'bytecode':0xe0,'control' :
+            macro('alumacro', rx=0, ry=0, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R0,R1', 'bytecode':0xe1,'control' :
+            macro('alumacro', rx=0, ry=1, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R0,R2', 'bytecode':0xe2,'control' :
+            macro('alumacro', rx=0, ry=2, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R0,R3', 'bytecode':0xe3,'control' :
+            macro('alumacro', rx=0, ry=3, afnc = 'XOR',latchflag = True)
+        },
+
+        {'name': 'XOR R1,R0', 'bytecode':0xe4,'control' :
+            macro('alumacro', rx=1, ry=0, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R1,R1', 'bytecode':0xe5,'control' :
+            macro('alumacro', rx=1, ry=1, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R1,R2', 'bytecode':0xe6,'control' :
+            macro('alumacro', rx=1, ry=2, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R1,R3', 'bytecode':0xe7,'control' :
+            macro('alumacro', rx=1, ry=3, afnc = 'XOR',latchflag = True)
+        },
+
+
+        {'name': 'XOR R2,R0', 'bytecode':0xe8,'control' :
+            macro('alumacro', rx=2, ry=0, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R2,R1', 'bytecode':0xe9,'control' :
+            macro('alumacro', rx=2, ry=1, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R2,R2', 'bytecode':0xea,'control' :
+            macro('alumacro', rx=2, ry=2, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R2,R3', 'bytecode':0xeb,'control' :
+            macro('alumacro', rx=2, ry=3, afnc = 'XOR',latchflag = True)
+        },
+
+        {'name': 'XOR R3,R0', 'bytecode':0xec,'control' :
+            macro('alumacro', rx=3, ry=0, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R3,R1', 'bytecode':0xed,'control' :
+            macro('alumacro', rx=3, ry=1, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R3,R2', 'bytecode':0xee,'control' :
+            macro('alumacro', rx=3, ry=2, afnc = 'XOR',latchflag = True)
+        },
+        {'name': 'XOR R3,R3', 'bytecode':0xef,'control' :
+            macro('alumacro', rx=3, ry=3, afnc = 'XOR',latchflag = True)
+        },
 
 
     {'name':'HLT','bytecode': 0xff,
