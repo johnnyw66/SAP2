@@ -9,7 +9,7 @@
 
 This microprocessor written for the **LogiSim Evolution** CAD can be built with standard TTL/CMOS logic chips.
 Fed up with soldering - I wanted to 'build' the microprocessor before my attempt to describe this in *Verilog
-HDL* and then placing the design on one of my Altera FPGAs. It will support 80 instructions which are listed below.
+HDL* and then placing the design on one of my Altera FPGAs. It will support over 80 instructions which are listed below.
 
 
 At some point I will add in I/O instructions and have it drive a VGA/Video Composite output
@@ -79,11 +79,13 @@ AND Rx,Ry|Rx & Ry -> Rx|Z|4
 OR Rx,Ry|Rx or Rx-> R|Z S V|4
 XOR Rx,Ry| Rx ^ Ry -> Rx| Z S V|4
 INC Rx | Rx + 1 -> Rx | Z S V O|5
+SHL Rx | {Rx,Cf}<<1 -> Rx | Z S V C|5
+SHR Rx | {Cf,Rx}>>1 -> Rx | Z S V C|5
 DEC Rx | Rx - 1 -> Rx | Z S V O|5
 INC SP | SP + 1 -> SP |None|5
 DEC SP | SP - 1 -> SP |None|5
 OUT Rx| Rx sent to Display Unit|None|4
-*38 Opcodes in total*
+*46 Opcodes in total*
 
 Opcode|Action|Flags|Tstates
 ------|------|-----|-------
