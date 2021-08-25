@@ -14,5 +14,5 @@ if [ $a = $b ];
 then
   echo "Integrity Checks on assembler tool are OK"
 else
-  echo "***WE HAVE A PROBLEM **** Files are NOT the same - Assembler is Producing different output than expected.****"
+  echo "***WE HAVE A PROBLEM **** The Assembler utility 'assembler.py'is producing different output than expected.****"
 fi
