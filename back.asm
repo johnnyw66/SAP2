@@ -1,4 +1,4 @@
-.org 100
+.org 0x8000
 :start
   ; eat_comment
   movwi sp,0xffff ;xxx

@@ -2,10 +2,24 @@
 ; Build this with the Python assembler.py utility
 ; ./assembler.py djnz.asm
 ; to produce djnz.hex
-  movi r0,255
-:loop
-  out r0
-  djnz r0,loop
-  hlt
 
+:start
+  movi r0,255
+:display
+  out r0
+  st r0,0
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+  NOP
+
+  ld r2,0x3fff
+
+  djnz r0,display
+  hlt
 .end

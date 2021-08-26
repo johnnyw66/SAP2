@@ -1,4 +1,4 @@
-.ORG 0
+.ORG 0x8000
 :start  MOVI R1,100
       LD r1, Fred_Wm
         LD r1,Fred_Wm

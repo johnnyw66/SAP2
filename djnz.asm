@@ -1,4 +1,4 @@
-.org 0
+.org 0x8000
 ; Build this with the Python assembler.py utility
 ; ./assembler.py djnz.asm
 ; to produce djnz.hex

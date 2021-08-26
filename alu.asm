@@ -1,4 +1,4 @@
-.org 0
+.org 0x8000
 :start
     movi r0,1
     out r0

@@ -1,4 +1,4 @@
-.org 0
+.org 0x8000
 :start
   call subregtest
   hlt
@@ -77,7 +77,7 @@
       sub r2,r3
       out r2
       ret
-      
+
 :subregtest3
     call initaddregdata
     out r3
