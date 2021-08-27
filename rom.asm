@@ -1,4 +1,4 @@
 .org 0
-movi r0,0xaa
-;st r0,0x801c
 jmp 0x8000
+.dt 'ROM (C) John Wilson 2021.'
+.end

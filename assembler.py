@@ -71,6 +71,7 @@ codeBuilder = {
     'db' : {'build':'dataBuilder','size':1},
     'dw' : {'build':'dataBuilder','size':2},
     'ds' : {'build':'dataBuilder','size':-1},
+    'dt' : {'build':'stringBuilder','size':-1},
     'end' : {'build':'nullBuilder'},
 }
 
@@ -107,6 +108,13 @@ class Builder:
                 return  self.initByteArray(op)
         self.warning("BUILDER NOT FOUND FOR ",nm)
         return  self.initByteArray(op)
+
+    def stringBuilder(self, op, buildinfo):
+        self.info("stringbuilder",op)
+        bincode = [ord(_x) for _x in list(op['data'])]
+        bincode.append(0)
+        #assert(len(bincode) == op['size'],"See a code doctor - mismatch in size of data element")
+        return bincode
 
     def dataBuilder(self, op, buildinfo):
         self.info("databuilder",op)
@@ -527,10 +535,23 @@ class AssemblerParser(Parser):
 
 
     def definedata(self):
-        op = self.match('db','dw','ds')
+        op = self.match('db','dw','ds','dt')
         if (op is not None):
-            v = self.match('number')
-            return {'data': v,'op':op, 'size': 1 if op == 'db' else 2 if op == 'dw' else v}
+            if (op == 'dt'):
+                v = self.char("'")
+                chars = []
+                while True:
+                    char = self.maybe_char('0-9A-Za-z_@(). ')
+                    if char is None:
+                        break
+                    chars.append(char)
+
+                v = self.char("'")
+                txt = ''.join(chars)
+                return {'op':op,'data': txt,'size': len(chars) + 1}
+            else:
+                v = self.match('number')
+                return {'op':op,'data': v, 'size': 1 if op == 'db' else 2 if op == 'dw' else v}
         return None
 
     def ds(self):
@@ -541,6 +562,9 @@ class AssemblerParser(Parser):
 
     def dw(self):
         return self.keyword('dw')
+
+    def dt(self):
+        return self.keyword('dt')
 
     def origin(self):
         op = self.keyword('org')
