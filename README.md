@@ -17,7 +17,7 @@ along with a Serial UART. I will also split the current 64k RAM into a 32k ROM w
 If my interest still holds - the ROM could contain some simple monitor program to load software over an RS232 serial port. Perhaps look at retargeting a C Compiler?
 
 
-For what it's worth - I've included the circuit for a programmer unit so the user can enter byte code by hand.
+For what it's worth - I've included the sub-circuit for a programmer unit so the user can enter byte code by hand.
 I prefer to use a combination of the LogicSim GUI and my simple **assembler utility**.
 
 Assemble your machine code from an 'asm' text file using the included python utility **assembler.py** - and load the program into the RAM memory unit (right click the RAM unit and select 'Load Image' - then select an assembled file (.hex)). You start the LogicSim emulation by using the keys 'CMD/CTRL' + 'R'to reset the processor - followed by 'CMD/CTRL' + 'K' to start the CPU clock. You can change the speed of the processor by selecting **simulate** on the GUI and **Auto-Tick Frequency**.
@@ -51,14 +51,21 @@ Example code:
 .end
 `````
 
+I've include a spreadsheet of my opcodes with their bytecode **make up**.
+I've tried to group them wherever possible. I would appreciate any feedback.
+
+
 **Issues**
 
 I am currently using **32** (!!!!) control lines. Way too much. Although the current design uses a 32-bit data output - you can easily swap this for 4 conventional ROMs with 8-bit data buses. The utility *buildcontrolrom.py* can be modified to build 4 microcode ROMs if you're inclined to build a real processor.
 
-25th August: Currently I don't do anything with the **.org** directive.
+Perhaps I can get some inspiration from looking at the design of the **Gigatron TTL computer** - which I built in 2018. Using 32 control lines seems like a bit of an overkill.
 
+25th August: Currently I don't handle multiple **.org** directives properly.
 
-Perhaps I can get some inspiration from looking at the design of **Gigatron TTL computer** - which I built in 2018. Using 32 control lines seems like a bit of an overkill.
+27th August: Added example circuit to do memory mapped IO. Writes to 0x7ff0, 0x7ff1, 0x7ff2 set up registers to
+a crude sound system. See **sound.asm**
+
 
 
 # Instruction Set
@@ -137,3 +144,26 @@ Software Requirements
 Java 8 (I used java version "1.8.0_60" - major version 52 and 1.11 - major version 55) on Mac OS X 10.15 (Catalina) - August 2021
 
 To run LogiSim - just type the command **java -jar logisim-evolution-3.5.0-all.jar** from a terminal.
+
+Python Utilities included-
+----
+**buildmicrocode.py** - Builds microcode instructions for the the **controller** subcircuit.
+
+**assembler.py** - Python utitlity to convert assembler source (.asm) to binary (hex) machine code.
+Thanks to **Supriyo Biwas** for his article on recursive decent parsers.
+
+**staticdisplay.py** Builds 7Seg Control line Rom for Decimal Display circuit.
+
+Also, Thanks to...
+---
+
+**Dieter Muller** (not the footballer!) - For his notes on building a 6502. His chapters on using multiplexers inspired my ALU sub-circuit. http://www.6502.org/users/dieter/
+
+**Ben Eater** I had already built part on an ALU before watching his videos - but it was his engaging Youtube content that really inspired me to finish off my first complete CPU. https://www.youtube.com/c/BenEater
+
+**Shiva** My old workmate - who asked me the question on 'How do you multiply two numbers without using the
+multiply or add instructions' - back in 2015.
+
+Look out for
+---
+**James Sharman** His YouTube content is amazing. Anyone new to building or understanding microprocessors - I would recommend watching **Ben's** channel - followed by **James's** videos on his **pipe-lined CPU**. I use to work with James back in the 90s. He was **THE NERD** in our group of nerds. https://www.youtube.com/user/weirdboyjim

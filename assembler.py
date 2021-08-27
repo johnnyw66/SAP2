@@ -2,6 +2,9 @@
 import sys
 import os.path
 
+# Thanks to **Supriyo Biwas** for his article on recursive decent parsers.
+# Johnny Wilson - Sussex 2021
+
 codeBuilder = {
     'mov' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0x90},
     'movi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x40},
@@ -661,7 +664,7 @@ if __name__ == '__main__':
 
 
     def buildHelpText():
-        return "SOME HELP TEXT HERE"
+        return " Example: './assembler.py example.asm [options -v (verbose), -d (debug), -q (quiet), -s (symbol table)]'"
 
 
     def handleCommandArgs(argv):
@@ -692,7 +695,7 @@ if __name__ == '__main__':
 
         if (sourceFilename is None):
             hText = buildHelpText()
-            raise Exception(f"Source file is needed to assemble! Example: '{assembler} example.asm'\n{hText}")
+            raise Exception(f"Source file is needed to assemble!\n{hText}")
 
         if (not os.path.isfile(sourceFilename)):
             raise Exception(f"Sourcefile '{sourceFilename}' does not exist.")
