@@ -63,10 +63,33 @@ Perhaps I can get some inspiration from looking at the design of the **Gigatron 
 
 25th August: Currently I don't handle multiple **.org** directives properly.
 
-27th August: Added example circuit to do memory mapped IO. Writes to 0x7ff0, 0x7ff1, 0x7ff2 set up registers to
-a crude sound system. See **sound.asm**
+**27th August**: Addressing decoding is now supported. I have now split the memory into two sections.
+0x000 to 0x7fff now holds a ROM. 0x8000 to 0xffff is a 32 Kb RAM module. The ROM currently holds the 3 byte of instructions 'JMP 0x8000' at address 0x0000 -
+
+Added example circuit to do memory mapped IO. Writes to 0x7ff0, 0x7ff1, 0x7ff2 set up registers to a crude sound system. See **sound.asm**
+
+```
+  .org 0x8000
+
+  movi r0, 0xff   ; low freq
+  movi r1, 0x00   ; high freq
+  movi r2, 0x8f   ; volume - lower 4 bits and enable bit - MSB
+
+:loopsnd
+  call playfreq
+  djnz r0, loopsnd
+  hlt
 
 
+
+:playfreq
+  st r0,0x7ff0    ; low freq
+  st r1,0x7ff1    ; high freq 6 bits
+  st r2, 0x7ff2   ; vol and enable (top bit)
+  ret
+.end
+
+```
 
 # Instruction Set
 
