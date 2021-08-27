@@ -7,7 +7,7 @@ hexfile=$f.'hex'
 comparefile='compareassemblertest.hex'
 # Make sure comparefile and asmfile exists
 
-./assembler.py -q $asmfile
+./assembler.py $asmfile -q -1 
 a=$(md5 $hexfile | grep -E  -o "\s([0-9a-f]+$)")
 b=$(md5 $comparefile | grep -E -o "\s([0-9a-f]+$)")
 if [ $a = $b ];

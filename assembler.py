@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 import sys
 import os.path
+from enum import Enum
+class OutputType(Enum):
+    BINARY = 0
+    RAWHEX = 1
+    ADDRESSEDHEX = 2
 
 # Thanks to **Supriyo Biwas** for his article on recursive decent parsers.
 # Johnny Wilson - Sussex 2021
@@ -684,6 +689,19 @@ if __name__ == '__main__':
         file.close()
         return totalsize
 
+    def produceBinFile(binName,ops):
+        combinarray = []
+
+        file = open(binName, "wb")
+
+        for op in ops:
+            binarray = builder.build(op)
+            combinarray += binarray
+
+        file.write(bytes(combinarray))
+        file.close()
+        return len(combinarray)
+
 
     def produceV3HexFile(binName,ops):
 
@@ -731,7 +749,7 @@ if __name__ == '__main__':
 
 
     def buildHelpText():
-        return " Example: './assembler.py example.asm [options -v (verbose), -d (debug), -q (quiet), -s (symbol table)]'"
+        return " Example: './assembler.py example.asm [options -v (verbose), -d (debug), -q (quiet), -s (symbol table)] -3 [default] addressed hex output -1 raw hex output -b binary output'"
 
 
     def handleCommandArgs(argv):
@@ -771,6 +789,9 @@ if __name__ == '__main__':
         print(e)
         sys.exit(-1)
 
+    outTypeBinary = 0
+    outTypeRaw = 1
+    outTypeAddr = 2
 
     parser = AssemblerParser()
     pc = 0
@@ -784,6 +805,7 @@ if __name__ == '__main__':
     quiet = 'q' in options
     symtable = 's' in options
     help = 'h' in options
+    outType  = OutputType.BINARY if 'b' in options else OutputType.RAWHEX if '1' in options else OutputType.ADDRESSEDHEX
 
     if (help):
         print(buildHelpText())
@@ -850,12 +872,37 @@ if __name__ == '__main__':
 
         # Now build up binary version of our code
         builder = Builder(labels)
-        binName = sourceFilename.split(".")[0] + ".hex"
+        binName = sourceFilename.split(".")[0] + (".bin" if outType == OutputType.BINARY else ".hex")
+
         if (not quiet):
             print(f"Producing LogiSym bin file '{binName}'")
 
         #size = produceHexFile(binName,code)
-        size = produceV3HexFile(binName, code)
+        #match optype:
+        #    case OutputType.RAWHEX:
+        #            print("RAWHEX")
+        #            break
+        #    case OutputType.BINARY:
+        #            print("BINARY")
+        #            break
+        #    case OutputType.ADDRESSEDHEX:
+        #            print("ADDRESSEDHEX")
+        #            break
+        #info(f"{outType}")
+        if (outType == OutputType.BINARY):
+            size = produceBinFile(binName, code)
+        elif (outType == OutputType.RAWHEX):
+            size = produceHexFile(binName, code)
+        elif (outType == OutputType.ADDRESSEDHEX):
+            size = produceV3HexFile(binName, code)
+        else:
+            pass
+
+        #OutputType.RAWHEX
+        #OutputType.BINARY
+        #OutputType.ADDRESSEDHEX
+
+
 
         if (not quiet):
             print(f"\nSize: {size} bytes")
