@@ -4300,7 +4300,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="addrWidth" val="15"/>
       <a name="appearance" val="logisim_evolution"/>
       <a name="contents">addr/data: 15 8
-40 aa 6c 0 80
+6c 0 80 52 4f 4d 20 28
+43 29 20 4a 6f 68 6e 20
+57 69 6c 73 6f 6e 20 32
+30 32 31 2e 228*0 6c 6 1
+6c b 1 1f 20 23 22 6f
+e1 e4 e1 6f 28401*0 53 49 4e
+0 43 4f 53 0 66 60
 </a>
       <a name="label" val="ROMModule"/>
       <a name="labelvisible" val="true"/>
@@ -4343,7 +4349,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(1040,2840)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7e7d1c5e"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6934e5b0"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4353,7 +4359,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(1070,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4052669c"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1fafb676"/>
       <a name="bg" val="#030303"/>
       <a name="label" val="digit4"/>
       <a name="labelloc" val="south"/>
@@ -4379,7 +4385,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(1120,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4c872d9f"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5f1f918f"/>
       <a name="bg" val="#030303"/>
       <a name="label" val="digit3"/>
       <a name="labelloc" val="south"/>
@@ -4394,7 +4400,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(1170,2840)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5912f258"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@421c496a"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4403,7 +4409,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="color" val="#42f02f"/>
     </comp>
     <comp lib="5" loc="(1170,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4f1b9ac8"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@c4b2dfc"/>
       <a name="bg" val="#030303"/>
       <a name="label" val="digit2"/>
       <a name="labelloc" val="south"/>
@@ -4414,7 +4420,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(1220,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1c2e7331"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6e352605"/>
       <a name="bg" val="#030303"/>
       <a name="label" val="digit1"/>
       <a name="labelloc" val="south"/>
@@ -4424,44 +4430,44 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="label" val="WRITE"/>
     </comp>
     <comp lib="5" loc="(1320,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@69b04efe"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4d8541a5"/>
       <a name="bg" val="#030303"/>
       <a name="labelloc" val="south"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(1350,2850)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@277ef1a2"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6df21666"/>
       <a name="bg" val="#ffffff"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#ffffff"/>
     </comp>
     <comp lib="5" loc="(1370,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3420e25f"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3803e2e9"/>
       <a name="bg" val="#030303"/>
       <a name="labelloc" val="south"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(1420,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5bf8b811"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7f41eee2"/>
       <a name="bg" val="#030303"/>
       <a name="labelloc" val="south"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(1470,4380)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@30d4da2e"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@182e00c6"/>
       <a name="bg" val="#030303"/>
       <a name="labelloc" val="south"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(1480,2850)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@60f7ce77"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@65127483"/>
       <a name="bg" val="#ffffff"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#ffffff"/>
     </comp>
     <comp lib="5" loc="(1610,2850)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5376fa2c"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4221d662"/>
       <a name="bg" val="#ffffff"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#ffffff"/>
@@ -4470,32 +4476,32 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="label" val="RESET"/>
     </comp>
     <comp lib="5" loc="(1740,2850)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4d50f863"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3267063a"/>
       <a name="bg" val="#ffffff"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#ffffff"/>
     </comp>
     <comp lib="5" loc="(1870,2720)" name="LED"/>
     <comp lib="5" loc="(190,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5bc35e4d"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5aa70880"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(190,4440)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@519b734"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2c67d93b"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
     </comp>
     <comp lib="5" loc="(1950,2840)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@615a9a21"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@60398813"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
     </comp>
     <comp lib="5" loc="(2080,2840)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2b03e589"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6ae514f8"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4505,13 +4511,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(290,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6af3f792"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@864f22c"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(290,4440)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@221b4def"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1ad85c1a"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4529,13 +4535,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(390,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1725501f"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@368d3642"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(390,4440)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@23bec0df"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@748da6bf"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4657,13 +4663,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(600,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5604ec5d"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5b57cf90"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(600,4370)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@2e88b747"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@3b7706c"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4685,13 +4691,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(700,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@1390bf21"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5cd7797e"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(700,4370)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@46fd2db4"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@45768405"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4729,7 +4735,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
     </comp>
     <comp lib="5" loc="(800,5750)" name="Button"/>
     <comp lib="5" loc="(820,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@376a4732"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@20b8f874"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
@@ -4739,7 +4745,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(840,4370)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5c33ec17"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@18b4d81f"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4756,13 +4762,13 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(90,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@4a4c2907"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@7fcf4efe"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
     </comp>
     <comp lib="5" loc="(90,4440)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@65732d77"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@ee8bbae"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -4772,7 +4778,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="south"/>
     </comp>
     <comp lib="5" loc="(920,4090)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@c5a53c"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@6974995f"/>
       <a name="bg" val="#0a0a0a"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#050505"/>
@@ -4785,7 +4791,7 @@ f6ee f632 f6fe f6f6 127e7e 127e12 127ebc 127eb6
       <a name="facing" val="north"/>
     </comp>
     <comp lib="5" loc="(940,4370)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@43d5b267"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@57bed04e"/>
       <a name="bg" val="#030303"/>
       <a name="labelvisible" val="true"/>
       <a name="offcolor" val="#080808"/>
@@ -7530,8 +7536,10 @@ be30c401 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 1e30c405 2e30c101
 2630c401 5e30c401 ae30c001 27*3e30c401 5e30c401 be30c401 2630c401 5e30c401
 ae30c101 27*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae30c201 27*3e30c401
 5e30c401 be30c401 2630c401 5e30c401 ae30c301 27*3e30c401 5e30c401 be30c401
-2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
-2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c30cc01 3e70d081 25*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c31cc01 3e70d181 25*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c32cc01 3e70d281 25*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c33cc01 3e70d381 25*3e30c401 5e30c401 be30c401
 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
 2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
@@ -7544,10 +7552,14 @@ ae30c101 27*3e30c401 5e30c401 be30c401 2630c401 5e30c401 ae30c201 27*3e30c401
 2630c401 5e30c401 ae10c401 3c31cc01 3e71d101 25*3e30c401 5e30c401 be30c401
 2630c401 5e30c401 ae10c401 3c32cc01 3e71d201 25*3e30c401 5e30c401 be30c401
 2630c401 5e30c401 ae10c401 3c33cc01 3e71d301 25*3e30c401 5e30c401 be30c401
-2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
-2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
-2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
-2630c401 29*3e30c401 5e30c401 be30c401 2630c401 29*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c30cc01 3e72d001 25*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c31cc01 3e72d101 25*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c32cc01 3e72d201 25*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c33cc01 3e72d301 25*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c30cc01 3e73d001 25*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c31cc01 3e73d101 25*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c32cc01 3e73d201 25*3e30c401 5e30c401 be30c401
+2630c401 5e30c401 ae10c401 3c33cc01 3e73d301 25*3e30c401 5e30c401 be30c401
 2630c401 3c30cc01 3e11c441 3e71d001 5e30c401 ae304401 5e30c401 ae308401
 3e35e401 21*3e30c401 5e30c401 be30c401 2630c401 3c31cc01 3e11c441 3e71d101
 5e30c401 ae304401 5e30c401 ae308401 3e35e401 21*3e30c401 5e30c401 be30c401
@@ -8803,7 +8815,6 @@ be30c401 2630c401 3c32cc01 3e11cc01 3e70d281 26*3e30c401 5e30c401 be30c401
     <comp lib="0" loc="(150,260)" name="Pin">
       <a name="appearance" val="NewPins"/>
       <a name="label" val="wr"/>
-      <a name="radix" val="16"/>
     </comp>
     <comp lib="0" loc="(160,110)" name="Pin">
       <a name="appearance" val="NewPins"/>
@@ -8813,7 +8824,6 @@ be30c401 2630c401 3c32cc01 3e11cc01 3e70d281 26*3e30c401 5e30c401 be30c401
     <comp lib="0" loc="(160,320)" name="Pin">
       <a name="appearance" val="NewPins"/>
       <a name="label" val="reset"/>
-      <a name="radix" val="16"/>
     </comp>
     <comp lib="0" loc="(160,40)" name="Pin">
       <a name="appearance" val="NewPins"/>
@@ -9089,7 +9099,6 @@ be30c401 2630c401 3c32cc01 3e11cc01 3e70d281 26*3e30c401 5e30c401 be30c401
       <a name="facing" val="west"/>
       <a name="label" val="en"/>
       <a name="output" val="true"/>
-      <a name="radix" val="16"/>
     </comp>
     <comp lib="1" loc="(300,420)" name="AND Gate">
       <a name="size" val="30"/>
@@ -18876,19 +18885,19 @@ f 1e e0 2d e0 2d e0 f0
       <a name="width" val="4"/>
     </comp>
     <comp lib="5" loc="(140,150)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@687abf0b"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@5203dcf9"/>
       <a name="labelvisible" val="true"/>
     </comp>
     <comp lib="5" loc="(190,150)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@149e3fe6"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@197d28dc"/>
       <a name="labelvisible" val="true"/>
     </comp>
     <comp lib="5" loc="(240,150)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@39df840c"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@548ef4cd"/>
       <a name="labelvisible" val="true"/>
     </comp>
     <comp lib="5" loc="(290,150)" name="7-Segment Display">
-      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@57f74fda"/>
+      <a name="Dummy" val="com.cburch.logisim.fpga.data.ComponentMapInformationContainer@751362b2"/>
       <a name="labelvisible" val="true"/>
     </comp>
     <comp loc="(420,390)" name="seg16hdisplay"/>

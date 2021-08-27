@@ -661,18 +661,61 @@ if __name__ == '__main__':
 
 
     def produceHexFile(binName,binarray):
+        return produceRawHexFile(binName,binarray)
 
+    def produceRawHexFile(binName,ops):
 
         file = open(binName, "w+")
         file.write("v2.0 raw\n")
-        for index,op in enumerate(binarray):
-            file.write(f"{op:02x} ")
-            if (index % 8 == 7):
-                file.write("\n")
+        totalsize = 0
+        bcnt = 0
+
+        for op in ops:
+            if op['size'] > 0:
+                binarray = builder.build(op)
+                totalsize += len(binarray)
+                for index,bytecode in enumerate(binarray):
+                    file.write(f"{bytecode:02x} ")
+                    if (bcnt % 8 == 7):
+                        file.write("\n")
+                    bcnt += 1
 
         file.write("\n")
         file.close()
+        return totalsize
 
+
+    def produceV3HexFile(binName,ops):
+
+        file = open(binName, "w+")
+        file.write("v3.0 hex words addressed\n")
+        address = 0
+        lastaddr = -1
+        totalsize = 0
+
+        for op in ops:
+            address = op['pc']
+            binarray = builder.build(op)
+            sz = len(binarray)
+            totalsize += sz
+
+            if (sz > 0):
+                diff = (address -lastaddr)
+                if (diff > 0):
+                    file.write(f"\n{address:04x}: ")
+                for index,byteopcode in enumerate(binarray):
+                    file.write(f"{byteopcode:02x} ")
+
+                lastaddr = op['pc'] + sz
+
+
+
+                #if (index % 8 == 7):
+                #    file.write("\n")
+
+        file.write("\n")
+        file.close()
+        return totalsize
 
     def processLabels(ops,labels):
         if (op['op'] == 'label'):
@@ -807,23 +850,16 @@ if __name__ == '__main__':
 
         # Now build up binary version of our code
         builder = Builder(labels)
-        binarray = []
-
-        for op in code:
-            bytearray = builder.build(op)
-            binarray+=bytearray
-
-        if (not quiet):
-            info(f"\nSize: {len(binarray)} bytes\n\n")
-
         binName = sourceFilename.split(".")[0] + ".hex"
         if (not quiet):
             print(f"Producing LogiSym bin file '{binName}'")
 
-        produceHexFile(binName, binarray)
+        #size = produceHexFile(binName,code)
+        size = produceV3HexFile(binName, code)
 
         if (not quiet):
-            print("\n\ncomplete.\n")
+            print(f"\nSize: {size} bytes")
+            print("complete.\n")
 
         sys.exit(0)
     except (SyntaxError) as e:
