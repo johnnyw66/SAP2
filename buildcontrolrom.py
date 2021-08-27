@@ -3,14 +3,6 @@
 controlWordSize = 32
 ACTIVEHIGH = 1
 ACTIVELOW = 0
-#import sys
-#def fnc(*args,**options):#
-#    print(len(args))
-#    print(options['zippy'])
-
-#fnc(1,2,3,4,5,zippy = True)
-#print("Hello")
-#sys.exit(-1)
 
 # Definition for each of our control lines. We define which bit in the
 # control word they occupy and if that control bit is active low or active high.
@@ -135,10 +127,21 @@ def bankregfunction(*args):
     control = {}
     return control
 
+def aluimmediate(*args):
+        posargs = args[0]
+        keywords = args[1]
+        control = []
+        fnc = keywords['afnc']
+        rx = keywords['rx']
+        control.append({'Ep','nLm'})
+        control.append({'Cp','nCE','nLb'})
+        control.append(decorateReadReg({'Ek','nLa'},keywords['rx']))
+        control.append(decorateWriteReg(decorateFunction({'nLk','Eu','Lf'},fnc),rx))
+        return control
 
 macros = {
             'alumacro': alufunction,
-            'bankreg' : bankregfunction
+            'aluimmediatemacro' : aluimmediate
 }
 
 
@@ -469,7 +472,6 @@ opcodes = [
 
     # OPCODES 0x26 to 0x3f are unused
 
-    # OPCODES 0x26 to 0x3f are unused
 
     {'name':'MOVIR0','bytecode': 0x40,
     'control':
@@ -505,20 +507,20 @@ opcodes = [
 
     {'name':'TODO XORIR0','bytecode': 0x44,
     'control':
-    [
-    ]},
+        macro('aluimmediatemacro', rx=0, afnc = 'XOR',latchflag = True)
+    },
     {'name':'TODO XORIR1','bytecode': 0x45,
     'control':
-    [
-    ]},
+        macro('aluimmediatemacro', rx=1, afnc = 'XOR',latchflag = True)
+    },
     {'name':'TODO XORIR2','bytecode': 0x46,
     'control':
-    [
-    ]},
+        macro('aluimmediatemacro', rx=2, afnc = 'XOR',latchflag = True)
+    },
     {'name':'TODO XORIR3','bytecode': 0x47,
     'control':
-    [
-    ]},
+        macro('aluimmediatemacro', rx=3, afnc = 'XOR',latchflag = True)
+    },
 
     # OPCODES 0x48 to 0x4f are unused
 
@@ -605,9 +607,41 @@ opcodes = [
 
     # ANDI base 0x58 (0x58, 0x59, 0x5a, 0x5b)
 
+    {'name':'TOTEST ANDI R0','bytecode': 0x58,
+    'control':
+        macro('aluimmediatemacro', rx=0, afnc = 'AND',latchflag = True)
+    },
+    {'name':'TOTEST ANDI R0','bytecode': 0x59,
+    'control':
+        macro('aluimmediatemacro', rx=1, afnc = 'AND',latchflag = True)
+    },
+    {'name':'TOTEST ANDI R0','bytecode': 0x5a,
+    'control':
+        macro('aluimmediatemacro', rx=2, afnc = 'AND',latchflag = True)
+    },
+    {'name':'TOTEST ANDI R0','bytecode': 0x5b,
+    'control':
+        macro('aluimmediatemacro', rx=3, afnc = 'AND',latchflag = True)
+    },
 
     # ORI base 0x5C (0x5c, 0x5d, 0x5e, 0x5f)
 
+    {'name':'TOTEST ORI R0','bytecode': 0x5c,
+    'control':
+        macro('aluimmediatemacro', rx=0, afnc = 'OR',latchflag = True)
+    },
+    {'name':'TOTEST ORI R1','bytecode': 0x5d,
+    'control':
+        macro('aluimmediatemacro', rx=1, afnc = 'OR',latchflag = True)
+    },
+    {'name':'TOTEST ORI R2','bytecode': 0x5e,
+    'control':
+        macro('aluimmediatemacro', rx=2, afnc = 'OR',latchflag = True)
+    },
+    {'name':'TOTEST ORI R3','bytecode': 0x5f,
+    'control':
+        macro('aluimmediatemacro', rx=3, afnc = 'OR',latchflag = True)
+    },
 
 
     # XORI is found at base 0x44!
