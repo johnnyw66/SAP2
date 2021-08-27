@@ -150,20 +150,20 @@ Python Utilities included-
 **buildmicrocode.py** - Builds microcode instructions for the the **controller** subcircuit.
 
 **assembler.py** - Python utitlity to convert assembler source (.asm) to binary (hex) machine code.
-Thanks to **Supriyo Biwas** for his article on recursive decent parsers.
 
 **staticdisplay.py** Builds 7Seg Control line Rom for Decimal Display circuit.
 
 Also, Thanks to...
 ---
 
-**Dieter Muller** (not the footballer!) - For his notes on building a 6502. His chapters on using multiplexers inspired my ALU sub-circuit. http://www.6502.org/users/dieter/
+**Dieter Muller** - (not the footballer!) - For his notes on building a 6502. His chapters on using multiplexers inspired my ALU sub-circuit. http://www.6502.org/users/dieter/
 
-**Ben Eater** I had already built part on an ALU before watching his videos - but it was his engaging Youtube content that really inspired me to finish off my first complete CPU. https://www.youtube.com/c/BenEater
+**Ben Eater** - I had already built part on an ALU before watching his videos - but it was his engaging Youtube content that really inspired me to finish off my first complete CPU. https://www.youtube.com/c/BenEater
 
-**Shiva** My old workmate - who asked me the question on 'How do you multiply two numbers without using the
-multiply or add instructions' - back in 2015.
+**Shiva** -  My old workmate - who posed me the question on 'How do you multiply two numbers without using the
+multiply or add operators' - a question he was asked back in a job interview in 2015.
+
 
 Look out for
 ---
-**James Sharman** His YouTube content is amazing. Anyone new to building or understanding microprocessors - I would recommend watching **Ben's** channel - followed by **James's** videos on his **pipe-lined CPU**. I use to work with James back in the 90s. He was **THE NERD** in our group of nerds. https://www.youtube.com/user/weirdboyjim
+**James Sharman** - His YouTube content is amazing. Anyone new to building or understanding microprocessors - I would recommend watching **Ben's** channel - followed by **James's** videos on his **Pipelined CPU**. I use to work with James back in the 90s. He was **THE NERD** in our group of nerds. https://www.youtube.com/user/weirdboyjim
