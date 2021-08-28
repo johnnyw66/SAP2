@@ -55,7 +55,7 @@ Example code:
 
 I am currently using **32** (!!!!) control lines. Way too much.
 
-If you look at the spreadsheet (*uprocISA.ods*)of my opcodes with their bitcode make up, you can see I missed a trick with their values. Had I grouped the Reg/Reg instructions a little better I think I can reduce on the width of the controller ROM. I need to change the Reg instructions 8-bit bitcode to something like **1aaaddss** where the 3-bit value **aaa** is the ALU function, and the two 2-bit values **dd** and **ss** are the **d**estination and **s**ource Registers.
+If you look at the spreadsheet (*uprocISA.ods*)  the processor opcodes with their bitcode make up, you can see I missed a trick with their values. Had I grouped the Reg/Reg instructions a little better I think I can reduce on the width of the controller ROM. I need to change the Reg instructions 8-bit bitcode to something like **1aaaddss** where the 3-bit value **aaa** is the ALU function, and the two 2-bit values **dd** and **ss** are the **d**estination and **s**ource Registers.
 
 **dd**/**ss**|Reg
 -------------|---
@@ -214,7 +214,7 @@ Also, Thanks to...
 
 **Dieter Muller** - (not the footballer!) - For his notes on building a 6502. His chapters on using multiplexers inspired my ALU sub-circuit. http://www.6502.org/users/dieter/
 
-**Ben Eater** - I had already built part on an ALU before watching his videos - but it was his engaging Youtube content that really inspired me to finish off my first complete CPU. https://www.youtube.com/c/BenEater
+**Ben Eater** - I had already built part of an ALU before watching his videos - but it was his engaging Youtube content that really inspired me to finish off my first complete CPU. https://www.youtube.com/c/BenEater
 
 **Shiva** -  My old workmate - who posed me the question on 'How do you multiply two numbers without using the
 multiply or add operators' - a question he was asked in a job interview back in 2015.
