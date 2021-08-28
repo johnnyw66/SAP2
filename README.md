@@ -66,19 +66,20 @@ If you look at the spreadsheet (*uprocISA.ods*)  the processor opcodes with thei
 
 *aaa*|function
 -----|--------
-000|A + B
-001|A - B
-010|A & B
-011|A or B
-100|A ^ B
-101|SHR A + 0
-110|SHL A + 0
-111| B + 0 (MOV rx,ry)?
+000| B + 0 (MOV rx,ry)?
+001|A + B
+010|A - B
+011|A & B
+100|A or B
+101|A ^ B
+110|SHR A + 0
+111|SHL A + 0
 
 (Note: A and B are the names I've given to the 8-bit ALU registers -
 The function 'B+0' should not latch the Flag Register.)
 
 
+See the sheet called *Proposed New ISA* in the spreadsheet for updates.
 
 
 Swapping the 32-bit ROM for 8-bit ROMs
@@ -217,7 +218,7 @@ Also, Thanks to...
 **Ben Eater** - I had already built part of an ALU before watching his videos - but it was his engaging Youtube content that really inspired me to finish off my first complete CPU. https://www.youtube.com/c/BenEater
 
 **Shiva** -  My old workmate - who posed me the question on 'How do you multiply two numbers without using the
-multiply or add operators' - a question he was asked in a job interview back in 2015.
+multiply or add operators?' - a question he was asked in a job interview back in 2015.
 
 
 Look out for
