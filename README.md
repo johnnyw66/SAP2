@@ -2,7 +2,6 @@
 
 
 ![SAP2 Inspired Project](/images/alusub.jpg)
-![SAP2 Inspired Project](/images/logicunit_function_generator2.jpg)
 
 24 August 2021
 ---
@@ -91,6 +90,7 @@ Swapping the 32-bit ROM for 8-bit ROMs
 
 Updates
 ---
+![SAP2 Inspired Project](/images/logicunit_function_generator2.jpg)
 
 **27th August**: Addressing decoding is supported. I have now split the memory into two sections.
 0x000 to 0x7fff now holds a ROM. 0x8000 to 0xffff is a 32 Kb RAM module. The ROM currently holds the 3 byte instruction 'JMP 0x8000' at address 0x0000 -
