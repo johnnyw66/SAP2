@@ -2,7 +2,7 @@
 
 
 ![SAP2 Inspired Project](/images/alusub.jpg)
-
+![SAP2 Inspired Project](/images/logicunit_function_generator2.jpg)
 
 24 August 2021
 ---
