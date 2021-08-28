@@ -79,7 +79,7 @@ If you look at the spreadsheet (*uprocISA.ods*)  the processor opcodes with thei
 The function 'B+0' should not latch the Flag Register.)
 
 
-See the sheet called *Proposed New ISA* in the spreadsheet for updates.
+See '*Proposed New ISA*' in the spreadsheet for updates.
 
 
 Swapping the 32-bit ROM for 8-bit ROMs
