@@ -55,7 +55,7 @@ Example code:
 
 I am currently using **32** (!!!!) control lines. Way too much.
 
-If you look at the spreadsheet of my opcodes with their bitcode **make up**, you can see I missed a trick with their values. Had I grouped the Reg/Reg instructions a little better I think I can reduce on the width of the controller ROM. I need to change the Reg instructions 8-bit bitcode to something like **1aaaddss** where the 3-bit value **aaa** is the ALU function, and the two 2-bit values **dd** and **ss** are the destination and Source Registers.
+If you look at the spreadsheet of my opcodes with their bitcode **make up**, you can see I missed a trick with their values. Had I grouped the Reg/Reg instructions a little better I think I can reduce on the width of the controller ROM. I need to change the Reg instructions 8-bit bitcode to something like **1aaaddss** where the 3-bit value **aaa** is the ALU function, and the two 2-bit values **dd** and **ss** are the **d**estination and **s**ource Registers.
 
 **dd**/**ss**|Reg
 -------------|---
@@ -75,8 +75,8 @@ If you look at the spreadsheet of my opcodes with their bitcode **make up**, you
 110|SHL A + 0
 111| B + 0 (MOV rx,ry)?
 
-(Note: A and B are the names I've given to the 8-bit ALU registers
-Need to make the 'B+0' does not latch the Flag Register.)
+(Note: A and B are the names I've given to the 8-bit ALU registers -
+Make the 'B+0' does not latch the Flag Register.)
 
 
 
