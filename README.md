@@ -50,22 +50,48 @@ Example code:
 
 .end
 `````
-
-I've include a spreadsheet of my opcodes with their bytecode **make up**.
-I've tried to group them wherever possible. I would appreciate any feedback.
-
-
 **Issues**
+---
 
-I am currently using **32** (!!!!) control lines. Way too much. Although the current design uses a 32-bit data output - you can easily swap this for 4 conventional ROMs with 8-bit data buses. The utility *buildcontrolrom.py* can be modified to build 4 microcode ROMs if you're inclined to build a real processor.
+I am currently using **32** (!!!!) control lines. Way too much.
 
-Perhaps I can get some inspiration from looking at the design of the **Gigatron TTL computer** - which I built in 2018. Using 32 control lines seems like a bit of an overkill.
+If you look at the spreadsheet of my opcodes with their bitcode **make up**, you can see I missed a trick with their values. Had I grouped the Reg/Reg instructions a little better I think I can reduce on the width of the controller ROM. I need to change the Reg instructions 8-bit bitcode to something like **1aaaddss** where the 3-bit value **aaa** is the ALU function, and the two 2-bit values **dd** and **ss** are the destination and Source Registers.
+
+**dd**/**ss**|Reg
+-------------|---
+00|R0
+01|R1
+10|R2
+11|R3
+
+*aaa*|function
+-----|--------
+000|A + B
+001|A - B
+010|A & B
+011|A or B
+100|A ^ B
+101|SHR A + 0
+110|SHL A + 0
+111| B + 0 (MOV rx,ry)?
+
+(Note: A and B are the names I've given to the 8-bit ALU registers
+Need to make the 'B+0' does not latch the Flag Register.)
+
+
+
+
+Swapping the 32-bit ROM for 8-bit ROMs
+---
+
+ Although the current design uses a 32-bit data output - you can easily swap this for 4 conventional ROMs with 8-bit data buses. The utility *buildcontrolrom.py* can be modified to build 4 microcode ROMs if you're inclined to build a real processor.
+
 
 Updates
 ---
 
 **27th August**: Addressing decoding is supported. I have now split the memory into two sections.
-0x000 to 0x7fff now holds a ROM. 0x8000 to 0xffff is a 32 Kb RAM module. The ROM currently holds the 3 byte of instructions 'JMP 0x8000' at address 0x0000 -
+0x000 to 0x7fff now holds a ROM. 0x8000 to 0xffff is a 32 Kb RAM module. The ROM currently holds the 3 byte of instruction 'JMP 0x8000' at address 0x0000 -
 
 Added example circuit to do memory mapped IO. Writes to 0x7ff0, 0x7ff1, 0x7ff2 set up registers to a crude sound system. See **sound.asm**
 
