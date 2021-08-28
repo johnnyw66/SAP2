@@ -61,9 +61,10 @@ I am currently using **32** (!!!!) control lines. Way too much. Although the cur
 
 Perhaps I can get some inspiration from looking at the design of the **Gigatron TTL computer** - which I built in 2018. Using 32 control lines seems like a bit of an overkill.
 
-25th August: Currently I don't handle multiple **.org** directives properly.
+Updates
+---
 
-**27th August**: Addressing decoding is now supported. I have now split the memory into two sections.
+**27th August**: Addressing decoding is supported. I have now split the memory into two sections.
 0x000 to 0x7fff now holds a ROM. 0x8000 to 0xffff is a 32 Kb RAM module. The ROM currently holds the 3 byte of instructions 'JMP 0x8000' at address 0x0000 -
 
 Added example circuit to do memory mapped IO. Writes to 0x7ff0, 0x7ff1, 0x7ff2 set up registers to a crude sound system. See **sound.asm**
@@ -78,6 +79,8 @@ Added example circuit to do memory mapped IO. Writes to 0x7ff0, 0x7ff1, 0x7ff2 s
 :loopsnd
   call playfreq
   djnz r0, loopsnd
+  movi r2,0x00
+  call playfreq
   hlt
 
 
