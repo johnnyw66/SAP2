@@ -190,7 +190,7 @@ Also, Thanks to...
 **Ben Eater** - I had already built part on an ALU before watching his videos - but it was his engaging Youtube content that really inspired me to finish off my first complete CPU. https://www.youtube.com/c/BenEater
 
 **Shiva** -  My old workmate - who posed me the question on 'How do you multiply two numbers without using the
-multiply or add operators' - a question he was asked back in a job interview in 2015.
+multiply or add operators' - a question he was asked in a job interview back in 2015.
 
 
 Look out for
