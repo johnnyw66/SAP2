@@ -84,7 +84,7 @@ The function 'B+0' should not latch the Flag Register.)
 Swapping the 32-bit ROM for 8-bit ROMs
 ---
 
- Although the current design uses a 32-bit data output - you can easily swap this for 4 conventional ROMs with 8-bit data buses. The utility *buildcontrolrom.py* can be modified to build 4 microcode ROMs if you're inclined to build a real processor. I've included an alternative controller subcircuit (*controller_8bitroms*) for this purpose.
+ Although the current design uses a ROM with a 32-bit data output - you can easily swap this for 4 conventional ROMs with 8-bit data buses. The utility *buildcontrolrom.py* can be modified to build 4 microcode ROMs if you're inclined to build a real processor. I've included an alternative controller subcircuit (*controller_8bitroms*) for this purpose.
 
 
 
