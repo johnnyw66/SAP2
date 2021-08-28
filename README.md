@@ -93,7 +93,7 @@ Updates
 ---
 
 **27th August**: Addressing decoding is supported. I have now split the memory into two sections.
-0x000 to 0x7fff now holds a ROM. 0x8000 to 0xffff is a 32 Kb RAM module. The ROM currently holds the 3 byte of instruction 'JMP 0x8000' at address 0x0000 -
+0x000 to 0x7fff now holds a ROM. 0x8000 to 0xffff is a 32 Kb RAM module. The ROM currently holds the 3 byte instruction 'JMP 0x8000' at address 0x0000 -
 
 Added example circuit to do memory mapped IO. Writes to 0x7ff0, 0x7ff1, 0x7ff2 set up registers to a crude sound system. See **sound.asm**
 
