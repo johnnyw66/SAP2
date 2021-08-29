@@ -73,6 +73,8 @@ codeBuilder = {
 
     'org' : {'build':'nullBuilder'},
     'symbol' : {'build':'nullBuilder'},
+    'comment' : {'build':'nullBuilder'},
+
     'db' : {'build':'dataBuilder','size':1},
     'dw' : {'build':'dataBuilder','size':2},
     'ds' : {'build':'dataBuilder','size':-1},
@@ -198,6 +200,13 @@ class Builder:
         return [0] *  op['size']
 
 
+class ParseError(Exception):
+        def __init__(self,msg):
+            self.msg = msg
+
+        def __str__(self):
+            return f"**ParseError**: <{self.msg}>"
+
 class ParserDefinitionError(Exception):
         def __init__(self,msg):
             self.msg = msg
@@ -240,13 +249,13 @@ class BaseParser():
         return self.text[self.pos:]
 
     def gobblewhitespace(self):
-        while self.text[self.pos] in WSPACE:
+        while self.pos < self.len and self.text[self.pos] in WSPACE:
             self.pos += 1
         #print("gooble ended at ",self.pos,self.text[self.pos:])
 
 
-    def position(self):
-        print(self.pos, "out of ",self.len, "text", self.text)
+#    def position(self):
+#        print(self.pos, "out of ",self.len, "text", self.text)
 
     def eof(self):
         return self.pos == self.len
@@ -262,7 +271,6 @@ class BaseParser():
     def match(self,wantedtok):
         lentoken = len(wantedtok)
         nxt = self.text[self.pos:(self.pos + lentoken)]
-
         if (nxt != wantedtok):
             raise ParseError('COUND NOT MATCH')
         self.pos = self.pos + lentoken
@@ -353,9 +361,7 @@ class BaseParser():
 
     def tryrules(self,*rules):
         self.gobblewhitespace()
-        #print("tryrules",rules,self)
         for rule in rules:
-            print("trying Rule ", rule)
             try:
                 rv = getattr(self, rule)()
                 if (rv is not None):
@@ -380,8 +386,12 @@ class AssemblerParser(BaseParser):
         allops = []
         while (self.pos < self.len):
             rv = self.tryrules('comment','symbol','directive','instruction')
-            print("**Built Operation**",rv)
-            allops.append(rv)
+            if (rv is not None):
+                allops.append(rv)
+            if (rv is None):
+                raise ParserException(f"Can not parse {self.text}")
+
+            print("**Built Operation**",rv,self)
 
         return allops
 
@@ -452,10 +462,12 @@ class AssemblerParser(BaseParser):
 
 
     def instruction(self):
-        return self.tryrules('intermediate8','reg8','ld','call','singlebyte','singleop','out','pushpop','djnz','movwi')
+        return self.tryrules('movwi','intermediate8','reg8','ld','call','singlebyte','singleop','out','pushpop','djnz')
 
     def registers16(self):
-            return self.trymatch('sp')
+            t = self.trymatch('sp')
+            print("reg16",self,t)
+            return t
 
     def singleop(self):
         op = self.trymatch('exx','pushall','popall','ret','nop','hlt','clc','setc')
@@ -473,14 +485,15 @@ class AssemblerParser(BaseParser):
     def pushpop(self):
         op = self.trymatch('pop','push')
         if (op is not None):
-            reg = self.match('registers')
+            reg = self.tryrules('registers')
             return {'op': op+'r'+str(reg), 'reg':reg, 'size':1}
         return None
 
     def singlebyte(self):
         op = self.trymatch('inc','dec')
         if (op is not None):
-            reg = self.match('registers','registers16')
+            print('singlebyte',op,self)
+            reg = self.tryrules('registers','registers16')
             return {'op': op if isinstance(reg,int) else op+reg, 'reg':reg, 'size':1}
         return None
 
@@ -488,34 +501,34 @@ class AssemblerParser(BaseParser):
     def djnz(self):
         op = self.trymatch('djnz')
         if (op is not None):
-            reg = self.match('registers')
-            self.char(',')
-            data = self.match('number','symbolstr')
+            reg = self.registers()
+            self.chars(',')
+            data = self.tryrules('number','symbolstr')
             return {'op': op, 'reg': reg,'data':data, 'size':3}
         return None
 
     def call(self):
         op = self.trymatch('call','jmp','jpz','jpnz','jpc','jpnc','jps','jpns','jpo','jpno')
         if (op is not None):
-            data = self.match('number','symbolstr')
+            data = self.tryrules('number','symbolstr')
             return {'op': op, 'data':data, 'size':3}
         return None
 
     def ld(self):
         op = self.trymatch('ld','st')
         if (op is not None):
-            regl = self.match('registers')
-            self.char(',')
-            data = self.match('number','symbolstr')
+            regl = self.tryrules('registers')
+            self.chars(',')
+            data = self.tryrules('number','symbolstr')
             return {'op': op, 'reg': regl, 'data':data, 'size':3}
         return None
 
     def movwi(self):
-        op = self.trymatch('movwi',)
+        op = self.trymatch('movwi')
         if (op is not None):
-            regl = self.match('registers16')
-            self.char(',')
-            data = self.match('number','symbolstr')
+            regl = self.tryrules('registers16')
+            self.chars(',')
+            data = self.tryrules('number','symbolstr')
             return {'op': op, 'reg': regl, 'data':data, 'size':3}
         return None
 
@@ -594,7 +607,6 @@ class AssemblerParser(BaseParser):
         if (self.trymatch('0x')):
             chars.append('0')
             chars.append('x')
-            print("Matching SO FAR - HEX",self)
             chars.append(self.chars('0-9A-Fa-f'))
 
             while True:
@@ -714,7 +726,7 @@ if __name__ == '__main__':
         return totalsize
 
     def processLabels(ops,labels):
-        if (op['op'] == 'label'):
+        if (op['op'] == 'symbol'):
             labelnm = op['data']
             addr = op['pc']
             if (labelnm in labels):
