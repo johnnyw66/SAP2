@@ -478,7 +478,7 @@ class AssemblerParser(BaseParser):
     def out(self):
         op = self.trymatch('out','shl','shr')
         if (op is not None):
-            reg = self.match('registers')
+            reg = self.tryrules('registers')
             return {'op': op, 'reg':reg, 'size':1}
         return None
 
