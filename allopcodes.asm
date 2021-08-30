@@ -24,10 +24,10 @@
   out r3
 
 
-  ld r0,0
-  ld r1,0
-  ld r2,0
-  ld r3,0
+  ld r0,0x1234
+  ld r1,0x5678
+  ld r2,0x9abc
+  ld r3,0xdef0
 
   st r0,0xabcd
   st r1,0x1234
@@ -38,11 +38,11 @@
   movwi sp,0x0000
   inc sp
   dec sp
-  nop
-  nop
+  push r0
+  push r2
   pushall
-  nop
-  nop
+  pop r0
+  pop r2
   popall
   exx
 
@@ -217,7 +217,6 @@
   xor r3,r2
   xor r3,r3
 
-
   hlt
 
 
@@ -227,6 +226,7 @@
   :label1
   .db 0
   .ds 200
-  .dt 'Hello World (c) 2021!'
+  .dt 'Hello World (c) 2021    '
+  nop
 
 .end

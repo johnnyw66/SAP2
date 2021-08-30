@@ -699,10 +699,6 @@ if __name__ == '__main__':
                 lastaddr = op['pc'] + sz
 
 
-
-                #if (index % 8 == 7):
-                #    file.write("\n")
-
         file.write("\n")
         file.close()
         return totalsize
@@ -721,7 +717,7 @@ if __name__ == '__main__':
 
 
     def buildHelpText():
-        return " Example: './assembler.py example.asm [options -v (verbose), -d (debug), -q (quiet), -s (symbol table)] -3 [default] addressed hex output -1 raw hex output -b binary output'"
+        return " Example: './assembler.py example.asm [options -v (verbose), -d (debug), -q (quiet), -s (symbol table)] -3 [default] addressed hex output -1 raw hex output -b binary output  -n (no output)'"
 
 
     def handleCommandArgs(argv):
@@ -777,6 +773,8 @@ if __name__ == '__main__':
     quiet = 'q' in options
     symtable = 's' in options
     help = 'h' in options
+    nooutput = 'n' in options
+
     outType  = OutputType.BINARY if 'b' in options else OutputType.RAWHEX if '1' in options else OutputType.ADDRESSEDHEX
 
     if (help):
@@ -865,17 +863,20 @@ if __name__ == '__main__':
         #            print("ADDRESSEDHEX")
         #            break
         #info(f"{outType}")
-        if (outType == OutputType.BINARY):
-            size = produceBinFile(binName, code)
-        elif (outType == OutputType.RAWHEX):
-            size = produceHexFile(binName, code)
-        elif (outType == OutputType.ADDRESSEDHEX):
-            size = produceV3HexFile(binName, code)
-        else:
-            pass
+        if (not nooutput):
+            if (outType == OutputType.BINARY):
+                size = produceBinFile(binName, code)
+            elif (outType == OutputType.RAWHEX):
+                size = produceHexFile(binName, code)
+            elif (outType == OutputType.ADDRESSEDHEX):
+                size = produceV3HexFile(binName, code)
+            else:
+                pass
+
+            if (not quiet):
+                print(f"\nSize: {size} bytes")
 
         if (not quiet):
-            print(f"\nSize: {size} bytes")
             print("complete.\n")
 
         sys.exit(0)
