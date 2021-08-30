@@ -3,6 +3,7 @@ import sys
 import os.path
 from enum import Enum
 WSPACE = "\f\v\r\t\n "
+RAMADDRESS = 0x8000
 
 class OutputType(Enum):
     BINARY = 0
@@ -675,28 +676,34 @@ if __name__ == '__main__':
         return len(combinarray)
 
 
-    def produceV3HexFile(binName,ops):
+    def produceV3HexFile(binName, ops, addrOffset = 0x8000):
 
         file = open(binName, "w+")
         file.write("v3.0 hex words addressed\n")
         address = 0
         lastaddr = -1
         totalsize = 0
+        bytecount = 0
+        lastaddrfromORG = -1
+        bytecountfromORG = 0
 
-        for op in ops:
-            address = op['pc']
+        for opindex,op in enumerate(ops):
             binarray = builder.build(op)
             sz = len(binarray)
             totalsize += sz
 
-            if (sz > 0):
-                diff = (address -lastaddr)
-                if (diff > 0):
-                    file.write(f"\n{address:04x}: ")
-                for index,byteopcode in enumerate(binarray):
-                    file.write(f"{byteopcode:02x} ")
+            address = op['pc']
+            if (address != lastaddrfromORG) and (op['op'] == 'org' or lastaddrfromORG == -1):
+                bytecountfromORG = 0
+                lastaddrfromORG = address
+                file.write(f"\n{ address - addrOffset:04x}: ")
 
-                lastaddr = op['pc'] + sz
+            if (sz > 0):
+                for index,byteopcode in enumerate(binarray):
+                    if (bytecountfromORG % 32 == 31):
+                        file.write(f"\n{address  + index - addrOffset:04x}: ")
+                    file.write(f"{byteopcode:02x} ")
+                    bytecountfromORG += 1
 
 
         file.write("\n")
@@ -717,7 +724,7 @@ if __name__ == '__main__':
 
 
     def buildHelpText():
-        return " Example: './assembler.py example.asm [options -v (verbose), -d (debug), -q (quiet), -s (symbol table)] -3 [default] addressed hex output -1 raw hex output -b binary output  -n (no output)'"
+        return "\n\nExample: ./assembler.py example.asm [options]\n\n -v verbose\n -d debug\n -q quiet\n -s symbol table\n -3 [default] V3 addressed hex output\n -1 raw hex output\n -b binary output\n -n no output\n -r ROM address offset on V3 Hex output\n"
 
 
     def handleCommandArgs(argv):
@@ -726,7 +733,7 @@ if __name__ == '__main__':
 
         for index,arg in enumerate(argv):
             if (arg.startswith('-') and len(arg) > 1):
-                options.add(arg[1])
+                options.add(arg[1:])
             else:
                 if (index > 0):
                     file = arg
@@ -774,6 +781,7 @@ if __name__ == '__main__':
     symtable = 's' in options
     help = 'h' in options
     nooutput = 'n' in options
+    rom = 'r' in options
 
     outType  = OutputType.BINARY if 'b' in options else OutputType.RAWHEX if '1' in options else OutputType.ADDRESSEDHEX
 
@@ -782,7 +790,7 @@ if __name__ == '__main__':
         sys.exit(0);
 
     if (not quiet):
-        print(f"Trying to assemble '{sourceFilename}' verbose:{verbose}... quiet:{quiet} debug:{debug} symtable:{symtable}\n")
+        print(f"Trying to assemble '{sourceFilename}' ROMMODE:{rom} verbose:{verbose}... quiet:{quiet} debug:{debug} symtable:{symtable}\n")
 
     asm = open(sourceFilename, "r")
     completed = False
@@ -869,7 +877,7 @@ if __name__ == '__main__':
             elif (outType == OutputType.RAWHEX):
                 size = produceHexFile(binName, code)
             elif (outType == OutputType.ADDRESSEDHEX):
-                size = produceV3HexFile(binName, code)
+                size = produceV3HexFile(binName, code, 0 if rom else RAMADDRESS)
             else:
                 pass
 
