@@ -29,10 +29,10 @@
   ld r2,0
   ld r3,0
 
-  st r0,0x0000
-  st r1,0x0000
-  st r2,0x0000
-  st r3,0x0000
+  st r0,0xabcd
+  st r1,0x1234
+  st r2,0x5678
+  st r3,0x9abc
 
 
   movwi sp,0x0000
@@ -226,7 +226,7 @@
   .ds 20
   :label1
   .db 0
-  .ds 20
-
+  .ds 200
+  .dt 'Hello World (c) 2021!'
 
 .end

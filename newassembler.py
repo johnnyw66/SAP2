@@ -224,12 +224,7 @@ class ParserException(Exception):
 class BaseParser():
 
     def __init__(self):
-        print("BaseParser __init__")
-        #self.text = text
-        #self.pos = 0
-        #self.len = len(text)
         self._cache = dict()
-
 
     def __str__(self):
         return f"<{self.text}> pos:{self.pos} out of {self.len} current <{self.text[self.pos:]}>"
@@ -367,32 +362,24 @@ class BaseParser():
                 if (rv is not None):
                     return rv
             except Exception as e:
-                print(f"EXCEPTION {e}")
-
+                #print(f"COME ON! EXCEPTION {e}")
+                pass
 
 class AssemblerParser(BaseParser):
     def __init__(self):
         super().__init__()
 
-    def start(self):
-        print("Start ")
 
     def parse(self,text):
         super().init(text)
-        print("Parse ")
-        #self.text = text
-        #self.len = len(text)
-        #self.pos = 0
         allops = []
         while (self.pos < self.len):
+
             rv = self.tryrules('comment','symbol','directive','instruction')
             if (rv is not None):
                 allops.append(rv)
-            if (rv is None):
+            else:
                 raise ParserException(f"Can not parse {self.text}")
-
-            print("**Built Operation**",rv,self)
-
         return allops
 
     def comment(self):
@@ -422,11 +409,10 @@ class AssemblerParser(BaseParser):
 
     def directive(self):
         if (self.peek_chars(".")):
-            return self.tryrules('org','end','db','dw','dt')
+            return self.tryrules('org','end','db','dw','ds','dt')
 
     def org(self):
         if (self.trymatch('org')):
-            print("org",self)
             return {'op':'org', 'data': self.number(),'size':0}
 
     def end(self):
@@ -441,9 +427,13 @@ class AssemblerParser(BaseParser):
         if (self.trymatch('db')):
             return {'op':'db', 'data': self.number(),'size':1}
 
+    def ds(self):
+        if (self.trymatch('ds')):
+            return {'op':'ds', 'data': 0,'size':self.number()}
+
     def dt(self):
         if (self.trymatch('dt')):
-            strmatch = 'A-Za-z0-9_@ '
+            strmatch = 'A-Za-z0-9_@().!//-+# '
             astr = []
             self.chars("'")
 
@@ -465,9 +455,7 @@ class AssemblerParser(BaseParser):
         return self.tryrules('movwi','intermediate8','reg8','ld','call','singlebyte','singleop','out','pushpop','djnz')
 
     def registers16(self):
-            t = self.trymatch('sp')
-            print("reg16",self,t)
-            return t
+            return self.trymatch('sp')
 
     def singleop(self):
         op = self.trymatch('exx','pushall','popall','ret','nop','hlt','clc','setc')
@@ -492,7 +480,7 @@ class AssemblerParser(BaseParser):
     def singlebyte(self):
         op = self.trymatch('inc','dec')
         if (op is not None):
-            print('singlebyte',op,self)
+            #print('singlebyte',op,self)
             reg = self.tryrules('registers','registers16')
             return {'op': op if isinstance(reg,int) else op+reg, 'reg':reg, 'size':1}
         return None
@@ -636,12 +624,6 @@ class AssemblerParser(BaseParser):
 
 
 
-
-#p = MyParser(".dt 'Hello' ; xxx")
-#p.parse()
-#print(p.chars("0"))
-#raise ParserDefinitionError("Some Parserdefintion Error")
-#print(peekahead_chars('0-9'))
 
 if __name__ == '__main__':
 
@@ -814,7 +796,11 @@ if __name__ == '__main__':
             if len(text) == 0:
                 break
             line = line + 1
-            ops = parser.parse(text.strip())
+            ops = None
+            try:
+                ops = parser.parse(text.strip())
+            except Exception as e:
+                print(f"Assembler **FAILED** on Line {line} {e}")
             # ops is an array of operation instructions - (in the case of 'label' followed by opcode instruction)
             if (ops is not None):
                 for op in ops:
@@ -887,12 +873,6 @@ if __name__ == '__main__':
             size = produceV3HexFile(binName, code)
         else:
             pass
-
-        #OutputType.RAWHEX
-        #OutputType.BINARY
-        #OutputType.ADDRESSEDHEX
-
-
 
         if (not quiet):
             print(f"\nSize: {size} bytes")
