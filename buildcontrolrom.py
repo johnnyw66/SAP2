@@ -824,26 +824,26 @@ opcodes = [
             macro('alumacro', rx=0, afnc = 'SHR',latchflag = True)
     },
     {'name': 'SHR R1', 'bytecode':0x81,'control' :
-            macro('alumacro', rx=0, afnc = 'SHR',latchflag = True)
+            macro('alumacro', rx=1, afnc = 'SHR',latchflag = True)
     },
-    {'name': 'SHR R1', 'bytecode':0x82,'control' :
-            macro('alumacro', rx=0, afnc = 'SHR',latchflag = True)
+    {'name': 'SHR R2', 'bytecode':0x82,'control' :
+            macro('alumacro', rx=2, afnc = 'SHR',latchflag = True)
     },
-    {'name': 'SHR R2', 'bytecode':0x83,'control' :
-            macro('alumacro', rx=0, afnc = 'SHR',latchflag = True)
+    {'name': 'SHR R3', 'bytecode':0x83,'control' :
+            macro('alumacro', rx=3, afnc = 'SHR',latchflag = True)
     },
 
     {'name': 'SHL R0', 'bytecode':0x84,'control' :
             macro('alumacro', rx=0, afnc = 'SHL',latchflag = True)
     },
     {'name': 'SHL R1', 'bytecode':0x85,'control' :
-            macro('alumacro', rx=0, afnc = 'SHL',latchflag = True)
+            macro('alumacro', rx=1, afnc = 'SHL',latchflag = True)
     },
-    {'name': 'SHL R1', 'bytecode':0x86,'control' :
-            macro('alumacro', rx=0, afnc = 'SHL',latchflag = True)
+    {'name': 'SHL R2', 'bytecode':0x86,'control' :
+            macro('alumacro', rx=2, afnc = 'SHL',latchflag = True)
     },
-    {'name': 'SHL R2', 'bytecode':0x87,'control' :
-            macro('alumacro', rx=0, afnc = 'SHL',latchflag = True)
+    {'name': 'SHL R3', 'bytecode':0x87,'control' :
+            macro('alumacro', rx=3, afnc = 'SHL',latchflag = True)
     },
 
 
