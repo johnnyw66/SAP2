@@ -4,14 +4,14 @@
 f='allopcodes'
 
 asmfile=$f.'asm'
-hexfile=$f.'hex'
-comparefile='compareallops.hex'
+hexfile=$f.'bin'
+comparefile='compareallops.bin'
 
 rm -f $comparefile
-./newassembler.py $asmfile -q -1
+./newassembler.py $asmfile -q -b
 cp $hexfile $comparefile
 rm -f $hexfile
-./assembler.py $asmfile -q -1
+./assembler.py $asmfile -q -b
 
 a=$(md5 $hexfile | grep -E  -o "\s([0-9a-f]+$)")
 b=$(md5 $comparefile | grep -E -o "\s([0-9a-f]+$)")
