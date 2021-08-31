@@ -3,6 +3,8 @@ import sys
 import os.path
 from enum import Enum, auto
 from dataclasses import dataclass
+from abc import abstractmethod, ABC
+
 
 WSPACE = "\f\v\r\t\n "
 RAMADDRESS = 0x8000
@@ -253,9 +255,11 @@ class BaseParser(ABC):
         self.pos = 0
         self.len = len(text)
 
+    @abstractmethod
     def start(self) -> None:
         raise ParserDefinitionError("Abstract Function 'start' needs to overrriden")
 
+    @abstractmethod
     def parse(self) -> None:
         raise ParserDefinitionError("Abstract Function 'parse' needs to overrriden")
 
@@ -393,19 +397,29 @@ class AssemblerParser(BaseParser):
 
 
     def parse(self, text):
+
         super().init(text)
+        self.start()
         allops = []
+
         while (self.pos < self.len):
 
             rv = self.tryrules('comment','symbol','directive','instruction')
-#
-            if (rv is not None):
-                allops.append(rv)
-            else:
+            if (rv is None):
                 raise ParserException(f"Can not parse {self.text}")
+            allops.append(rv)
+
         return allops
 
+
+    def start(self):
+        # Set up anything else to do with parsing our syntax -
+        # We don't need to do anything here - as code generation is very simple.
+        # Symbols are handled by walking through our code operations - twice
+        pass
+
     def comment(self) -> AssemblerOperation:
+        """If we spot a comment TOKEN - then save text up to EOL and finish off parsing the line"""
         if self.peek_chars(';#'):
             data = self.text[self.pos:]
             self.pos = self.len + 1
