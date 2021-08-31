@@ -180,7 +180,9 @@ class Builder:
         self.info("singleRegTripleByteBuilder",op)
         bincode = self.initByteArray(op)
         bincode[0] = buildinfo.bytecode | op.reg
+
         # check if data is a 'symbol' - look up if needed
+        # SMELLY
         dValue = op.data if isinstance(op.data,int) else self.symtable[op.data]
 
         bincode[1] = (dValue) & 0xff
@@ -205,6 +207,7 @@ class Builder:
         bincode = self.initByteArray(op)
         bincode[0] = buildinfo.bytecode
 
+        #SMELLY
         dValue = op.data if isinstance(op.data,int) else self.symtable[op.data]
 
         bincode[1] = (dValue) & 0xff
@@ -520,6 +523,7 @@ class AssemblerParser(BaseParser):
         op = self.trymatch('inc','dec')
         if (op is not None):
             reg = self.tryrules('registers','registers16')
+            #SMELLY
             return AssemblerOperation(operation = op if isinstance(reg,int) else op+reg, reg = reg, size = 1)
         return None
 
