@@ -1,16 +1,96 @@
 #!/usr/bin/env python3
 import sys
 import os.path
-from enum import Enum
+from enum import Enum, auto
 from dataclasses import dataclass
 
 WSPACE = "\f\v\r\t\n "
 RAMADDRESS = 0x8000
 
 class OutputType(Enum):
-    BINARY = 0
-    RAWHEX = 1
-    ADDRESSEDHEX = 2
+    BINARY = auto()
+    RAWHEX = auto()
+    ADDRESSEDHEX = auto()
+
+@dataclass
+class BuildOperation:
+    build : str
+    bytecode : int = None
+
+
+
+codeBuilder = {
+    'mov' : BuildOperation(build = 'doubleRegSingleByteBuilder', bytecode = 0x90),
+    'movi' : BuildOperation(build = 'singleRegDoubleByteBuilder', bytecode = 0x40),
+    'movwi' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x1c),    # set SP to address -  instruction
+
+    # Load/Store from/to Memory
+    'ld' : BuildOperation(build = 'singleRegTripleByteBuilder', bytecode = 0x14),
+    'st' : BuildOperation(build = 'singleRegTripleByteBuilder', bytecode = 0x18),
+
+    'out' : BuildOperation(build = 'singleRegSingleByteBuilder' , bytecode = 0x10),
+    'inc' : BuildOperation(build = 'singleRegSingleByteBuilder', bytecode = 0x88),
+    'dec' : BuildOperation(build = 'singleRegSingleByteBuilder' , bytecode = 0x8c),
+    'decsp' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x1e),
+    'incsp' : BuildOperation(build = 'singleByteBuilder', bytecode = 0x1d),
+
+    'pushr0' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x1f),
+    'pushr2' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x20),
+    'pushall' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x21),
+    'popr0' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x22),
+    'popr2' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x23),
+    'popall' : BuildOperation(build = 'singleByteBuilder', bytecode = 0x24),
+
+    'shr' : BuildOperation(build = 'singleRegSingleByteBuilder' , bytecode = 0x80),
+    'shl' : BuildOperation(build = 'singleRegSingleByteBuilder' , bytecode = 0x84),
+
+    'add' : BuildOperation(build = 'doubleRegSingleByteBuilder', bytecode = 0xa0),
+    'sub' : BuildOperation(build = 'doubleRegSingleByteBuilder', bytecode = 0xb0),
+    'and' : BuildOperation(build = 'doubleRegSingleByteBuilder', bytecode = 0xc0),
+    'or' : BuildOperation(build = 'doubleRegSingleByteBuilder', bytecode = 0xd0),
+    'xor' : BuildOperation(build = 'doubleRegSingleByteBuilder', bytecode = 0xe0),
+
+    'addi' : BuildOperation(build = 'singleRegDoubleByteBuilder', bytecode = 0x50),
+    'subi' : BuildOperation(build = 'singleRegDoubleByteBuilder', bytecode = 0x54),
+    'andi' : BuildOperation(build = 'singleRegDoubleByteBuilder', bytecode = 0x58),
+    'ori' : BuildOperation(build = 'singleRegDoubleByteBuilder', bytecode = 0x5c),
+    'xori' : BuildOperation(build = 'singleRegDoubleByteBuilder', bytecode = 0x44),
+
+
+    'djnz' : BuildOperation(build = 'singleRegTripleByteBuilder', bytecode = 0x60),
+    'jpz' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x64),
+    'jpnz' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x65),
+    'jpc' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x66),
+    'jpnc' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x67),
+
+    'jps' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x68),
+    'jpns' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x69),
+    'jpo' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x6a),
+    'jpno' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x6b),
+    'jmp' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x6c),
+
+    'call' : BuildOperation(build = 'threeByteBuilder', bytecode = 0x6e),
+    'ret' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x6f),
+
+    'clc' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x01),
+    'setc' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x02),
+
+    'nop' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x00),
+    'exx' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0x25),
+    'hlt' : BuildOperation(build = 'singleByteBuilder' , bytecode = 0xff),
+
+
+    'org' : BuildOperation(build = 'nullBuilder'),
+    'symbol' : BuildOperation(build = 'nullBuilder'),
+    'comment' : BuildOperation(build = 'nullBuilder'),
+
+    'db' : BuildOperation(build = 'dataBuilder'),
+    'dw' : BuildOperation(build = 'dataBuilder'),
+    'ds' : BuildOperation(build = 'dataBuilder'),
+    'dt' : BuildOperation(build = 'stringBuilder'),
+    'end' : BuildOperation(build = 'nullBuilder'),
+}
+
 
 @dataclass
 class AssemblerOperation:
@@ -21,78 +101,6 @@ class AssemblerOperation:
     reg : int = None
     regr : int = None
 
-
-codeBuilder = {
-    'mov' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0x90},
-    'movi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x40},
-    'movwi' : {'build':'threeByteBuilder', 'bytecode':0x1c},    # set SP to address -  instruction
-
-    # Load/Store from/to Memory
-    'ld' : {'build':'singleRegTripleByteBuilder', 'bytecode':0x14},
-    'st' : {'build':'singleRegTripleByteBuilder', 'bytecode':0x18},
-
-    'out' : {'build':'singleRegSingleByteBuilder','bytecode':0x10},
-    'inc' : {'build':'singleRegSingleByteBuilder', 'bytecode':0x88},
-    'dec' : {'build':'singleRegSingleByteBuilder','bytecode':0x8c},
-    'decsp' : {'build':'singleByteBuilder','bytecode':0x1e},
-    'incsp' : {'build':'singleByteBuilder', 'bytecode':0x1d},
-
-    'pushr0' : {'build':'singleByteBuilder','bytecode':0x1f},
-    'pushr2' : {'build':'singleByteBuilder','bytecode':0x20},
-    'pushall' : {'build':'singleByteBuilder','bytecode':0x21},
-    'popr0' : {'build':'singleByteBuilder','bytecode':0x22},
-    'popr2' : {'build':'singleByteBuilder','bytecode':0x23},
-    'popall' : {'build':'singleByteBuilder', 'bytecode':0x24},
-
-    'shr' : {'build':'singleRegSingleByteBuilder','bytecode':0x80},
-    'shl' : {'build':'singleRegSingleByteBuilder','bytecode':0x84},
-
-    'add' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xa0},
-    'sub' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xb0},
-    'and' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xc0},
-    'or' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xd0},
-    'xor' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xe0},
-
-    'addi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x50},
-    'subi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x54},
-    'andi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x58},
-    'ori' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x5c},
-    'xori' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x44},
-
-
-    'djnz' : {'build':'singleRegTripleByteBuilder', 'bytecode':0x60},
-    'jpz' : {'build':'threeByteBuilder', 'bytecode':0x64},
-    'jpnz' : {'build':'threeByteBuilder', 'bytecode':0x65},
-    'jpc' : {'build':'threeByteBuilder', 'bytecode':0x66},
-    'jpnc' : {'build':'threeByteBuilder', 'bytecode':0x67},
-
-    'jps' : {'build':'threeByteBuilder', 'bytecode':0x68},
-    'jpns' : {'build':'threeByteBuilder', 'bytecode':0x69},
-    'jpo' : {'build':'threeByteBuilder', 'bytecode':0x6a},
-    'jpno' : {'build':'threeByteBuilder', 'bytecode':0x6b},
-    'jmp' : {'build':'threeByteBuilder', 'bytecode':0x6c},
-
-    'call' : {'build':'threeByteBuilder', 'bytecode':0x6e},
-    'ret' : {'build':'singleByteBuilder','bytecode':0x6f},
-
-    'clc' : {'build':'singleByteBuilder','bytecode':0x01},
-    'setc' : {'build':'singleByteBuilder','bytecode':0x02},
-
-    'nop' : {'build':'singleByteBuilder','bytecode':0x00},
-    'exx' : {'build':'singleByteBuilder','bytecode':0x25},
-    'hlt' : {'build':'singleByteBuilder','bytecode':0xff},
-
-
-    'org' : {'build':'nullBuilder'},
-    'symbol' : {'build':'nullBuilder'},
-    'comment' : {'build':'nullBuilder'},
-
-    'db' : {'build':'dataBuilder','size':1},
-    'dw' : {'build':'dataBuilder','size':2},
-    'ds' : {'build':'dataBuilder','size':-1},
-    'dt' : {'build':'stringBuilder','size':-1},
-    'end' : {'build':'nullBuilder'},
-}
 
 class Builder:
     def __init__(self,symtable):
@@ -112,13 +120,13 @@ class Builder:
             print("**WARNING** "+str,nm)
             self.cachewarning.add(nm)
 
-    def opCodeBuilder(self, op):
+    def opCodeBuilder(self, op: AssemblerOperation) -> [int]:
 
         nm = op.operation
         if (nm in codeBuilder):
-            builderfnc = codeBuilder[nm]['build']
+            builderfnc = codeBuilder[nm].build
             try:
-                return getattr(self,builderfnc)(op,codeBuilder[nm])
+                return getattr(self,builderfnc)(op, codeBuilder[nm])
             except KeyError as e:
                 self.warning(f"FAILED TO FIND INFO FOR OPCODE {nm}: {e}",nm)
                 return  self.initByteArray(op)
@@ -128,14 +136,13 @@ class Builder:
         self.warning("BUILDER NOT FOUND FOR ",nm)
         return  self.initByteArray(op)
 
-    def stringBuilder(self, op, buildinfo):
+    def stringBuilder(self, op: AssemblerOperation, buildinfo: BuildOperation) -> [int]:
         self.info("stringbuilder",op)
-        bincode = [ord(_x) for _x in list(op.data)]
-        bincode.append(0)
-        #assert(len(bincode) == op['size'],"See a code doctor - mismatch in size of data element")
-        return bincode
+        return [ord(_x) for _x in (list(op.data) + [chr(0)])]
 
-    def dataBuilder(self, op, buildinfo):
+
+
+    def dataBuilder(self, op: AssemblerOperation, buildinfo: BuildOperation) -> [int]:
         self.info("databuilder",op)
         bincode = self.initByteArray(op)
         nm = op.operation
@@ -146,31 +153,31 @@ class Builder:
             bincode[1] = op.data>>8 & 0xff
         return bincode
 
-    def singleByteBuilder(self, op, buildinfo):
-        self.info("singleByteBuilder",op)
+    def singleByteBuilder(self, op: AssemblerOperation, buildinfo: BuildOperation) -> [int]:
+        self.info("singleByteBuilder", op)
         bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode']
+        bincode[0] = buildinfo.bytecode
         return bincode
 
-    def singleRegSingleByteBuilder(self, op, buildinfo):
+    def singleRegSingleByteBuilder(self, op: AssemblerOperation, buildinfo: BuildOperation) -> [int]:
         self.info("singleRegSingleByteBuilder",op)
         bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode'] | op.reg
+        bincode[0] = buildinfo.bytecode | op.reg
         return bincode
 
 
-    def singleRegDoubleByteBuilder(self, op, buildinfo):
+    def singleRegDoubleByteBuilder(self, op: AssemblerOperation, buildinfo) -> [int]:
         self.info("singleRegDoubleByteBuilder",op)
         bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode'] | op.reg
+        bincode[0] = buildinfo.bytecode | op.reg
         bincode[1] = op.data
         return bincode
 
 
-    def singleRegTripleByteBuilder(self, op, buildinfo):
+    def singleRegTripleByteBuilder(self, op: AssemblerOperation, buildinfo: BuildOperation) -> [int]:
         self.info("singleRegTripleByteBuilder",op)
         bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode'] | op.reg
+        bincode[0] = buildinfo.bytecode | op.reg
         # check if data is a 'symbol' - look up if needed
         dValue = op.data if isinstance(op.data,int) else self.symtable[op.data]
 
@@ -180,21 +187,21 @@ class Builder:
         return bincode
 
 
-    def doubleRegSingleByteBuilder(self, op, buildinfo):
+    def doubleRegSingleByteBuilder(self, op: AssemblerOperation, buildinfo: BuildOperation) -> [int]:
         self.info("doubleRegSingleByteBuilder",op)
         bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode'] | (op.reg<<2) | (op.regr<<0)
+        bincode[0] = buildinfo.bytecode | (op.reg<<2) | (op.regr<<0)
         #print(f"{bincode[0]:02x}")
         return bincode
 
 
 #   This probably needs to be rewritten - it's here just to handle
 #   movwi sp,_16bitaddress instruction
-    def threeByteBuilder(self, op, buildinfo):
+    def threeByteBuilder(self, op: AssemblerOperation, buildinfo: BuildOperation) -> [int]:
         self.info("threeByteBuilder",op)
 
         bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode']
+        bincode[0] = buildinfo.bytecode
 
         dValue = op.data if isinstance(op.data,int) else self.symtable[op.data]
 
@@ -205,10 +212,10 @@ class Builder:
         return bincode
 
 
-    def nullBuilder(self, op, buildinfo):
+    def nullBuilder(self, op: AssemblerOperation, buildinfo: BuildOperation) -> [int]:
         return [0] * 0
 
-    def initByteArray(self, op):
+    def initByteArray(self, op: AssemblerOperation) -> [int]:
         return [0] *  op.size
 
 
@@ -241,15 +248,15 @@ class BaseParser():
     def __str__(self):
         return f"<{self.text}> pos:{self.pos} out of {self.len} current <{self.text[self.pos:]}>"
 
-    def init(self,text):
+    def init(self,text) -> None:
         self.text = text
         self.pos = 0
         self.len = len(text)
 
-    def start(self):
+    def start(self) -> None:
         raise ParserException('Abstract Function needs to overrriden')
 
-    def parse(self):
+    def parse(self) -> None:
         raise ParserException('Abstract Function needs to overrriden')
 
     def current(self) -> str:
@@ -275,7 +282,7 @@ class BaseParser():
             self.pos += 1
         return ''.join(chars)
 
-    def match(self,wantedtok : str) -> str:
+    def match(self, wantedtok: str) -> str:
         lentoken = len(wantedtok)
         nxt = self.text[self.pos:(self.pos + lentoken)]
         if (nxt != wantedtok):
@@ -284,7 +291,7 @@ class BaseParser():
         return nxt
 
 
-    def wanted(self,wantedtok : str) -> str:
+    def wanted(self, wantedtok: str) -> str:
         try:
             return self.match(wantedtok)
         except ParseError as e:
@@ -305,7 +312,7 @@ class BaseParser():
         return None
 
 
-    def produce_chars_pattern(self, pattern : str) -> str:
+    def produce_chars_pattern(self, pattern: str) -> str:
 
         wanted = set()
 
@@ -346,7 +353,7 @@ class BaseParser():
 
         return ''.join(list(wanted))
 
-    def peek_chars(self, pattern : str) -> str:
+    def peek_chars(self, pattern: str) -> str:
         try:
             return self.chars(pattern)
         except ParserException as e:
@@ -354,7 +361,7 @@ class BaseParser():
         except IndexError as e:
             return None
 
-    def chars(self, pattern : str, bump : bool = True) -> str:
+    def chars(self, pattern: str, bump: bool = True) -> str:
         #self.gobblewhitespace()
         if (pattern not in self._cache):
             self._cache[pattern] = self.produce_chars_pattern(pattern)
@@ -550,17 +557,17 @@ class AssemblerParser(BaseParser):
 
 
 
-    def regreginstruction(self, opcode) -> AssemblerOperation:
+    def regreginstruction(self, opcode: str) -> AssemblerOperation:
         rx = self.registers()
         self.chars(',')
         ry = self.registers()
-        return AssemblerOperation(operation = opcode, reg = rx, regr = ry, size = 1)
+        return AssemblerOperation(operation= opcode, reg = rx, regr = ry, size = 1)
 
-    def intermediate(self, opcode) -> AssemblerOperation:
+    def intermediate(self, opcode: str) -> AssemblerOperation:
         rx = self.registers()
         self.chars(',')
         value = self.number()
-        return AssemblerOperation(operation = opcode, reg = rx, data = value, size = 2)
+        return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
 
 
     def reg8(self) -> int:
@@ -654,7 +661,7 @@ if __name__ == '__main__':
         def __str__(self):
             return f'{self.msg} at line {self.pos}'
 
-    def produceBinFile(binName :str, ops :[AssemblerOperation] ) -> int:
+    def produceBinFile(binName: str, ops: [AssemblerOperation]) -> int:
         combinarray = []
 
         file = open(binName, "wb")
@@ -669,7 +676,7 @@ if __name__ == '__main__':
 
 
 
-    def produceV2HexFile(binName : str, ops) -> int:
+    def produceV2HexFile(binName: str, ops) -> int:
 
         file = open(binName, "w+")
         file.write("v2.0 raw\n")
@@ -677,10 +684,10 @@ if __name__ == '__main__':
         bcnt = 0
 
         for op in ops:
-            if op['size'] > 0:
+            if op.size > 0:
                 binarray = builder.build(op)
                 totalsize += len(binarray)
-                for index,bytecode in enumerate(binarray):
+                for index, bytecode in enumerate(binarray):
                     file.write(f"{bytecode:02x} ")
                     if (bcnt % 8 == 7):
                         file.write("\n")
@@ -691,7 +698,7 @@ if __name__ == '__main__':
         return totalsize
 
 
-    def produceV3HexFile(binName :str, ops, addrOffset :int  = 0x8000) -> int:
+    def produceV3HexFile(binName: str, ops, addrOffset: int  = 0x8000) -> int:
 
         file = open(binName, "w+")
         file.write("v3.0 hex words addressed\n")
@@ -739,7 +746,7 @@ if __name__ == '__main__':
         return totalsize
 
 
-    def processLabels(ops : AssemblerOperation,labels : dict) -> None:
+    def processLabels(ops: AssemblerOperation,labels : dict) -> None:
         if (ops.operation == 'symbol'):
             labelnm = ops.data
             addr = ops.pc
@@ -755,7 +762,7 @@ if __name__ == '__main__':
         return "\n\nExample: ./assembler.py example.asm [options]\n\n -v verbose\n -d debug\n -q quiet\n -s symbol table\n -3 [default] V3 addressed hex output\n -2 raw hex output\n -b binary output\n -n no output\n -r ROM address offset on V3 Hex output\n"
 
 
-    def handleCommandArgs(argv : [str]) -> ([str],str,str):
+    def handleCommandArgs(argv: [str]) -> ([str],str,str):
         """Hello"""
 
         options=set()
