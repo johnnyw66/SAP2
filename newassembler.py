@@ -421,25 +421,14 @@ class AssemblerParser(BaseParser):
         # Symbols are handled by walking through our code operations - twice
         pass
 
+    # Top rules
+
     def comment(self) -> AssemblerOperation:
         """If we spot a comment TOKEN - then save text up to EOL and finish off parsing the line"""
         if self.peek_chars(';#'):
             data = self.text[self.pos:]
             self.pos = self.len + 1
             return AssemblerOperation(operation = 'comment',data = data , size = 0)
-
-    def symbolstr(self) -> str:
-        symbol = []
-        ch = self.chars('A-Za-z0-9_')
-        symbol.append(ch)
-
-        while True:
-            ch = self.peek_chars('A-Za-z0-9_')
-            if (ch is None):
-                break
-            symbol.append(ch)
-
-        return ''.join(symbol)
 
 
     def symbol(self) -> AssemblerOperation:
@@ -450,6 +439,17 @@ class AssemblerParser(BaseParser):
     def directive(self) -> AssemblerOperation:
         if (self.peek_chars(".")):
             return self.tryrules('org','end','db','dw','ds','dt')
+
+
+
+    def instruction(self) -> AssemblerOperation:
+        return self.tryrules('movwi','intermediate8','reg8','ld',\
+                            'call','singlebyte','singleop','out','pushpop','djnz')
+
+
+
+    # Directive operations
+
 
     def org(self) -> AssemblerOperation:
         if (self.trymatch('org')):
@@ -491,12 +491,55 @@ class AssemblerParser(BaseParser):
             return AssemblerOperation(operation = 'dt', data = fstr, size = len(fstr) + 1)
 
 
-    def instruction(self) -> AssemblerOperation:
-        return self.tryrules('movwi','intermediate8','reg8','ld',\
-                            'call','singlebyte','singleop','out','pushpop','djnz')
+    # Instruction operations
 
-    def registers16(self) -> str:
-            return self.trymatch('sp')
+    def movwi(self) -> AssemblerOperation:
+        op = self.trymatch('movwi')
+        if (op is not None):
+            regl = self.tryrules('registers16')
+            self.chars(',')
+            data = self.tryrules('number','symbolstr')
+            return AssemblerOperation(operation = op, reg = regl, data = data, size = 3)
+        return None
+
+
+    def intermediate8(self) -> AssemblerOperation:
+        m = self.trymatch('movi','addi','subi','andi','ori','xori')
+        if (m):
+            return self.intermediate(m)
+        return None
+
+    def reg8(self) -> AssemblerOperation:
+        m = self.trymatch('mov','add','sub','and','or','xor')
+        if (m):
+            return self.regreginstruction(m)
+        return None
+
+    def ld(self) -> AssemblerOperation:
+        op = self.trymatch('ld','st')
+        if (op is not None):
+            regl = self.tryrules('registers')
+            self.chars(',')
+            data = self.tryrules('number','symbolstr')
+            return AssemblerOperation(operation = op, reg =  regl, data = data, size = 3)
+        return None
+
+    def call(self) -> AssemblerOperation:
+        op = self.trymatch('call','jmp','jpz','jpnz','jpc',\
+                            'jpnc','jps','jpns','jpo','jpno')
+        if (op is not None):
+            data = self.tryrules('number','symbolstr')
+            return AssemblerOperation(operation = op, data = data, size = 3)
+        return None
+
+
+    def singlebyte(self) -> AssemblerOperation:
+        op = self.trymatch('inc','dec')
+        if (op is not None):
+            reg = self.tryrules('registers','registers16')
+            #SMELLY
+            return AssemblerOperation(operation = op if isinstance(reg,int) else op+reg, reg = reg, size = 1)
+        return None
 
     def singleop(self) -> AssemblerOperation:
         op = self.trymatch('exx','pushall','popall','ret',\
@@ -519,13 +562,6 @@ class AssemblerParser(BaseParser):
             return AssemblerOperation(operation = op+'r'+str(reg), reg = reg,  size = 1)
         return None
 
-    def singlebyte(self) -> AssemblerOperation:
-        op = self.trymatch('inc','dec')
-        if (op is not None):
-            reg = self.tryrules('registers','registers16')
-            #SMELLY
-            return AssemblerOperation(operation = op if isinstance(reg,int) else op+reg, reg = reg, size = 1)
-        return None
 
 
     def djnz(self) -> AssemblerOperation:
@@ -537,41 +573,13 @@ class AssemblerParser(BaseParser):
             return AssemblerOperation(operation =  op, reg = reg, data = data, size = 3)
         return None
 
-    def call(self) -> AssemblerOperation:
-        op = self.trymatch('call','jmp','jpz','jpnz','jpc',\
-                            'jpnc','jps','jpns','jpo','jpno')
-        if (op is not None):
-            data = self.tryrules('number','symbolstr')
-            return AssemblerOperation(operation = op, data = data, size = 3)
-        return None
 
-    def ld(self) -> AssemblerOperation:
-        op = self.trymatch('ld','st')
-        if (op is not None):
-            regl = self.tryrules('registers')
-            self.chars(',')
-            data = self.tryrules('number','symbolstr')
-            return AssemblerOperation(operation = op, reg =  regl, data = data, size = 3)
-        return None
-
-    def movwi(self) -> AssemblerOperation:
-        op = self.trymatch('movwi')
-        if (op is not None):
-            regl = self.tryrules('registers16')
-            self.chars(',')
-            data = self.tryrules('number','symbolstr')
-            return AssemblerOperation(operation = op, reg = regl, data = data, size = 3)
-        return None
-
-
-    def registers(self) -> int:
-        r = self.chars('rR')
-        reg = self.chars('0-3')
-        return int(reg)
-
-
-
-
+    # Support functions
+    def intermediate(self, opcode: str) -> AssemblerOperation:
+        rx = self.registers()
+        self.chars(',')
+        value = self.number()
+        return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
 
     def regreginstruction(self, opcode: str) -> AssemblerOperation:
         rx = self.registers()
@@ -579,24 +587,27 @@ class AssemblerParser(BaseParser):
         ry = self.registers()
         return AssemblerOperation(operation= opcode, reg = rx, regr = ry, size = 1)
 
-    def intermediate(self, opcode: str) -> AssemblerOperation:
-        rx = self.registers()
-        self.chars(',')
-        value = self.number()
-        return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
 
+    def registers16(self) -> str:
+            return self.trymatch('sp')
 
-    def reg8(self) -> int:
-        m = self.trymatch('mov','add','sub','and','or','xor')
-        if (m):
-            return self.regreginstruction(m)
-        return None
+    def registers(self) -> int:
+        r = self.chars('rR')
+        reg = self.chars('0-3')
+        return int(reg)
 
-    def intermediate8(self):
-        m = self.trymatch('movi','addi','subi','andi','ori','xori')
-        if (m):
-            return self.intermediate(m)
-        return None
+    def symbolstr(self) -> str:
+        symbol = []
+        ch = self.chars('A-Za-z0-9_')
+        symbol.append(ch)
+
+        while True:
+            ch = self.peek_chars('A-Za-z0-9_')
+            if (ch is None):
+                break
+            symbol.append(ch)
+
+        return ''.join(symbol)
 
     def number(self) -> int:
         num = self.tryrules('binarynumber','hexnumber','octalnumber','decnumber')
@@ -781,7 +792,7 @@ if __name__ == '__main__':
 
 
     def handleCommandArgs(argv: [str]) -> ([str],str,str):
-        """Hello"""
+        """Command line options have NO parameters so just record them"""
 
         options=set()
         file = None
@@ -801,9 +812,7 @@ if __name__ == '__main__':
 
     # ** Main Process Starts here ***
 
-    #print(f"Arguments count: {len(sys.argv)}")
-    #for i, arg in enumerate(sys.argv):
-    #    print(f"Argument {i:>6}: {arg}")
+
     options,sourceFilename,assembler = handleCommandArgs(sys.argv)
 
     try:
@@ -949,8 +958,6 @@ symtable:{symtable}\n")
 
         if (not quiet):
             print(f"\nSize: {size} bytes")
-
-        if (not quiet):
             print("complete.\n")
 
         sys.exit(0)
