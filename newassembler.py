@@ -1,4 +1,30 @@
 #!/usr/bin/env python3
+"""
+    Assembler for the SAP2 Microprocessor
+
+    Johnny Wilson, Sussex August 2021
+    Works with the LogiSim Evolution microprocessor circuit sap2.circ
+    See  https://github.com/johnnyw66/SAP2
+    Simple program
+
+    .org 0x8000
+:start
+        movwi sp,0xffff     ; set stack pointer
+        call display
+        hlt
+
+:display
+        mov r0,255
+:nxt
+        out r0
+        djnz r0, nxt
+        ret
+
+
+    .end
+
+
+"""
 import sys
 import os.path
 from enum import Enum, auto
@@ -751,12 +777,12 @@ if __name__ == '__main__':
                 lastaddrfromORG = address
                 if (addrOffset > address):
                     print("***WARNING*** address mismatch on assembling. Please check ORG directives - if assembling for RAM. Ignoring base address offset..")
-                file.write(f"\n{ address - (addrOffset if addrOffset < address else 0):04x}: ")
+                file.write(f"\n{ address - (addrOffset if addrOffset <= address else 0):04x}: ")
 
             if (sz > 0):
                 for index,byteopcode in enumerate(binarray):
                     if (bytecountfromORG % 32 == 31):
-                        file.write(f"\n{(address  + index - (addrOffset if addrOffset < address else 0)):04x}: ")
+                        file.write(f"\n{(address  + index - addrOffset if addrOffset <= address else 0):04x}: ")
                     file.write(f"{byteopcode:02x} ")
                     bytecountfromORG += 1
 
