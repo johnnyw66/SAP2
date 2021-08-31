@@ -695,6 +695,7 @@ if __name__ == '__main__':
 
         file = open(binName, "w+")
         file.write("v3.0 hex words addressed\n")
+
         address = 0
         lastaddr = -1
         totalsize = 0
@@ -727,6 +728,16 @@ if __name__ == '__main__':
         file.write("\n")
         file.close()
         return totalsize
+
+
+    def produceDummyOuput(ops) -> int:
+        totalsize = 0
+        for opindex,op in enumerate(ops):
+            binarray = builder.build(op)
+            sz = len(binarray)
+            totalsize += sz
+        return totalsize
+
 
     def processLabels(ops : AssemblerOperation,labels : dict) -> None:
         if (ops.operation == 'symbol'):
@@ -883,8 +894,6 @@ symtable:{symtable}\n")
         builder = Builder(labels)
         binName = sourceFilename.split(".")[0] + (".bin" if outType == OutputType.BINARY else ".hex")
 
-        if (not quiet):
-            print(f"Producing LogiSym bin file '{binName}'")
 
         #size = produceHexFile(binName,code)
         #match optype:
@@ -899,6 +908,9 @@ symtable:{symtable}\n")
         #            break
         #info(f"{outType}")
         if (not nooutput):
+            if (not quiet):
+                print(f"Producing LogiSym output file '{binName}'")
+
             if (outType == OutputType.BINARY):
                 size = produceBinFile(binName, code)
             elif (outType == OutputType.RAWHEX):
@@ -906,10 +918,12 @@ symtable:{symtable}\n")
             elif (outType == OutputType.ADDRESSEDHEX):
                 size = produceV3HexFile(binName, code, 0 if rom else RAMADDRESS)
             else:
-                pass
+                raise Exception('Output type is not defined')
+        else:
+            size = produceDummyOuput(code)
 
-            if (not quiet):
-                print(f"\nSize: {size} bytes")
+        if (not quiet):
+            print(f"\nSize: {size} bytes")
 
         if (not quiet):
             print("complete.\n")
