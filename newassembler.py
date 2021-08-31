@@ -240,7 +240,7 @@ class ParserException(Exception):
         def __str__(self):
             return f"**ParserException**: {self.msg}"
 
-class BaseParser():
+class BaseParser(ABC):
 
     def __init__(self):
         self._cache = dict()
