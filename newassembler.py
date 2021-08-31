@@ -231,7 +231,7 @@ class ParserDefinitionError(Exception):
             self.msg = msg
 
         def __str__(self):
-            return f"**ParserError**: {self.msg}"
+            return f"**ParserDefinitionError**: {self.msg}"
 
 class ParserException(Exception):
         def __init__(self,msg):
@@ -254,10 +254,10 @@ class BaseParser():
         self.len = len(text)
 
     def start(self) -> None:
-        raise ParserException('Abstract Function needs to overrriden')
+        raise ParserDefinitionError("Abstract Function 'start' needs to overrriden")
 
     def parse(self) -> None:
-        raise ParserException('Abstract Function needs to overrriden')
+        raise ParserDefinitionError("Abstract Function 'parse' needs to overrriden")
 
     def current(self) -> str:
         return self.text[self.pos:]
@@ -265,17 +265,12 @@ class BaseParser():
     def gobblewhitespace(self) -> None:
         while self.pos < self.len and self.text[self.pos] in WSPACE:
             self.pos += 1
-        #print("gooble ended at ",self.pos,self.text[self.pos:])
-
-
-#    def position(self):
-#        print(self.pos, "out of ",self.len, "text", self.text)
 
     def eof(self) -> bool:
         return self.pos == self.len
 
     def next(self) -> str:
-        chars = [] ;
+        chars = []
         self.gobblewhitespace()
         while self.pos < self.len and self.text[self.pos] not in WSPACE :
             chars.append(self.text[self.pos])
@@ -354,15 +349,19 @@ class BaseParser():
         return ''.join(list(wanted))
 
     def peek_chars(self, pattern: str) -> str:
+
         try:
             return self.chars(pattern)
         except ParserException as e:
+            # We have not found a char match - so go back and check other rules/token matches
             return None
         except IndexError as e:
+            # Arrived here from 'chars' function - 'ch = self.text[self.pos]'
+            # -  exhausted parsing our current line of text
             return None
 
     def chars(self, pattern: str, bump: bool = True) -> str:
-        #self.gobblewhitespace()
+
         if (pattern not in self._cache):
             self._cache[pattern] = self.produce_chars_pattern(pattern)
         ch = self.text[self.pos]
@@ -383,7 +382,6 @@ class BaseParser():
                 if (rv is not None):
                     return rv
             except ParserException as e:
-                #print(f"COME ON! EXCEPTION {e}")
                 pass
 
 
@@ -722,12 +720,14 @@ if __name__ == '__main__':
 
                 bytecountfromORG = 0
                 lastaddrfromORG = address
-                file.write(f"\n{ address - addrOffset:04x}: ")
+                if (addrOffset > address):
+                    print("***WARNING*** address mismatch on assembling. Please check ORG directives - if assembling for RAM. Ignoring base address offset..")
+                file.write(f"\n{ address - (addrOffset if addrOffset < address else 0):04x}: ")
 
             if (sz > 0):
                 for index,byteopcode in enumerate(binarray):
                     if (bytecountfromORG % 32 == 31):
-                        file.write(f"\n{(address  + index - addrOffset):04x}: ")
+                        file.write(f"\n{(address  + index - (addrOffset if addrOffset < address else 0)):04x}: ")
                     file.write(f"{byteopcode:02x} ")
                     bytecountfromORG += 1
 
@@ -746,7 +746,7 @@ if __name__ == '__main__':
         return totalsize
 
 
-    def processLabels(ops: AssemblerOperation,labels : dict) -> None:
+    def processLabels(ops: AssemblerOperation, labels: dict) -> None:
         if (ops.operation == 'symbol'):
             labelnm = ops.data
             addr = ops.pc
