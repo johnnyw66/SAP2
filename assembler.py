@@ -1,84 +1,297 @@
 #!/usr/bin/env python3
+"""
+    Assembler for the SAP2 Microprocessor
+
+    Johnny Wilson, Sussex August 2021
+    Works with the LogiSim Evolution microprocessor circuit sap2.circ
+    See  https://github.com/johnnyw66/SAP2
+    Simple program
+
+    .org 0x8000
+:start
+        movwi sp,0xffff     ; set stack pointer
+        call display
+        hlt
+
+:display
+        mov r0,255
+:nxt
+        out r0
+        djnz r0, nxt
+        ret
+
+
+    .end
+
+
+"""
 import sys
 import os.path
-from enum import Enum
+from enum import Enum, auto
+from dataclasses import dataclass
+from abc import abstractmethod, ABC
+
+
+WSPACE = "\f\v\r\t\n "
+RAMADDRESS = 0x8000
+
+class Data(ABC):
+    def __init__(self,data):
+        self.data = data
+
+    def getRawData(self):
+        return self.data
+
+    @abstractmethod
+    def getData(self):
+        pass
+
+    def __str__(self):
+        return f"Raw data <{self.data}>"
+
+    def __repr__(self):
+        return f"Raw data: <{self.data}>"
+
+
+class SymbolWordData(Data):
+
+    def __init__(self, data, lookup):
+        super().__init__(data)
+        self.lut = lookup
+
+    def getData(self):
+        value = self.lut[self.data]
+        return [value & 0xff, value>>8 & 0xff]
+
+    def __str__(self):
+        return f"SymbolWordData: {super().__str__()}"
+    def __repr__(self):
+        return f"SymbolWordData: {super().__str__()}"
+
+class WordData(Data):
+
+    def __init__(self, data):
+        super().__init__(data)
+
+    def getData(self):
+        value = self.data
+        return [value & 0xff, value>>8 & 0xff]
+    def __str__(self):
+        return f"WordData: {super().__str__()}"
+    def __repr__(self):
+        return f"WordData: {super().__str__()}"
+
+class ByteData(Data):
+
+    def __init__(self, data):
+        super().__init__(data & 0xff)
+
+    def getData(self):
+        value = self.data
+        return [value]
+
+    def __str__(self):
+        return f"ByteData: {super().__str__()}"
+
+    def __repr__(self):
+        return f"ByteData: {super().__str__()}"
+
+class StringData(Data):
+
+    def __init__(self, data):
+        super().__init__(data)
+
+    def getData(self):
+        return [ord(_x) for _x in (list(self.getRawData()) + [chr(0)])]
+
+@dataclass
+class SupportOperation:
+    data : str = None
+    reg : int = None
+    regr : int = None
+
+    def __str__(self):
+        return f"reg:{self.reg}  regr:{self.regr} data:{self.data}"
+
+class ByteCodeResolver(ABC):
+
+    @abstractmethod
+    def getByteCode(self,supportdata: SupportOperation) -> int:
+        pass
+
+class SimpleByteCodeResolver(ByteCodeResolver):
+    def __init__(self, bytecode: int):
+        self.bytecode = bytecode
+
+    def getByteCode(self,support: SupportOperation) -> int:
+        return self.bytecode
+
+
+
+class LookupByOpByteCodeResolver(ByteCodeResolver):
+    def __init__(self, table):
+        self.lut = table
+
+    def getByteCode(self,support: SupportOperation) -> int:
+        return self.lut[support.reg]
+
+
+
+class ByteCodeBuilder(ABC):
+
+    @abstractmethod
+    def build_bytecode(self, support_data: SupportOperation) -> [int]:
+        pass
+
+class SingleByteCodeBuilder(ByteCodeBuilder):
+    def __init__(self, basebyte_resolver):
+        self.basebyte_resolver = basebyte_resolver
+
+    def build_bytecode(self, support: SupportOperation) -> [int]:
+        base_code = self.basebyte_resolver.getByteCode(support)
+        return [base_code]
+
+
+class SingleRegByteCodeBuilder(ByteCodeBuilder):
+    def __init__(self, basebyte_resolver):
+        self.basebyte_resolver = basebyte_resolver
+
+    def build_bytecode(self, support: SupportOperation) -> [int]:
+        base_code = self.basebyte_resolver.getByteCode(support)
+        return [base_code | (support.reg)] + ([] if support.data is None else support.data.getData())
+
+
+
+class DoubleRegByteCodeBuilder(ByteCodeBuilder):
+    def __init__(self, basebyte_resolver):
+        self.basebyte_resolver = basebyte_resolver
+
+    def build_bytecode(self, support: SupportOperation) -> [int]:
+        base_code = self.basebyte_resolver.getByteCode(support)
+        return [base_code | (support.reg<<2) | (support.regr)]
+
+
+
+class TripleByteCodeBuilder(ByteCodeBuilder):
+    def __init__(self, basebyte_resolver):
+        self.basebyte_resolver = basebyte_resolver
+
+    def build_bytecode(self, support: SupportOperation) -> [int]:
+        base_code = self.basebyte_resolver.getByteCode(support)
+        return [base_code]  + support.data.getData()
+
+class NullByteCodeBuilder(ByteCodeBuilder):
+
+    def build_bytecode(self, support: SupportOperation) -> [int]:
+        return []
+
+class DataByteCodeBuilder(ByteCodeBuilder):
+
+    def build_bytecode(self, support: SupportOperation) -> [int]:
+        return support.data.getData()
+
+
+class ReserveSpaceByteCodeBuilder(ByteCodeBuilder):
+
+    def build_bytecode(self, support: SupportOperation) -> [int]:
+        return [0]*support.size
+
+
 class OutputType(Enum):
-    BINARY = 0
-    RAWHEX = 1
-    ADDRESSEDHEX = 2
+    BINARY = auto()
+    RAWHEX = auto()
+    ADDRESSEDHEX = auto()
 
-# Thanks to **Supriyo Biwas** for his article on recursive decent parsers.
-# Johnny Wilson - Sussex 2021
+@dataclass
+class BuildOperation:
+    build : str
+    bytecode : int = None
 
-codeBuilder = {
-    'mov' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0x90},
-    'movi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x40},
-    'movwi' : {'build':'threeByteBuilder', 'bytecode':0x1c},    # set SP to address -  instruction
+codeBuilder= {
+    'mov' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0x90)),
+    'movi' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x40)),
+    'movwi' : TripleByteCodeBuilder(LookupByOpByteCodeResolver({'sp':0x1c,'r0':0x1c, 'r2':0x1c})),    # set SP/R0R1/R2R3 to address -  instruction
 
-    # Load/Store from/to Memory
-    'ld' : {'build':'singleRegTripleByteBuilder', 'bytecode':0x14},
-    'st' : {'build':'singleRegTripleByteBuilder', 'bytecode':0x18},
+    'ld' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x14)),
+    'st' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x18)),
 
-    'out' : {'build':'singleRegSingleByteBuilder','bytecode':0x10},
-    'inc' : {'build':'singleRegSingleByteBuilder', 'bytecode':0x88},
-    'dec' : {'build':'singleRegSingleByteBuilder','bytecode':0x8c},
-    'decsp' : {'build':'singleByteBuilder','bytecode':0x1e},
-    'incsp' : {'build':'singleByteBuilder', 'bytecode':0x1d},
+    'out' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x10)),
+    'inc' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x88)),
+    'dec' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x8c)),
 
-    'pushr0' : {'build':'singleByteBuilder','bytecode':0x1f},
-    'pushr2' : {'build':'singleByteBuilder','bytecode':0x20},
-    'pushall' : {'build':'singleByteBuilder','bytecode':0x21},
-    'popr0' : {'build':'singleByteBuilder','bytecode':0x22},
-    'popr2' : {'build':'singleByteBuilder','bytecode':0x23},
-    'popall' : {'build':'singleByteBuilder', 'bytecode':0x24},
+    'decsp' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x1e)),
+    'incsp' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x1d)),
 
-    'shr' : {'build':'singleRegSingleByteBuilder','bytecode':0x80},
-    'shl' : {'build':'singleRegSingleByteBuilder','bytecode':0x84},
+    'pushr0' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x1f)),
+    'pushr2' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x20)),
+    'pushall' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x21)),
+    'popr0' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x22)),
+    'popr2' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x23)),
+    'popall' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x24)),
 
-    'add' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xa0},
-    'sub' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xb0},
-    'and' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xc0},
-    'or' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xd0},
-    'xor' : {'build':'doubleRegSingleByteBuilder', 'bytecode':0xe0},
+    'shr' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x80)),
+    'shl' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x84)),
 
-    'addi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x50},
-    'subi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x54},
-    'andi' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x58},
-    'ori' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x5c},
-    'xori' : {'build':'singleRegDoubleByteBuilder', 'bytecode':0x44},
+    'add' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0xa0)),
+    'sub' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0xb0)),
+    'and' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0xc0)),
+    'or' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0xd0)),
+    'xor' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0xe0)),
 
 
-    'djnz' : {'build':'singleRegTripleByteBuilder', 'bytecode':0x60},
-    'jpz' : {'build':'threeByteBuilder', 'bytecode':0x64},
-    'jpnz' : {'build':'threeByteBuilder', 'bytecode':0x65},
-    'jpc' : {'build':'threeByteBuilder', 'bytecode':0x66},
-    'jpnc' : {'build':'threeByteBuilder', 'bytecode':0x67},
+    'addi' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x50)),
+    'subi' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x54)),
+    'andi' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x58)),
+    'ori' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x5c)),
+    'xori' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x44)),
 
-    'jps' : {'build':'threeByteBuilder', 'bytecode':0x68},
-    'jpns' : {'build':'threeByteBuilder', 'bytecode':0x69},
-    'jpo' : {'build':'threeByteBuilder', 'bytecode':0x6a},
-    'jpno' : {'build':'threeByteBuilder', 'bytecode':0x6b},
-    'jmp' : {'build':'threeByteBuilder', 'bytecode':0x6c},
+    'djnz' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x60)),
 
-    'call' : {'build':'threeByteBuilder', 'bytecode':0x6e},
-    'ret' : {'build':'singleByteBuilder','bytecode':0x6f},
+    'jpz' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x64)),
+    'jpnz' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x65)),
 
-    'clc' : {'build':'singleByteBuilder','bytecode':0x01},
-    'setc' : {'build':'singleByteBuilder','bytecode':0x02},
+    'jpc' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x66)),
+    'jpnc' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x67)),
 
-    'nop' : {'build':'singleByteBuilder','bytecode':0x00},
-    'exx' : {'build':'singleByteBuilder','bytecode':0x25},
-    'hlt' : {'build':'singleByteBuilder','bytecode':0xff},
+    'jps' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x68)),
+    'jpns' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x69)),
 
+    'jpo' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x6a)),
+    'jpno' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x6b)),
 
-    'org' : {'build':'nullBuilder'},
-    'label' : {'build':'nullBuilder'},
-    'db' : {'build':'dataBuilder','size':1},
-    'dw' : {'build':'dataBuilder','size':2},
-    'ds' : {'build':'dataBuilder','size':-1},
-    'dt' : {'build':'stringBuilder','size':-1},
-    'end' : {'build':'nullBuilder'},
+    'jmp' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x6c)),
+    'call' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x6e)),
+
+    'ret' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x6f)),
+
+    'clc' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x01)),
+    'setc' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x02)),
+    'nop' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x00)),
+    'exx' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x25)),
+    'hlt' : SingleByteCodeBuilder(SimpleByteCodeResolver(0xff)),
+
+    'org' : NullByteCodeBuilder(),
+    'symbol' : NullByteCodeBuilder(),
+    'comment' : NullByteCodeBuilder(),
+
+    'db' : DataByteCodeBuilder(),
+    'dw' : DataByteCodeBuilder(),
+    'ds' : ReserveSpaceByteCodeBuilder(),
+    'dt' : DataByteCodeBuilder(),
+
+    'end' : NullByteCodeBuilder(),
 }
+
+
+@dataclass
+class AssemblerOperation:
+    operation : str = None
+    pc : int = None
+    size : int = None
+    data : str = None
+    reg : int = None
+    regr : int = None
+
 
 class Builder:
     def __init__(self,symtable):
@@ -98,559 +311,482 @@ class Builder:
             print("**WARNING** "+str,nm)
             self.cachewarning.add(nm)
 
-    def opCodeBuilder(self, op):
-
-        nm = op['op']
+    def opCodeBuilder(self, op: AssemblerOperation) -> [int]:
+        nm = op.operation
         if (nm in codeBuilder):
-            builderfnc = codeBuilder[nm]['build']
             try:
-                return getattr(self,builderfnc)(op,codeBuilder[nm])
+                builder = codeBuilder[nm]
+                so = op
+                binarray = builder.build_bytecode(so)
+                return binarray
             except KeyError as e:
-                self.warning(f"FAILED TO FIND INFO FOR OPCODE {nm}: {e}",nm)
-                return  self.initByteArray(op)
-            except AttributeError as e:
-                self.warning(f"FAILED TO FIND BUILDER FOR OPCODE {nm} {e}",nm)
-                return  self.initByteArray(op)
-        self.warning("BUILDER NOT FOUND FOR ",nm)
-        return  self.initByteArray(op)
-
-    def stringBuilder(self, op, buildinfo):
-        self.info("stringbuilder",op)
-        bincode = [ord(_x) for _x in list(op['data'])]
-        bincode.append(0)
-        #assert(len(bincode) == op['size'],"See a code doctor - mismatch in size of data element")
-        return bincode
-
-    def dataBuilder(self, op, buildinfo):
-        self.info("databuilder",op)
-        bincode = self.initByteArray(op)
-        nm = op['op']
-        if (nm == 'db'):
-            bincode[0] = op['data'] & 0xff
-        if (nm == 'dw'):
-            bincode[0] = op['data'] & 0xff
-            bincode[1] = op['data']>>8 & 0xff
-        return bincode
-
-    def singleByteBuilder(self, op, buildinfo):
-        self.info("singleByteBuilder",op)
-        bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode']
-        return bincode
-
-    def singleRegSingleByteBuilder(self, op, buildinfo):
-        self.info("singleRegSingleByteBuilder",op)
-        bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode'] | op['reg']
-        return bincode
-
-
-    def singleRegDoubleByteBuilder(self, op, buildinfo):
-        self.info("singleRegDoubleByteBuilder",op)
-        bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode'] | op['reg']
-        bincode[1] = op['data']
-        return bincode
-
-
-    def singleRegTripleByteBuilder(self, op, buildinfo):
-        self.info("singleRegTripleByteBuilder",op)
-        bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode'] | op['reg']
-        # check if data is a 'symbol' - look up if needed
-        dValue = op['data'] if isinstance(op['data'],int) else self.symtable[op['data']]
-
-        bincode[1] = (dValue) & 0xff
-        bincode[2] = (dValue>>8) & 0xff
-        #print("singleRegTripleByteBuilder",op,bincode)
-        return bincode
-
-
-    def doubleRegSingleByteBuilder(self, op, buildinfo):
-        self.info("doubleRegSingleByteBuilder",op)
-        bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode'] | (op['reg']<<2) | (op['regr']<<0)
-        #print(f"{bincode[0]:02x}")
-        return bincode
-
-
-#   This probably needs to be rewritten - it's here just to handle
-#   movwi sp,_16bitaddress instruction
-    def threeByteBuilder(self, op, buildinfo):
-        self.info("threeByteBuilder",op)
-
-        bincode = self.initByteArray(op)
-        bincode[0] = buildinfo['bytecode']
-
-        dValue = op['data'] if isinstance(op['data'],int) else self.symtable[op['data']]
-
-        bincode[1] = (dValue) & 0xff
-        bincode[2] = (dValue>>8) & 0xff
-
-        #print("threeByteBuilder",op,bincode)
-        return bincode
-
-
-    def nullBuilder(self, op, buildinfo):
-        return [0] * 0
-
-    def initByteArray(self, op):
-        return [0] *  op['size']
+                print(f"SymbolTable Error {e}")
+                return []
+        else:
+            print("Can not find opCode builder for ",op)
+            return []
 
 
 class ParseError(Exception):
-    def __init__(self, pos, msg, *args):
-        self.pos = pos
-        self.msg = msg
-        self.args = args
+        def __init__(self,msg):
+            self.msg = msg
+
+        def __str__(self):
+            return f"**ParseError**: <{self.msg}>"
+
+class ParserDefinitionError(Exception):
+        def __init__(self,msg):
+            self.msg = msg
+
+        def __str__(self):
+            return f"**ParserDefinitionError**: {self.msg}"
+
+class ParserException(Exception):
+        def __init__(self,msg):
+            self.msg = msg
+
+        def __str__(self):
+            return f"**ParserException**: {self.msg}"
+
+class BaseParser(ABC):
+
+    def __init__(self):
+        self._cache = dict()
 
     def __str__(self):
-        return '%s at position %s' % (self.msg % self.args, self.pos)
+        return f"<{self.text}> pos:{self.pos} out of {self.len} current <{self.text[self.pos:]}>"
 
-class Parser:
-    def __init__(self):
-        self.cache = {}
-
-    def parse(self, text):
+    def init(self,text) -> None:
         self.text = text
-        self.pos = -1
-        self.len = len(text) - 1
-        if (self.len > 0):
-            rv = self.start()
-            self.eat_comment()
-            self.assert_end()
-            return rv
-        return None
+        self.pos = 0
+        self.len = len(text)
 
-    def assert_end(self):
-        if self.pos < self.len:
-            raise ParseError(
-                self.pos + 1,
-                'Expected end of string but got %s',
-                self.text[self.pos + 1]
-            )
-    def eat_comment(self):
-       if ( self.pos < self.len and self.text[self.pos + 1] in ";#"):
-            self.pos = self.len
+    @abstractmethod
+    def start(self) -> None:
+        raise ParserDefinitionError("Abstract Function 'start' needs to overrriden")
 
+    @abstractmethod
+    def parse(self) -> None:
+        raise ParserDefinitionError("Abstract Function 'parse' needs to overrriden")
 
-    def eat_whitespace(self):
-        while self.pos < self.len and self.text[self.pos + 1] in " \f\v\r\t\n":
+    def current(self) -> str:
+        return self.text[self.pos:]
+
+    def gobblewhitespace(self) -> None:
+        while self.pos < self.len and self.text[self.pos] in WSPACE:
             self.pos += 1
 
-    def split_char_ranges(self, chars):
-        try:
-            return self.cache[chars]
-        except KeyError:
-            pass
+    def eof(self) -> bool:
+        return self.pos == self.len
 
-        rv = []
-        index = 0
-        length = len(chars)
-
-        while index < length:
-            if index + 2 < length and chars[index + 1] == '-':
-                if chars[index] >= chars[index + 2]:
-                    raise ValueError('Bad character range')
-
-                rv.append(chars[index:index + 3])
-                index += 3
-            else:
-                rv.append(chars[index])
-                index += 1
-
-        self.cache[chars] = rv
-        return rv
-
-    def char(self, chars=None, casesense=True):
-        if self.pos >= self.len:
-            raise ParseError(
-                self.pos + 1,
-                'Expected %s but got end of string',
-                'character' if chars is None else '[%s]' % chars
-            )
-
-        next_char = self.text[self.pos + 1]
-        if chars == None:
+    def next(self) -> str:
+        chars = []
+        self.gobblewhitespace()
+        while self.pos < self.len and self.text[self.pos] not in WSPACE :
+            chars.append(self.text[self.pos])
             self.pos += 1
-            return next_char
-
-        for char_range in self.split_char_ranges(chars):
-            if len(char_range) == 1:
-                if (next_char == char_range if casesense else next_char.lower() == char_range.lower()):
-                    self.pos += 1
-                    return next_char
-            # Range checks ignore casesense option
-            elif char_range[0] <= next_char <= char_range[2]:
-                self.pos += 1
-                return next_char
-
-        raise ParseError(
-            self.pos + 1,
-            'Expected %s but got %s',
-            'character' if chars is None else '[%s]' % chars,
-            next_char
-        )
-
-    def keyword(self, *keywords):
-
-        self.eat_whitespace()
-        if self.pos >= self.len:
-            raise ParseError(
-                self.pos + 1,
-                'Expected %s but got end of string',
-                ','.join(keywords)
-            )
-
-        for keyword in keywords:
-            low = self.pos + 1
-            high = low + len(keyword)
-            # Currently, keywords are case insensitive
-            if self.text[low:high].lower() == keyword.lower():
-                self.pos += len(keyword)
-                self.eat_whitespace()
-                return keyword
-
-        raise ParseError(
-            self.pos + 1,
-            'Expected %s but got %s',
-            ','.join(keywords),
-            self.text[self.pos + 1],
-        )
-
-    def match(self, *rules):
-        self.eat_whitespace()
-        last_error_pos = -1
-        last_exception = None
-        last_error_rules = []
-
-        for rule in rules:
-            initial_pos = self.pos
-            try:
-                rv = getattr(self, rule)()
-                self.eat_whitespace()
-                return rv
-            except ParseError as e:
-                self.pos = initial_pos
-
-                if e.pos > last_error_pos:
-                    last_exception = e
-                    last_error_pos = e.pos
-                    last_error_rules.clear()
-                    last_error_rules.append(rule)
-                elif e.pos == last_error_pos:
-                    last_error_rules.append(rule)
-
-        if len(last_error_rules) == 1:
-            raise last_exception
-        else:
-            raise ParseError(
-                last_error_pos,
-                'Expected %s but got %s',
-                ','.join(last_error_rules),
-                self.text[last_error_pos]
-            )
-
-    def maybe_char(self, chars=None, casesense=True):
-        try:
-            return self.char(chars, casesense)
-        except ParseError:
-            return None
-
-    def maybe_match(self, *rules):
-        try:
-            return self.match(*rules)
-        except ParseError:
-            return None
-
-    def maybe_keyword(self, *keywords):
-        try:
-            return self.keyword(*keywords)
-        except ParseError:
-            return None
-
-class AssemblerParser(Parser):
-
-    def start(self):
-        return self.assemble()
-
-    def assemble(self):
-        #rv = self.match('instruction','label','metaop')
-        #print("assemble",self.text)
-        rv = self.complexins()
-        return rv
-
-    def complexins(self):
-        rv = []
-        meta = self.maybe_match('metaop')
-        if (meta is not None):
-            rv.append(meta)
-#            return rv
-
-        lbl = self.maybe_match('label')
-        if (lbl is not None):
-            rv.append(lbl)
-
-        # Clearly some issue here!
-        try:
-            ins = self.maybe_match('instruction')
-            if (ins is not None):
-                rv.append(ins)
-        except Exception as e:
-            #print(e,self.text,line)
-            pass
-
-        return rv
-
-
-    def instruction(self):
-        return self.match('alu','movwi','movi','mov','ld','call','singlebyte','singleop','out','pushpop','djnz')
-
-    def singleop(self):
-        op = self.keyword('exx','pushall','popall','ret','nop','hlt','clc','setc')
-        if (op is not None):
-            return {'op': op, 'size':1}
-        return None
-
-    def out(self):
-        op = self.keyword('out','shl','shr')
-        if (op is not None):
-            reg = self.match('registers')
-            return {'op': op, 'reg':reg, 'size':1}
-        return None
-
-    def pushpop(self):
-        op = self.keyword('pop','push')
-        if (op is not None):
-            reg = self.match('registers')
-            return {'op': op+'r'+str(reg), 'reg':reg, 'size':1}
-        return None
-
-    def singlebyte(self):
-        op = self.keyword('inc','dec')
-        if (op is not None):
-            reg = self.match('registers','registers16')
-            return {'op': op if isinstance(reg,int) else op+reg, 'reg':reg, 'size':1}
-        return None
-
-
-    def djnz(self):
-        op = self.keyword('djnz')
-        if (op is not None):
-            reg = self.match('registers')
-            self.char(',')
-            data = self.match('number','labelstr')
-            return {'op': op, 'reg': reg,'data':data, 'size':3}
-        return None
-
-    def call(self):
-        op = self.keyword('call','jmp','jpz','jpnz','jpc','jpnc','jps','jpns','jpo','jpno')
-        if (op is not None):
-            data = self.match('number','labelstr')
-            return {'op': op, 'data':data, 'size':3}
-        return None
-
-    def ld(self):
-        op = self.keyword('ld','st')
-        if (op is not None):
-            regl = self.match('registers')
-            self.char(',')
-            data = self.match('number','labelstr')
-            return {'op': op, 'reg': regl, 'data':data, 'size':3}
-        return None
-
-    def movwi(self):
-        op = self.keyword('movwi',)
-        if (op is not None):
-            regl = self.match('registers16')
-            self.char(',')
-            data = self.match('number','labelstr')
-            return {'op': op, 'reg': regl, 'data':data, 'size':3}
-        return None
-
-    def alu(self):
-
-        logic = self.maybe_keyword('andi','ori','xori','addi','subi')
-        if (logic is not None):
-            regl = self.match('registers')
-            self.char(',')
-            data = self.match('number')
-            return {'op': logic, 'reg': regl, 'data':data, 'size':2}
-
-        logic = self.keyword('and','or','xor','add','sub')
-        if (logic is not None):
-            regl = self.match('registers')
-            self.char(',')
-            regr = self.match('registers')
-            return {'op': logic, 'reg': regl, 'regr':regr, 'size':1}
-
-
-        return None
-
-
-    def  mov(self):
-        if (self.keyword('mov') is not None):
-                regl = self.match('registers')
-                self.char(',')
-                regr = self.match('registers')
-                return {'op': 'mov', 'reg':regl, 'regr': regr,'size':1}
-        return None
-
-    def registers(self):
-            self.char('r',False)
-            return int(self.char('0-3'))
-
-    def registers16(self):
-            return self.keyword('sp')
-
-    def  movi(self):
-        if (self.keyword('movi') is not None):
-                regl = self.match('registers')
-                self.char(',')
-                data = self.match('number')
-                return {'op':'movi','reg':regl, 'data': data,'size':2}
-        return None
-
-    def labelstr(self):
-        chars=[]
-        chars.append(self.char('A-Za-z0-9_'))
-        while True:
-            char = self.maybe_char('A-Za-z0-9_')
-            if char is None:
-                    break
-            chars.append(char)
-
         return ''.join(chars)
 
-    def label(self):
-        self.char(':')
-        return {'op':'label', 'data': self.labelstr(), 'size' : 0}
+    def match(self, wantedtok: str) -> str:
+        lentoken = len(wantedtok)
+        nxt = self.text[self.pos:(self.pos + lentoken)]
+        if (nxt != wantedtok):
+            raise ParseError('COULD NOT MATCH')
+        self.pos = self.pos + lentoken
+        return nxt
 
 
+    def wanted(self, wantedtok: str) -> str:
+        try:
+            return self.match(wantedtok)
+        except ParseError as e:
+            return None
 
-    def metaop(self):
-        op = self.maybe_char('.')
-        if (op is not None):
-            return self.match('definedata','origin','end')
-        return None
+    def trymatch(self,*wantedtoks) -> str:
+        self.gobblewhitespace()
+        z = list(wantedtoks)
+        z.sort(key = lambda e: len(e),reverse=True)
+        #print(z)
 
-    def number(self):
-        rv = self.match('binarynumber','hexnumber','octalnumber','decnumber')
-        return rv
+        for tok in z:
+            caughttok = self.wanted(tok)
+            if (caughttok != None):
+                self.gobblewhitespace()
+                return caughttok
 
-
-    def definedata(self):
-        op = self.match('db','dw','ds','dt')
-        if (op is not None):
-            if (op == 'dt'):
-                v = self.char("'")
-                chars = []
-                while True:
-                    char = self.maybe_char('0-9A-Za-z_@(). ')
-                    if char is None:
-                        break
-                    chars.append(char)
-
-                v = self.char("'")
-                txt = ''.join(chars)
-                return {'op':op,'data': txt,'size': len(chars) + 1}
-            else:
-                v = self.match('number')
-                return {'op':op,'data': v, 'size': 1 if op == 'db' else 2 if op == 'dw' else v}
-        return None
-
-    def ds(self):
-        return self.keyword('ds')
-
-    def db(self):
-        return self.keyword('db')
-
-    def dw(self):
-        return self.keyword('dw')
-
-    def dt(self):
-        return self.keyword('dt')
-
-    def origin(self):
-        op = self.keyword('org')
-        if (op is not None):
-            return {'op':'org', 'data':self.match('number'), 'size':0}
         return None
 
 
-    def end(self):
-        op = self.keyword('end')
-        if (op is not None):
-            return {'op':'end', 'size':0}
-        return None
+    def produce_chars_pattern(self, pattern: str) -> str:
+
+        wanted = set()
+
+        # First scan for '//' and add the next character onto 'wanted' removing that character and '//'
+        newarraypattern = []
+
+        splt = pattern.split('//')
+        newarraypattern += splt[0]
+
+        for index,s in enumerate(splt):
+            if (index > 0):
+                if (len(s) > 0):
+                    wanted.add(s[0])  # add delimited characters to our required set
+                    newarraypattern += s[1:] # start to build up a pattern string without delimeters and their associated character
+
+        #print("Completed",newarraypattern)
+
+    #    for grp in pattern.split()
+        newpattern = ''.join(newarraypattern)
+
+        p = newpattern.split('-')
+
+        for i in range(len(p) - 1):
+
+            left = p[i][-1]
+            right = p[i + 1][0]
+
+            assert ord(left) < ord(right),f"Pattern order Problem with {left}-{right}"
+
+            for a in range(ord(left),ord(right)+1):
+                    wanted.add(chr(a))
+
+
+        remaining = p[-1][1 if len(p) > 1 else 0:]
+
+        for ch in remaining:
+            wanted.add(ch)
+
+        return ''.join(list(wanted))
+
+    def peek_chars(self, pattern: str) -> str:
+
+        try:
+            return self.chars(pattern)
+        except ParserException as e:
+            # We have not found a char match - so go back and check other rules/token matches
+            return None
+        except IndexError as e:
+            # Arrived here from 'chars' function - 'ch = self.text[self.pos]'
+            # -  exhausted parsing our current line of text
+            return None
+
+    def chars(self, pattern: str, bump: bool = True) -> str:
+
+        if (pattern not in self._cache):
+            self._cache[pattern] = self.produce_chars_pattern(pattern)
+        ch = self.text[self.pos]
+        if ch in self._cache[pattern]:
+            if (bump):
+                self.pos += 1
+            return ch
+        raise ParserException(f"Parser.chars Expected {pattern} but got <{ch}>")
 
 
 
-    def octalnumber(self):
-        chars = []
-        chars.append(self.char('0'))
-        chars.append(self.char('o'))
-        chars.append(self.char('0-7'))
+    def tryrules(self,*rules):
+        self.gobblewhitespace()
 
-        while True:
-            char = self.maybe_char('0-7')
-            if char is None:
+        for rule in rules:
+            try:
+                rv = getattr(self, rule)()
+                if (rv is not None):
+                    return rv
+            except ParserException as e:
+                pass
+
+
+
+
+class AssemblerParser(BaseParser):
+    def __init__(self, symbolTable):
+        super().__init__()
+        self.symbolTable = symbolTable  #@HERE
+
+
+    def parse(self, text):
+
+        super().init(text)
+        self.start()
+        allops = []
+
+        while (self.pos < self.len):
+
+            rv = self.tryrules('comment','symbol','directive','instruction')
+            if (rv is None):
+                raise ParserException(f"Can not parse {self.text}")
+            allops.append(rv)
+
+        return allops
+
+
+    def start(self):
+        # Set up anything else to do with parsing our syntax -
+        # We don't need to do anything here - as code generation is very simple.
+        # Symbols are handled by walking through our code operations - twice
+        pass
+
+    # Top rules
+
+    def comment(self) -> AssemblerOperation:
+        """If we spot a comment TOKEN - then save text up to EOL and finish off parsing the line"""
+        if self.peek_chars(';#'):
+            data = self.text[self.pos:]
+            self.pos = self.len + 1
+            return AssemblerOperation(operation = 'comment',data = data , size = 0)
+
+
+    def symbol(self) -> AssemblerOperation:
+        if (self.peek_chars(":")):
+            str = self.symbolstr()
+            return AssemblerOperation(operation = 'symbol', data = str,  size = 0)
+
+    def directive(self) -> AssemblerOperation:
+        if (self.peek_chars(".")):
+            return self.tryrules('org','end','db','dw','ds','dt')
+
+
+
+    def instruction(self) -> AssemblerOperation:
+        return self.tryrules('movwi','intermediate8','reg8','ld',\
+                            'call','singlebyte','singleop','out','pushpop','djnz')
+
+
+    # Directive operations
+
+    def org(self) -> AssemblerOperation:
+        if (self.trymatch('org')):
+            return AssemblerOperation(operation ='org', data = self.number16bit(), size = 0) #@HERE
+
+    def end(self) -> AssemblerOperation:
+        if (self.trymatch('end')):
+            return AssemblerOperation(operation ='end', size = 0)
+
+    def dw(self) -> AssemblerOperation:
+        if (self.trymatch('dw')):
+            return AssemblerOperation(operation = 'dw', data = self.number16bit(), size = 2) #@HERE
+
+    def db(self) -> AssemblerOperation:
+        if (self.trymatch('db')):
+            return AssemblerOperation(operation = 'db', data = self.number8bit(), size = 1) #@HERE
+
+    def ds(self) -> AssemblerOperation:
+        if (self.trymatch('ds')):
+            return AssemblerOperation(operation = 'ds', data =  0, size = self.number16bit().getRawData()) #@HERE
+
+    def dt(self) -> AssemblerOperation:
+        if (self.trymatch('dt')):
+            strmatch = 'A-Za-z0-9_@().!//-+# '
+            astr = []
+            self.chars("'")
+
+            ch = self.chars(strmatch)
+            astr.append(ch)
+
+            while True:
+                ch = self.peek_chars(strmatch)
+                if (ch is None):
                     break
-            chars.append(char)
+                astr.append(ch)
 
-        return int(''.join(chars),8)
+            self.chars("'")
+            fstr = ''.join(astr)  #@HERE
+            return AssemblerOperation(operation = 'dt', data = StringData(fstr), size = len(fstr) + 1) #@HERE
 
-    def binarynumber(self):
-        chars = []
 
-        chars.append(self.char('0'))
-        chars.append(self.char('b'))
-        chars.append(self.char('0-1'))
+    # Instruction operations
+
+    def movwi(self) -> AssemblerOperation:
+        op = self.trymatch('movwi')
+        if (op is not None):
+            regl = self.tryrules('registers16')
+            self.chars(',')
+            data = self.tryrules('number16bit','symbolstr') #@HERE
+            return AssemblerOperation(operation = op, reg = regl, data = data, size = 3)
+        return None
+
+
+    def intermediate8(self) -> AssemblerOperation:
+        m = self.trymatch('movi','addi','subi','andi','ori','xori')
+        if (m):
+            return self.intermediate(m)
+        return None
+
+    def reg8(self) -> AssemblerOperation:
+        m = self.trymatch('mov','add','sub','and','or','xor')
+        if (m):
+            return self.regreginstruction(m)
+        return None
+
+    def ld(self) -> AssemblerOperation:
+        op = self.trymatch('ld','st')
+        if (op is not None):
+            regl = self.tryrules('registers')
+            self.chars(',')
+            data = self.tryrules('number16bit','symbolstr') #@HERE
+            return AssemblerOperation(operation = op, reg =  regl, data = data, size = 3)
+        return None
+
+    def call(self) -> AssemblerOperation:
+        op = self.trymatch('call','jmp','jpz','jpnz','jpc',\
+                            'jpnc','jps','jpns','jpo','jpno')
+        if (op is not None):
+            data = self.tryrules('number16bit','symbolstr') #@HERE
+            return AssemblerOperation(operation = op, data = data, size = 3)
+        return None
+
+
+    def singlebyte(self) -> AssemblerOperation:
+        op = self.trymatch('inc','dec')
+        if (op is not None):
+            reg = self.tryrules('registers','registers16')
+            #SMELLY
+            return AssemblerOperation(operation = op if isinstance(reg,int) else op+reg, reg = reg, size = 1)
+        return None
+
+    def singleop(self) -> AssemblerOperation:
+        op = self.trymatch('exx','pushall','popall','ret',\
+                            'nop','hlt','clc','setc')
+        if (op is not None):
+            return AssemblerOperation (operation = op, size = 1)
+        return None
+
+    def out(self) -> AssemblerOperation:
+        op = self.trymatch('out','shl','shr')
+        if (op is not None):
+            reg = self.tryrules('registers')
+            return AssemblerOperation(operation = op, reg = reg, size = 1)
+        return None
+
+    def pushpop(self) -> AssemblerOperation:
+        op = self.trymatch('pop','push')
+        if (op is not None):
+            reg = self.tryrules('registers')
+            return AssemblerOperation(operation = op+'r'+str(reg), reg = reg,  size = 1)
+        return None
+
+
+
+    def djnz(self) -> AssemblerOperation:
+        op = self.trymatch('djnz')
+        if (op is not None):
+            reg = self.registers()
+            self.chars(',')
+            data = self.tryrules('number16bit','symbolstr')
+            return AssemblerOperation(operation =  op, reg = reg, data = data, size = 3)
+        return None
+
+
+    # Support functions
+    def intermediate(self, opcode: str) -> AssemblerOperation:
+        rx = self.registers()
+        self.chars(',')
+        value = self.number8bit()
+        return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
+
+    def regreginstruction(self, opcode: str) -> AssemblerOperation:
+        rx = self.registers()
+        self.chars(',')
+        ry = self.registers()
+        return AssemblerOperation(operation= opcode, reg = rx, regr = ry, size = 1)
+
+
+    def registers16(self) -> str:
+            return self.trymatch('sp','r0','r2') #@HERE
+
+    def registers(self) -> int:
+        r = self.chars('rR')
+        reg = self.chars('0-3')
+        return int(reg)
+
+    def symbolstr(self) -> str:
+        symbol = []
+        ch = self.chars('A-Za-z0-9_')
+        symbol.append(ch)
 
         while True:
-            char = self.maybe_char('0-1')
-            if char is None:
-                    break
-            chars.append(char)
-
-        return int(''.join(chars),2)
-
-
-
-    def hexnumber(self):
-        chars = []
-        chars.append(self.char('0'))
-        chars.append(self.char('x'))
-        chars.append(self.char('0-9A-Fa-f'))
-
-        while True:
-            char = self.maybe_char('0-9A-Fa-f')
-            if char is None:
-                    break
-            chars.append(char)
-
-
-        return int(''.join(chars),16)
-
-
-    def decnumber(self):
-        chars = []
-        sign = self.maybe_keyword('+', '-')
-        if sign is not None:
-            chars.append(sign)
-
-        chars.append(self.char('0-9'))
-
-        while True:
-            char = self.maybe_char('0-9')
-            if char is None:
+            ch = self.peek_chars('A-Za-z0-9_')
+            if (ch is None):
                 break
+            symbol.append(ch)
 
-            chars.append(char)
+        return SymbolWordData(''.join(symbol),self.symbolTable) #@HERE
+
+    #@HERE
+    def number16bit(self) -> int:
+        num = self.tryrules('binarynumber','hexnumber','octalnumber','decnumber')
+        if (num is not None):  #@HERE
+            return WordData(num)
+
+    #@HERE
+    def number8bit(self) -> int:
+        num = self.tryrules('binarynumber','hexnumber','octalnumber','decnumber')
+        if (num is not None):  #@HERE
+            return ByteData(num)
 
 
-        rv = int(''.join(chars))
-        return rv
+    def octalnumber(self) -> int:
+        chars = []
+
+        if (self.trymatch('0o')):
+            chars += '0o'
+            chars.append(self.chars('0-7'))
+
+            while True:
+                char = self.peek_chars('0-7')
+                if char is None:
+                    break
+                chars.append(char)
+            return int(''.join(chars),8)
+
+
+    def binarynumber(self) -> int:
+        chars = []
+        #v = self.trymatch('0b')
+        if (self.trymatch('0b')):
+            chars += '0b'
+            chars.append(self.chars('0-1'))
+            while True:
+                char = self.peek_chars('0-1')
+                if char is None:
+                    break
+                chars.append(char)
+            return int(''.join(chars),2)
+
+
+    def hexnumber(self) -> int:
+        chars = []
+
+        if (self.trymatch('0x')):
+            chars += '0x'
+            chars.append(self.chars('0-9A-Fa-f'))
+
+            while True:
+                char = self.peek_chars('0-9A-Fa-f')
+                if char is None:
+                    break
+                chars.append(char)
+            return int(''.join(chars),16)
+
+
+
+    def decnumber(self) -> int:
+
+        chars = []
+        sgn = self.peek_chars('+//-')
+        if sgn is not None:
+            chars.append(sgn)
+
+        chars.append(self.chars('0-9'))
+
+        while True:
+            ch = self.peek_chars('0-9')
+            if ch is None:
+                break
+            chars.append(ch)
+
+        return int(''.join(chars))
+
+
 
 
 if __name__ == '__main__':
@@ -663,33 +799,7 @@ if __name__ == '__main__':
         def __str__(self):
             return f'{self.msg} at line {self.pos}'
 
-
-
-    def produceHexFile(binName,binarray):
-        return produceRawHexFile(binName,binarray)
-
-    def produceRawHexFile(binName,ops):
-
-        file = open(binName, "w+")
-        file.write("v2.0 raw\n")
-        totalsize = 0
-        bcnt = 0
-
-        for op in ops:
-            if op['size'] > 0:
-                binarray = builder.build(op)
-                totalsize += len(binarray)
-                for index,bytecode in enumerate(binarray):
-                    file.write(f"{bytecode:02x} ")
-                    if (bcnt % 8 == 7):
-                        file.write("\n")
-                    bcnt += 1
-
-        file.write("\n")
-        file.close()
-        return totalsize
-
-    def produceBinFile(binName,ops):
+    def produceBinFile(binName: str, ops: [AssemblerOperation]) -> int:
         combinarray = []
 
         file = open(binName, "wb")
@@ -703,62 +813,104 @@ if __name__ == '__main__':
         return len(combinarray)
 
 
-    def produceV3HexFile(binName,ops):
+
+    def produceV2HexFile(binName: str, ops) -> int:
 
         file = open(binName, "w+")
-        file.write("v3.0 hex words addressed\n")
-        address = 0
-        lastaddr = -1
+        file.write("v2.0 raw\n")
         totalsize = 0
+        bcnt = 0
 
         for op in ops:
-            address = op['pc']
-            binarray = builder.build(op)
-            sz = len(binarray)
-            totalsize += sz
-
-            if (sz > 0):
-                diff = (address -lastaddr)
-                if (diff > 0):
-                    file.write(f"\n{address:04x}: ")
-                for index,byteopcode in enumerate(binarray):
-                    file.write(f"{byteopcode:02x} ")
-
-                lastaddr = op['pc'] + sz
-
-
-
-                #if (index % 8 == 7):
-                #    file.write("\n")
+            if op.size > 0:
+                binarray = builder.build(op)
+                totalsize += len(binarray)
+                for index, bytecode in enumerate(binarray):
+                    file.write(f"{bytecode:02x} ")
+                    if (bcnt % 8 == 7):
+                        file.write("\n")
+                    bcnt += 1
 
         file.write("\n")
         file.close()
         return totalsize
 
-    def processLabels(ops,labels):
-        if (op['op'] == 'label'):
-            labelnm = op['data']
-            addr = op['pc']
+
+    def produceV3HexFile(binName: str, ops, addrOffset: int  = 0x8000) -> int:
+
+        file = open(binName, "w+")
+        file.write("v3.0 hex words addressed\n")
+
+        address = 0
+        lastaddr = -1
+        totalsize = 0
+        bytecount = 0
+        lastaddrfromORG = -1
+        bytecountfromORG = 0
+
+        for opindex,op in enumerate(ops):
+            binarray = builder.build(op)
+            sz = len(binarray)
+            totalsize += sz
+
+            address = op.pc
+
+            if (address != lastaddrfromORG) and \
+                (op.operation == 'org' or (lastaddrfromORG == -1 and sz > 0)):
+
+                bytecountfromORG = 0
+                lastaddrfromORG = address
+                if (addrOffset > address):
+                    print("***WARNING*** address mismatch on assembling. Please check ORG directives - if assembling for RAM. Ignoring base address offset..")
+                file.write(f"\n{ address - (addrOffset if addrOffset <= address else 0):04x}: ")
+
+            if (sz > 0):
+                for index,byteopcode in enumerate(binarray):
+                    if (bytecountfromORG % 32 == 31):
+                        file.write(f"\n{(address  + index - addrOffset if addrOffset <= address else 0):04x}: ")
+                    file.write(f"{byteopcode:02x} ")
+                    bytecountfromORG += 1
+
+
+        file.write("\n")
+        file.close()
+        return totalsize
+
+
+    def produceDummyOuput(ops) -> int:
+        totalsize = 0
+        for opindex,op in enumerate(ops):
+            binarray = builder.build(op)
+            sz = len(binarray)
+            totalsize += sz
+        return totalsize
+
+
+    def processLabels(ops: AssemblerOperation, labels: dict) -> None:
+        if (ops.operation == 'symbol'):
+            labelnm = ops.data.getRawData() #@HERE
+            addr = ops.pc
             if (labelnm in labels):
-                raise SyntaxError('Replicated label',op['line'])
+                raise SyntaxError(f"Replicated label '{labelnm}'",ops.line)
             labels[labelnm] = addr
 
-
-    def info(str,end=None):
+    def info(str,end=None) -> None:
         print(str,end='')
 
 
-    def buildHelpText():
-        return " Example: './assembler.py example.asm [options -v (verbose), -d (debug), -q (quiet), -s (symbol table)] -3 [default] addressed hex output -1 raw hex output -b binary output'"
+    def buildHelpText() -> str:
+        return "\n\nExample: ./assembler.py example.asm [options]\n\n -v verbose\n -d debug\n -q quiet\n -s symbol table\n -3 [default] V3 addressed hex output\n -2 raw hex output\n -b binary output\n -n no output\n -r ROM address offset on V3 Hex output\n"
 
 
-    def handleCommandArgs(argv):
+    def handleCommandArgs(argv: [str]) -> ([str],str,str):
+        """Command line options have NO parameters so just record them"""
+
         options=set()
         file = None
 
         for index,arg in enumerate(argv):
             if (arg.startswith('-') and len(arg) > 1):
-                options.add(arg[1])
+                options.add(arg[1:])
             else:
                 if (index > 0):
                     file = arg
@@ -771,9 +923,7 @@ if __name__ == '__main__':
 
     # ** Main Process Starts here ***
 
-    #print(f"Arguments count: {len(sys.argv)}")
-    #for i, arg in enumerate(sys.argv):
-    #    print(f"Argument {i:>6}: {arg}")
+
     options,sourceFilename,assembler = handleCommandArgs(sys.argv)
 
     try:
@@ -793,26 +943,36 @@ if __name__ == '__main__':
     outTypeRaw = 1
     outTypeAddr = 2
 
-    parser = AssemblerParser()
     pc = 0
     line = 0
     code = []
     labels = {}
     errors = 0
+    parser = AssemblerParser(labels) #@HERE
 
     verbose ='v' in options
     debug = 'd' in options
     quiet = 'q' in options
     symtable = 's' in options
     help = 'h' in options
-    outType  = OutputType.BINARY if 'b' in options else OutputType.RAWHEX if '1' in options else OutputType.ADDRESSEDHEX
+    nooutput = 'n' in options
+    rom = 'r' in options
+
+    outType  = OutputType.BINARY if 'b' in options\
+                else OutputType.RAWHEX if '2' in options\
+                else OutputType.ADDRESSEDHEX
 
     if (help):
         print(buildHelpText())
         sys.exit(0);
 
     if (not quiet):
-        print(f"Trying to assemble '{sourceFilename}' verbose:{verbose}... quiet:{quiet} debug:{debug} symtable:{symtable}\n")
+        print(f"Trying to assemble '{sourceFilename}' \
+ROMMODE:{rom}' \
+verbose:{verbose} \
+quiet:{quiet} \
+debug:{debug} \
+symtable:{symtable}\n")
 
     asm = open(sourceFilename, "r")
     completed = False
@@ -824,16 +984,21 @@ if __name__ == '__main__':
             if len(text) == 0:
                 break
             line = line + 1
-            ops = parser.parse(text.strip())
+            ops = None
+            try:
+                ops = parser.parse(text.strip())
+            except Exception as e:
+                print(f"Assembler **FAILED** on Line {line} {e}")
             # ops is an array of operation instructions - (in the case of 'label' followed by opcode instruction)
             if (ops is not None):
                 for op in ops:
                     if (op is not None):
-                        op['line'] = line
+#                        op['line'] = line
+                        op.line = line
                         if (debug):
                             print(op)
                         code.append(op)
-                        if (op['op'] == 'end'):
+                        if (op.operation == 'end'):
                             completed = True
 
         except KeyboardInterrupt:
@@ -857,10 +1022,10 @@ if __name__ == '__main__':
 
         # Pre-process build a symbol address table
         for op in code:
-            if (op['op'] == 'org'):
-                pc = op['data']
-            op['pc'] = pc
-            pc += op['size']
+            if (op.operation == 'org'):
+                pc = op.data.getRawData()   #@HERE
+            op.pc = pc
+            pc += op.size
             if (verbose):
                 print(op)
             processLabels(op,labels)
@@ -874,8 +1039,6 @@ if __name__ == '__main__':
         builder = Builder(labels)
         binName = sourceFilename.split(".")[0] + (".bin" if outType == OutputType.BINARY else ".hex")
 
-        if (not quiet):
-            print(f"Producing LogiSym bin file '{binName}'")
 
         #size = produceHexFile(binName,code)
         #match optype:
@@ -889,20 +1052,20 @@ if __name__ == '__main__':
         #            print("ADDRESSEDHEX")
         #            break
         #info(f"{outType}")
-        if (outType == OutputType.BINARY):
-            size = produceBinFile(binName, code)
-        elif (outType == OutputType.RAWHEX):
-            size = produceHexFile(binName, code)
-        elif (outType == OutputType.ADDRESSEDHEX):
-            size = produceV3HexFile(binName, code)
+        if (not nooutput):
+            if (not quiet):
+                print(f"Producing LogiSym output file '{binName}'")
+
+            if (outType == OutputType.BINARY):
+                size = produceBinFile(binName, code)
+            elif (outType == OutputType.RAWHEX):
+                size = produceV2HexFile(binName, code)
+            elif (outType == OutputType.ADDRESSEDHEX):
+                size = produceV3HexFile(binName, code, 0 if rom else RAMADDRESS)
+            else:
+                raise Exception('Output type is not defined')
         else:
-            pass
-
-        #OutputType.RAWHEX
-        #OutputType.BINARY
-        #OutputType.ADDRESSEDHEX
-
-
+            size = produceDummyOuput(code)
 
         if (not quiet):
             print(f"\nSize: {size} bytes")
