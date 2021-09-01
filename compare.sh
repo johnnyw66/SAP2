@@ -8,7 +8,7 @@ hexfile=$f.'bin'
 comparefile='compareallops.bin'
 
 rm -f $comparefile
-./newassembler.py $asmfile -q -b
+./ass.py $asmfile -q -b
 cp $hexfile $comparefile
 rm -f $hexfile
 ./assembler.py $asmfile -q -b

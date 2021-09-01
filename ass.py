@@ -35,7 +35,6 @@ from abc import abstractmethod, ABC
 WSPACE = "\f\v\r\t\n "
 RAMADDRESS = 0x8000
 
-# START OF NEW @HERE
 class Data(ABC):
     def __init__(self,data):
         self.data = data
@@ -103,8 +102,7 @@ class StringData(Data):
         super().__init__(data)
 
     def getData(self):
-            pass
-
+        return [ord(_x) for _x in (list(self.getRawData()) + [chr(0)])]
 
 @dataclass
 class SupportOperation:
@@ -159,9 +157,9 @@ class SingleRegByteCodeBuilder(ByteCodeBuilder):
         self.basebyte_resolver = basebyte_resolver
 
     def build_bytecode(self, support: SupportOperation) -> [int]:
-        print(f"SingleRegByteCodeBuilder:build_bytecode Support Data {support}")
         base_code = self.basebyte_resolver.getByteCode(support)
-        return [base_code | (support.reg)] + [] if support.data is None else support.data.getData()
+        return [base_code | (support.reg)] + ([] if support.data is None else support.data.getData())
+
 
 
 class DoubleRegByteCodeBuilder(ByteCodeBuilder):
@@ -169,7 +167,6 @@ class DoubleRegByteCodeBuilder(ByteCodeBuilder):
         self.basebyte_resolver = basebyte_resolver
 
     def build_bytecode(self, support: SupportOperation) -> [int]:
-        print(f"DoubleRegByteCodeBuilder:build_bytecode Support Data {support}")
         base_code = self.basebyte_resolver.getByteCode(support)
         return [base_code | (support.reg<<2) | (support.regr)]
 
@@ -180,7 +177,6 @@ class TripleByteCodeBuilder(ByteCodeBuilder):
         self.basebyte_resolver = basebyte_resolver
 
     def build_bytecode(self, support: SupportOperation) -> [int]:
-        #print(f"build_bytecode")
         base_code = self.basebyte_resolver.getByteCode(support)
         return [base_code]  + support.data.getData()
 
@@ -200,7 +196,6 @@ class ReserveSpaceByteCodeBuilder(ByteCodeBuilder):
     def build_bytecode(self, support: SupportOperation) -> [int]:
         return [0]*support.size
 
-# END OF NEW @HERE
 
 class OutputType(Enum):
     BINARY = auto()
@@ -318,7 +313,6 @@ class Builder:
 
     def opCodeBuilder(self, op: AssemblerOperation) -> [int]:
         nm = op.operation
-        print('******opCodeBuilder******',op)
         if (nm in codeBuilder):
             try:
                 builder = codeBuilder[nm]
@@ -595,8 +589,8 @@ class AssemblerParser(BaseParser):
                 astr.append(ch)
 
             self.chars("'")
-            fstr = StringData(''.join(astr))  #@HERE
-            return AssemblerOperation(operation = 'dt', data = fstr, size = len(fstr) + 1)
+            fstr = ''.join(astr)  #@HERE
+            return AssemblerOperation(operation = 'dt', data = StringData(fstr), size = len(fstr) + 1) #@HERE
 
 
     # Instruction operations
