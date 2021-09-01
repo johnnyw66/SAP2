@@ -1,1 +1,1 @@
-  movwi sp,somewherehere
+  .dt 'ABC'

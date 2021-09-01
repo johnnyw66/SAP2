@@ -179,7 +179,7 @@ class BuildOperation:
 
 codeBuilder2 = {
     'mov' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0x90)),
-    'movwi' : TripleByteCodeBuilder(LookupByteCodeResolver({'sp':0x1d,'r0':0x1f, 'r2':0x1e})),    # set SP/R0R1/R2R3 to address -  instruction
+    'movwi' : TripleByteCodeBuilder(LookupByteCodeResolver({'sp':0x1c,'r0':0x1c, 'r2':0x1c})),    # set SP/R0R1/R2R3 to address -  instruction
 }
 
 codeBuilder = {
@@ -284,7 +284,13 @@ class Builder:
             self.cachewarning.add(nm)
 
     def opCodeBuilder(self, op: AssemblerOperation) -> [int]:
-        pass
+        nm = op.operation
+        print("opCodeBuilder!!!!")
+        if (nm in codeBuilder2):
+            builder = codeBuilder2[nm]
+            so = op
+            print(f"{db.build_bytecode(so)}")
+
 
 
     def opCodeBuilder2(self, op: AssemblerOperation) -> [int]:
