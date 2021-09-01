@@ -147,28 +147,28 @@ class SingleRegByteCodeBuilder(ByteCodeBuilder):
     def __init__(self, basebyte_resolver):
         self.basebyte_resolver = basebyte_resolver
 
-    def build_bytecode(self, support_data: SupportOperation) -> [int]:
+    def build_bytecode(self, support: SupportOperation) -> [int]:
         print(f"build_bytecode")
-        self.basebyte_resolver(support_data)
+        self.basebyte_resolver(support)
 
 class DoubleRegByteCodeBuilder(ByteCodeBuilder):
     def __init__(self, basebyte_resolver):
         self.basebyte_resolver = basebyte_resolver
 
-    def build_bytecode(self, support_data: SupportOperation) -> [int]:
-        print(f"xxxxDoubleRegByteCodeBuilder:build_bytecode Support Data {support_data}")
-        print(f"DoubleRegByteCodeBuilder:build_bytecode byte code = {self.basebyte_resolver.getByteCode(support_data):02x}")
-        base_code = self.basebyte_resolver.getByteCode(support_data)
-        return [base_code | (support_data.reg<<2) | (support_data.regr)]
+    def build_bytecode(self, support: SupportOperation) -> [int]:
+        print(f"xxxxDoubleRegByteCodeBuilder:build_bytecode Support Data {support}")
+        print(f"DoubleRegByteCodeBuilder:build_bytecode byte code = {self.basebyte_resolver.getByteCode(support):02x}")
+        base_code = self.basebyte_resolver.getByteCode(support)
+        return [base_code | (support.reg<<2) | (support.regr)]
 
 class TripleByteCodeBuilder(ByteCodeBuilder):
     def __init__(self, basebyte_resolver):
         self.basebyte_resolver = basebyte_resolver
 
-    def build_bytecode(self, support_data: SupportOperation) -> [int]:
+    def build_bytecode(self, support: SupportOperation) -> [int]:
         print(f"build_bytecode")
         base_code = self.basebyte_resolver.getByteCode(support_data)
-        return [base_code]  + support_data.data.getData()
+        return [base_code]  + support.data.getData()
 
 
 @dataclass
@@ -600,7 +600,10 @@ class AssemblerParser(BaseParser):
 
 
     def symbol(self) -> AssemblerOperation:
+        print("<><><><><><><><<>CHECKING FOR SYMBOL")
         if (self.peek_chars(":")):
+            print("Symbol FOUND <><><>><><><><><>")
+
             str = self.symbolstr()
             return AssemblerOperation(operation = 'symbol', data = str,  size = 0)
 
@@ -1028,12 +1031,12 @@ if __name__ == '__main__':
     outTypeRaw = 1
     outTypeAddr = 2
 
-    parser = AssemblerParser()
     pc = 0
     line = 0
     code = []
     labels = {}
     errors = 0
+    parser = AssemblerParser(labels)
 
     verbose ='v' in options
     debug = 'd' in options
