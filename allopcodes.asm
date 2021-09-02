@@ -1,3 +1,10 @@
+:start
+  movwi sp,0xfffe
+  movwi r0,0x1234
+  movwi r2,0xabcd
+  movwi r0,start
+  movwi r2,start
+
   nop
   clc
   setc
@@ -33,7 +40,6 @@
   st r1,0x1234
   st r2,0x5678
   st r3,0x9abc
-
 
   movwi sp,0x0000
   inc sp

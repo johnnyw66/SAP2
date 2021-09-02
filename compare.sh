@@ -8,7 +8,7 @@ hexfile=$f.'bin'
 comparefile='compareallops.bin'
 
 rm -f $comparefile
-./ass.py $asmfile -q -b
+./newass.py $asmfile -q -b
 cp $hexfile $comparefile
 rm -f $hexfile
 ./assembler.py $asmfile -q -b
@@ -19,7 +19,7 @@ if [ $a = $b ];
 then
   echo "Integrity Checks on assembler tool are OK"
 else
-  echo "***WE HAVE A PROBLEM **** The Assembler utility versions'assembler.py'and 'newassembler.py' are producing different output than expected.****"
+  echo "***WE HAVE A PROBLEM **** The Assembler utility versions'assembler.py'and 'newass.py' are producing different output than expected.****"
 fi
 rm -f $comparefile
 rm -f $hexfile

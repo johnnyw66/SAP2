@@ -501,7 +501,7 @@ class BaseParser(ABC):
 class AssemblerParser(BaseParser):
     def __init__(self, symbolTable):
         super().__init__()
-        self.symbolTable = symbolTable  #@HERE
+        self.symbolTable = symbolTable
 
 
     def parse(self, text):
@@ -556,7 +556,7 @@ class AssemblerParser(BaseParser):
 
     def org(self) -> AssemblerOperation:
         if (self.trymatch('org')):
-            return AssemblerOperation(operation ='org', data = self.number16bit(), size = 0) #@HERE
+            return AssemblerOperation(operation ='org', data = self.number16bit(), size = 0)
 
     def end(self) -> AssemblerOperation:
         if (self.trymatch('end')):
@@ -564,15 +564,15 @@ class AssemblerParser(BaseParser):
 
     def dw(self) -> AssemblerOperation:
         if (self.trymatch('dw')):
-            return AssemblerOperation(operation = 'dw', data = self.number16bit(), size = 2) #@HERE
+            return AssemblerOperation(operation = 'dw', data = self.number16bit(), size = 2)
 
     def db(self) -> AssemblerOperation:
         if (self.trymatch('db')):
-            return AssemblerOperation(operation = 'db', data = self.number8bit(), size = 1) #@HERE
+            return AssemblerOperation(operation = 'db', data = self.number8bit(), size = 1)
 
     def ds(self) -> AssemblerOperation:
         if (self.trymatch('ds')):
-            return AssemblerOperation(operation = 'ds', data =  0, size = self.number16bit().getRawData()) #@HERE
+            return AssemblerOperation(operation = 'ds', data =  0, size = self.number16bit().getRawData())
 
     def dt(self) -> AssemblerOperation:
         if (self.trymatch('dt')):
@@ -590,8 +590,8 @@ class AssemblerParser(BaseParser):
                 astr.append(ch)
 
             self.chars("'")
-            fstr = ''.join(astr)  #@HERE
-            return AssemblerOperation(operation = 'dt', data = StringData(fstr), size = len(fstr) + 1) #@HERE
+            fstr = ''.join(astr)
+            return AssemblerOperation(operation = 'dt', data = StringData(fstr), size = len(fstr) + 1)
 
 
     # Instruction operations
@@ -601,7 +601,7 @@ class AssemblerParser(BaseParser):
         if (op is not None):
             regl = self.tryrules('registers16')
             self.chars(',')
-            data = self.tryrules('number16bit','symbolstr') #@HERE
+            data = self.tryrules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, reg = regl, data = data, size = 3)
         return None
 
@@ -623,7 +623,7 @@ class AssemblerParser(BaseParser):
         if (op is not None):
             regl = self.tryrules('registers')
             self.chars(',')
-            data = self.tryrules('number16bit','symbolstr') #@HERE
+            data = self.tryrules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, reg =  regl, data = data, size = 3)
         return None
 
@@ -631,7 +631,7 @@ class AssemblerParser(BaseParser):
         op = self.trymatch('call','jmp','jpz','jpnz','jpc',\
                             'jpnc','jps','jpns','jpo','jpno')
         if (op is not None):
-            data = self.tryrules('number16bit','symbolstr') #@HERE
+            data = self.tryrules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, data = data, size = 3)
         return None
 
@@ -692,7 +692,7 @@ class AssemblerParser(BaseParser):
 
 
     def registers16(self) -> str:
-            return self.trymatch('sp','r0','r2') #@HERE
+            return self.trymatch('sp','r0','r2')
 
     def registers(self) -> int:
         r = self.chars('rR')
@@ -710,18 +710,18 @@ class AssemblerParser(BaseParser):
                 break
             symbol.append(ch)
 
-        return SymbolWordData(''.join(symbol),self.symbolTable) #@HERE
+        return SymbolWordData(''.join(symbol),self.symbolTable)
 
-    #@HERE
+
     def number16bit(self) -> int:
         num = self.tryrules('binarynumber','hexnumber','octalnumber','decnumber')
-        if (num is not None):  #@HERE
+        if (num is not None):
             return WordData(num)
 
-    #@HERE
+
     def number8bit(self) -> int:
         num = self.tryrules('binarynumber','hexnumber','octalnumber','decnumber')
-        if (num is not None):  #@HERE
+        if (num is not None):
             return ByteData(num)
 
 
@@ -889,7 +889,7 @@ if __name__ == '__main__':
 
     def processLabel(ops: AssemblerOperation, labels: dict) -> None:
 
-        labelnm = ops.data.getRawData() #@HERE
+        labelnm = ops.data.getRawData()
         addr = ops.pc
         if (labelnm in labels):
             raise SyntaxError(f"Replicated label '{labelnm}'",ops.line)
@@ -922,12 +922,10 @@ if __name__ == '__main__':
         return options,file,assembler
 
 
-    def debug():
-        pass
 
-    # ** Main Process Starts here ***
+    """ Main Process Starts here """
 
-
+    # Command Line options and check if source exists
     options,sourceFilename,assembler = handleCommandArgs(sys.argv)
 
     try:
@@ -945,7 +943,7 @@ if __name__ == '__main__':
 
 
     labels = {}
-    parser = AssemblerParser(labels) #@HERE
+    parser = AssemblerParser(labels)
 
     verbose_option ='v' in options
     debug_option = 'd' in options
@@ -1025,7 +1023,7 @@ symtable:{symtable_option}\n")
         for op in code:
 
             if (op.operation == 'org'):
-                program_counter = op.data.getRawData()   #@HERE
+                program_counter = op.data.getRawData()
 
             op.pc = program_counter
             program_counter += op.size
