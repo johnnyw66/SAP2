@@ -483,8 +483,11 @@ class BaseParser(ABC):
         raise ParserException(f"Parser.chars Expected {pattern} but got <{ch}>")
 
 
+    # Perhaps - get rid of this - and replace with 'try_function_rules'
+    # Using the 'getattr' function to find the actual function -
+    # just saves us having to preindex names with 'self.'
 
-    def tryrules(self,*rules):
+    def try_rules(self,*rules):
         self.gobblewhitespace()
 
         for rule in rules:
@@ -495,6 +498,16 @@ class BaseParser(ABC):
             except ParserException as e:
                 pass
 
+    def try_function_rules(self,*rules):
+        self.gobblewhitespace()
+
+        for rule in rules:
+            try:
+                rv = rule()
+                if (rv is not None):
+                    return rv
+            except ParserException as e:
+                pass
 
 
 
@@ -512,9 +525,11 @@ class AssemblerParser(BaseParser):
 
         while (self.pos < self.len):
 
-            rv = self.tryrules('comment','symbol','directive','instruction')
+            rv = self.try_rules('comment', 'symbol', 'directive', 'instruction')
+
             if (rv is None):
                 raise ParserException(f"Can not parse {self.text}")
+
             allops.append(rv)
 
         return allops
@@ -543,12 +558,12 @@ class AssemblerParser(BaseParser):
 
     def directive(self) -> AssemblerOperation:
         if (self.peek_chars(".")):
-            return self.tryrules('org','end','db','dw','ds','dt')
+            return self.try_rules('org','end','db','dw','ds','dt')
 
 
 
     def instruction(self) -> AssemblerOperation:
-        return self.tryrules('movwi','intermediate8','reg8','ld',\
+        return self.try_rules('movwi','intermediate8','reg8','ld',\
                             'call','singlebyte','singleop','out','pushpop','djnz')
 
 
@@ -599,9 +614,9 @@ class AssemblerParser(BaseParser):
     def movwi(self) -> AssemblerOperation:
         op = self.trymatch('movwi')
         if (op is not None):
-            regl = self.tryrules('registers16')
+            regl = self.try_rules('registers16')
             self.chars(',')
-            data = self.tryrules('number16bit','symbolstr')
+            data = self.try_rules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, reg = regl, data = data, size = 3)
         return None
 
@@ -621,9 +636,9 @@ class AssemblerParser(BaseParser):
     def ld(self) -> AssemblerOperation:
         op = self.trymatch('ld','st')
         if (op is not None):
-            regl = self.tryrules('registers')
+            regl = self.try_rules('registers')
             self.chars(',')
-            data = self.tryrules('number16bit','symbolstr')
+            data = self.try_rules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, reg =  regl, data = data, size = 3)
         return None
 
@@ -631,7 +646,7 @@ class AssemblerParser(BaseParser):
         op = self.trymatch('call','jmp','jpz','jpnz','jpc',\
                             'jpnc','jps','jpns','jpo','jpno')
         if (op is not None):
-            data = self.tryrules('number16bit','symbolstr')
+            data = self.try_rules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, data = data, size = 3)
         return None
 
@@ -639,7 +654,7 @@ class AssemblerParser(BaseParser):
     def singlebyte(self) -> AssemblerOperation:
         op = self.trymatch('inc','dec')
         if (op is not None):
-            reg = self.tryrules('registers','registers16')
+            reg = self.try_rules('registers','registers16')
             #SMELLY
             return AssemblerOperation(operation = op if isinstance(reg,int) else op+reg, reg = reg, size = 1)
         return None
@@ -654,14 +669,14 @@ class AssemblerParser(BaseParser):
     def out(self) -> AssemblerOperation:
         op = self.trymatch('out','shl','shr')
         if (op is not None):
-            reg = self.tryrules('registers')
+            reg = self.try_rules('registers')
             return AssemblerOperation(operation = op, reg = reg, size = 1)
         return None
 
     def pushpop(self) -> AssemblerOperation:
         op = self.trymatch('pop','push')
         if (op is not None):
-            reg = self.tryrules('registers')
+            reg = self.try_rules('registers')
             return AssemblerOperation(operation = op+'r'+str(reg), reg = reg,  size = 1)
         return None
 
@@ -672,7 +687,7 @@ class AssemblerParser(BaseParser):
         if (op is not None):
             reg = self.registers()
             self.chars(',')
-            data = self.tryrules('number16bit','symbolstr')
+            data = self.try_rules('number16bit','symbolstr')
             return AssemblerOperation(operation =  op, reg = reg, data = data, size = 3)
         return None
 
@@ -714,13 +729,13 @@ class AssemblerParser(BaseParser):
 
 
     def number16bit(self) -> int:
-        num = self.tryrules('binarynumber','hexnumber','octalnumber','decnumber')
+        num = self.try_rules('binarynumber','hexnumber','octalnumber','decnumber')
         if (num is not None):
             return WordData(num)
 
 
     def number8bit(self) -> int:
-        num = self.tryrules('binarynumber','hexnumber','octalnumber','decnumber')
+        num = self.try_rules('binarynumber','hexnumber','octalnumber','decnumber')
         if (num is not None):
             return ByteData(num)
 
@@ -899,6 +914,9 @@ if __name__ == '__main__':
     def info(str,end=None) -> None:
         print(str,end='')
 
+    def print_if_true(check, str):
+        if (check):
+            print(str)
 
     def buildHelpText() -> str:
         return "\n\nExample: ./assembler.py example.asm [options]\n\n -v verbose\n -d debug\n -q quiet\n -s symbol table\n -3 [default] V3 addressed hex output\n -2 raw hex output\n -b binary output\n -n no output\n -r ROM address offset on V3 Hex output\n"
@@ -962,8 +980,7 @@ if __name__ == '__main__':
         print(buildHelpText())
         sys.exit(0);
 
-    if (not quiet_option):
-        print(f"Trying to assemble '{sourceFilename}' \
+    print_if_true(not quiet_option,f"Trying to assemble '{sourceFilename}' \
 ROMMODE:{rom_option}' \
 verbose:{verbose_option} \
 quiet:{quiet_option} \
@@ -991,8 +1008,8 @@ symtable:{symtable_option}\n")
                 for op in operations:
                     if (op is not None):
                         op.line = line          # Fill operator with line number
-                        if (debug_option):
-                            print(op)
+                        #if (debug_option):
+                        print_if_true(debug_option, op)
                         code.append(op)         # Place this in an ordered array for our builder
                         if (op.operation == 'end'):
                             completed = True
@@ -1012,8 +1029,7 @@ symtable:{symtable_option}\n")
 
     # Parsing complete
     if (assembler_errors > 0):
-        if (not quiet_option):
-            print(f"Build Failed! {assembler_errors} assembler errors. See a Code Doctor. Quick!")
+        print_if_true(not quiet_option, f"Build Failed! {assembler_errors} assembler errors. See a Code Doctor. Quick!")
         sys.exit(-1)
 
     try:
@@ -1031,8 +1047,8 @@ symtable:{symtable_option}\n")
             if (op.operation == 'symbol'):
                 processLabel(op,labels)
 
-            if (verbose_option):
-                print(op)
+            print_if_true(verbose_option, op)
+
 
 
         if (not quiet_option and symtable_option):
@@ -1058,8 +1074,8 @@ symtable:{symtable_option}\n")
         #            break
         #info(f"{outType}")
         if (not nooutput_option):
-            if (not quiet_option):
-                print(f"Producing LogiSym output file '{binName}'")
+
+            print_if_true(not quiet_option, f"Producing LogiSym output file '{binName}'")
 
             if (outType == OutputType.BINARY):
                 size = produceBinFile(binName, code)
@@ -1072,9 +1088,8 @@ symtable:{symtable_option}\n")
         else:
             size = produceDummyOuput(code)
 
-        if (not quiet_option):
-            print(f"\nSize: {size} bytes")
-            print("complete.\n")
+        print_if_true(not quiet_option, f"\nSize: {size} bytes")
+        print_if_true(not quiet_option, "complete.\n")
 
         sys.exit(0)
     except (SyntaxError) as e:
