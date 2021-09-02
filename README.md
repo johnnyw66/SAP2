@@ -212,7 +212,7 @@ microcode **NOP** value after running this script. It should match the 32-bit he
 
 **staticdisplay.py** Builds 7-Seg Control line Rom for the Decimal Display circuit.
 
-Also, Thanks to...
+Thanks to...
 ---
 
 **Dieter Muller** - (not the footballer!) - For his notes on building a 6502. His chapters on using multiplexers inspired my ALU sub-circuit. http://www.6502.org/users/dieter/
