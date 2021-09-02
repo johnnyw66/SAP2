@@ -159,8 +159,10 @@ Opcode|Action|Flags|Tstates
 MOVI Rx,8bit | 8-bit value -> Rx| None|7
 LD Rx,16bitaddr |@(addr) -> Rx |None|0
 ST Rx,16bitaddr |@(addr) <- Rx |None|0
-MOVI SP,16bitaddr| 16-bit value -> SP| None|0
-*4 Opcodes in total*
+MOVWI SP,16bitaddr| 16-bit value -> SP| None|0
+MOVWI R0,16bitaddr+| 16-bit value -> {R1,R0}|0
+MOVWI R2,16bitaddr+| 16-bit value -> {R3,R2}|0
+*4 Opcodes in total(bottom 2 to be implemented)*
 
 Opcode|Action|Flags|Tstates
 ------|------|-----|-------
