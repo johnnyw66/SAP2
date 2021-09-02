@@ -726,7 +726,9 @@ class AssemblerParser(BaseParser):
         rx = self.registers()
         self.chars(',')
         if (self.peek_chars('@')):
-            if (fnc := self.trymatch('LOW','HIGH')):
+            fnc = self.trytrymatch('LOW','HIGH')
+            #if (fnc := self.trymatch('LOW','HIGH')):  #3.8!
+            if (fnc):
                 self.chars('(')
                 dvalue = self.try_rules('number16bit','symbolstr')
                 if (dvalue is None):
@@ -982,6 +984,10 @@ if __name__ == '__main__':
 
 
     """ Main Process Starts here """
+
+    #print(sys.version_info)
+    #if not (sys.version_info.major == 3 and sys.version_info.minor == 8 ):
+    #    sys.exit(-1)
 
     # Command Line options and check if source exists
     options,sourceFilename,assembler = handleCommandArgs(sys.argv)
