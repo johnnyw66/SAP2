@@ -54,6 +54,27 @@ class Data(ABC):
         return f"Raw data: <{self.data}>"
 
 
+class FunctionData(Data):
+    # Useful for 8-bit data instructions -(movi,addi,subi etc)
+    # movi r0,LOW(somesymbolname)
+    # movi r1,HIGH(somesymbolname)
+    # or
+    # movi r0,LOW(0x2fff)
+    # movi r1,HIGH(0x2fff)
+
+    def __init__(self, fnc, data):
+        super().__init__(data)
+        self.fnc = fnc
+
+    def getData(self):
+        return [self.data.getData()[0]] if self.fnc == 'LOW' else \
+                [self.data.getData()[1]]
+
+    def __str__(self):
+        return f"FunctionData: fnc:{self.fnc} {super().__str__()}"
+    def __repr__(self):
+        return f"FunctionData: fnc:{self.fnc} {super().__str__()}"
+
 class SymbolWordData(Data):
 
     def __init__(self, data, lookup):
@@ -692,10 +713,24 @@ class AssemblerParser(BaseParser):
         return None
 
 
-    # Support functions
+    # Added support functions @LOW and @HIGH to be able to calculate
+    # an 8-bit value from a data or symbol address which is 16-bit
+    # eg. movi r0, @LOW(0x8100)  - movi r0, @LOW(lookuptable) movi r1,@HIGH(lookuptable)
+
     def intermediate(self, opcode: str) -> AssemblerOperation:
         rx = self.registers()
         self.chars(',')
+        if (self.peek_chars('@')):
+            if (fnc := self.trymatch('LOW','HIGH')):
+                self.chars('(')
+                dvalue = self.try_rules('number16bit','symbolstr')
+                if (dvalue is None):
+                    return None
+                self.chars(')')
+                value = FunctionData(fnc,dvalue)
+                return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
+            # SHOULD NOT ARRIVE HERE! DO SOMETHING
+            return None
         value = self.number8bit()
         return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
 
@@ -914,9 +949,9 @@ if __name__ == '__main__':
     def info(str,end=None) -> None:
         print(str,end='')
 
-    def print_if_true(check, str):
+    def print_if_true(check, str,*args,**kwargs):
         if (check):
-            print(str)
+            print(str,*args,**kwargs)
 
     def buildHelpText() -> str:
         return "\n\nExample: ./assembler.py example.asm [options]\n\n -v verbose\n -d debug\n -q quiet\n -s symbol table\n -3 [default] V3 addressed hex output\n -2 raw hex output\n -b binary output\n -n no output\n -r ROM address offset on V3 Hex output\n"
@@ -960,8 +995,6 @@ if __name__ == '__main__':
         sys.exit(-1)
 
 
-    labels = {}
-    parser = AssemblerParser(labels)
 
     verbose_option ='v' in options
     debug_option = 'd' in options
@@ -986,6 +1019,22 @@ verbose:{verbose_option} \
 quiet:{quiet_option} \
 debug:{debug_option} \
 symtable:{symtable_option}\n")
+
+
+    labels = {}
+    parser = AssemblerParser(labels)        #Assembler Operations need a reference to the
+                                            #actual Symbol table ('labels') for the code generation - part -
+                                            #to resolve symbol names (addresses).
+
+                                            # There are no preprocessor symbols/constants (eg.'#DEFINE NUMBEROFLOOPS 0x22')
+                                            # handled by the parser as this can easily be
+                                            # implemented using a decent preprocessor
+                                            # such as 'cpp' or 'm4'
+
+                                            # The only thing we may need is something to handle
+                                            # finding bytes of an address -
+                                            #  such as movi r0,@LOW(16bitaddress/symbol)
+
 
     asm = open(sourceFilename, "r")
 
@@ -1039,7 +1088,7 @@ symtable:{symtable_option}\n")
         for op in code:
 
             if (op.operation == 'org'):
-                program_counter = op.data.getRawData()
+                program_counter = op.data.getRawData() # SMELLY
 
             op.pc = program_counter
             program_counter += op.size
@@ -1088,8 +1137,7 @@ symtable:{symtable_option}\n")
         else:
             size = produceDummyOuput(code)
 
-        print_if_true(not quiet_option, f"\nSize: {size} bytes")
-        print_if_true(not quiet_option, "complete.\n")
+        print_if_true(not quiet_option, f"\nSize: {size} bytes\ncomplete.\n")
 
         sys.exit(0)
     except (SyntaxError) as e:

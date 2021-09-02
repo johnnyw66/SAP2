@@ -91,6 +91,31 @@ Swapping the 32-bit ROM for 8-bit ROMs
 Updates
 ---
 ![SAP2 Inspired Project](/images/logicunit_function_generator2.jpg)
+**2nd Septermber**: Added inbuilt assembler functions *@LOW* and *@HIGH* to calculate low and
+high bytes from a 16-bit value.
+
+```
+.org 0x8000
+  ; The following 3 groups of statements are equivalent.
+
+  ; Group 1 - explicit 8-bit values
+  movi r2,0xaa
+  movi r3,0x81
+
+  ; Group 2 - explicit 16-bit values using LOW and HIGH functions
+  movi r2,@LOW(0x81aa)
+  movi r3,@HIGH(0x81aa)
+
+  ; Group 3 - symbol using LOW and HIGH functions
+  movi r2,@LOW(lookuptable)
+  movi r3,@HIGH(lookuptable)
+  hlt
+
+.org 0x81aa
+
+:lookuptable
+   .....
+```
 
 **27th August**: Addressing decoding is supported. I have now split the memory into two sections.
 0x000 to 0x7fff now holds a ROM. 0x8000 to 0xffff is a 32 Kb RAM module. The ROM currently holds the 3 byte instruction 'JMP 0x8000' at address 0x0000 -
