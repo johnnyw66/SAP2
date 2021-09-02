@@ -56,11 +56,11 @@ class Data(ABC):
 
 class FunctionData(Data):
     # Useful for 8-bit data instructions -(movi,addi,subi etc)
-    # movi r0,LOW(somesymbolname)
-    # movi r1,HIGH(somesymbolname)
+    # movi r0,@LOW(somesymbolname)
+    # movi r1,@HIGH(somesymbolname)
     # or
-    # movi r0,LOW(0x2fff)
-    # movi r1,HIGH(0x2fff)
+    # movi r0,@LOW(0x2fff)
+    # movi r1,@HIGH(0x2fff)
 
     def __init__(self, fnc, data):
         super().__init__(data)
@@ -98,6 +98,7 @@ class WordData(Data):
     def getData(self):
         value = self.data
         return [value & 0xff, value>>8 & 0xff]
+
     def __str__(self):
         return f"WordData: {super().__str__()}"
     def __repr__(self):
@@ -114,7 +115,6 @@ class ByteData(Data):
 
     def __str__(self):
         return f"ByteData: {super().__str__()}"
-
     def __repr__(self):
         return f"ByteData: {super().__str__()}"
 
@@ -125,6 +125,11 @@ class StringData(Data):
 
     def getData(self):
         return [ord(_x) for _x in (list(self.getRawData()) + [chr(0)])]
+
+    def __str__(self):
+        return f"StringData: {super().__str__()}"
+    def __repr__(self):
+        return f"StringData: {super().__str__()}"
 
 @dataclass
 class SupportOperation:
