@@ -130,7 +130,7 @@ Added example circuit to do memory mapped IO. Writes to 0x7ff0, 0x7ff1, 0x7ff2 s
 
 Opcode | Comment|Flags|Tstates
 -------| -------|-----|-------
-MOV Rx,Ry| Ry -> Rx | None|4
+MOV Rx,Ry| Ry -> Rx |_|4
 ADD Rx,Ry|Rx + Ry -> Rx|C Z V S|4
 SUB Rx,Ry|Rx - Ry -> Rx| Z V S|4
 AND Rx,Ry|Rx & Ry -> Rx|Z|4
@@ -140,9 +140,9 @@ INC Rx | Rx + 1 -> Rx | Z S V O|5
 SHL Rx | {Rx,Cf}<<1 -> Rx | Z S V C|5
 SHR Rx | {Cf,Rx}>>1 -> Rx | Z S V C|5
 DEC Rx | Rx - 1 -> Rx | Z S V O|5
-INC SP | SP + 1 -> SP |None|5
-DEC SP | SP - 1 -> SP |None|5
-OUT Rx| Rx sent to Display Unit|None|4
+INC SP | SP + 1 -> SP |_|5
+DEC SP | SP - 1 -> SP |_|5
+OUT Rx| Rx sent to Display Unit|_|4
 *46 Opcodes in total*
 
 Opcode|Action|Flags|Tstates
@@ -159,7 +159,7 @@ Opcode|Action|Flags|Tstates
 MOVI Rx,8bit | 8-bit value -> Rx| _|7
 LD Rx,16bitaddr |@(addr) -> Rx |_|0
 ST Rx,16bitaddr |@(addr) <- Rx |_|0
-MOVWI SP,16bitaddr| 16-bit value -> SP| None|0
+MOVWI SP,16bitaddr| 16-bit value -> SP| _|0
 MOVWI R0,16bitaddr+| 16-bit value -> {R1,R0}|_|0
 MOVWI R2,16bitaddr+| 16-bit value -> {R3,R2}|_|0
 *4 Opcodes in total(bottom 2 to be implemented)*
@@ -169,17 +169,17 @@ Opcode|Action|Flags|Tstates
 DJNZ Rx,16bitaddr | Rx - 1 -> Rx, 16bitaddr if NZ ? PC + 1 -> PC| Z S V O|0
 JPNZ 16bitaddr | PC <- PC + 1 if Z ? 16bitaddr|_|0
 JPNC 16bitaddr | PC <- PC + 1 if C ? 16bitaddr|_|0
-JMP  16bitaddr | PC <- 16bitaddr | None|0
+JMP  16bitaddr | PC <- 16bitaddr |_|0
 CALL 16bitaddr | @SP <- PC + 1, PC <- 16bitaddr, SP <- SP - 2| _|14
-RET| PC <- @SP| None|10
+RET| PC <- @SP|_|10
 *9 Opcodes in total*
 
 Opcode|Action|Flags|Tstates
 ------|------|-----|-------
-PUSH R0| R0 -> @SP, R1-> @SP+1 SP <- SP - 2|None|9
-PUSH R2| R2 -> @SP, R3-> @SP+1 SP <- SP - 2| None|9
-POP R0 | @SP -> R1, @SP+1 -> R0, SP <- SP + 2| None|9
-POP R2 | @SP -> R3, @SP+1 -> R2, SP <- SP + 2|None|9
+PUSH R0| R0 -> @SP, R1-> @SP+1 SP <- SP - 2|_|9
+PUSH R2| R2 -> @SP, R3-> @SP+1 SP <- SP - 2|_|9
+POP R0 | @SP -> R1, @SP+1 -> R0, SP <- SP + 2|_|9
+POP R2 | @SP -> R3, @SP+1 -> R2, SP <- SP + 2|_|9
 *4 Ocodes in total*
 
 
@@ -187,9 +187,9 @@ Opcode|Action|Flags|Tstates
 ------|------|-----|-------
 CLC| Cf <- 0| C |5
 SETC|Cf <- 1| C|5
-NOP| no operation| None|4
-EXX| Switch Reg Bank| None|4
-HLT| Stop uProc|None|4
+NOP| no operation|_|4
+EXX| Switch Reg Bank|_|4
+HLT| Stop uProc|_|4
 *5 Ocodes in total*
 
 **CLC and SETC are currently 'fudged' as they affect the sign and overflow FLAGS**
