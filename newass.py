@@ -237,7 +237,8 @@ class BuildOperation:
 codeBuilder= {
     'mov' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0x90)),
     'movi' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x40)),
-    'movwi' : TripleByteCodeBuilder(LookupByOpByteCodeResolver({'sp':0x1c,'r0':0x1c, 'r2':0x1c})),    # set SP/R0R1/R2R3 to address -  instruction
+    'movwi' : TripleByteCodeBuilder(LookupByOpByteCodeResolver({'sp':0x1c,'r0':0x28, 'r2':0x2a})),    # set SP/R0R1/R2R3 with a 16-bit address
+
 
     'ld' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x14)),
     'st' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x18)),
