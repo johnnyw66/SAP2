@@ -327,7 +327,7 @@ codeBuilder= {
 class AssemblerOperation:
     operation : str = None
     pc : int = None
-    size : int = None
+    size : int = 0
     data : str = None
     reg : int = None
     regr : int = None
@@ -550,6 +550,8 @@ class BaseParser(ABC):
             except ParserException as e:
                 pass
 
+    def finish_parsing(self):
+        self.pos = self.len + 1
 
 
 class AssemblerParser(BaseParser):
@@ -597,13 +599,16 @@ class AssemblerParser(BaseParser):
                                             # or a CPP function type
                     self.chars('"')
                     # ignore everything else - after the trailing quote
-                    self.pos = self.len + 1
+                    self.finish_parsing()
                     # check to see if this is not some built-in definition.
                     if (not fName.startswith("<")):
                         return AssemblerOperation(operation = 'cppline', data = data, source_file = fName, source_line = number - 1 , size = 0)
 
-                self.pos = self.len + 1
+                #self.finish_parsing()
                 return AssemblerOperation(operation = 'cppbuiltin',size = 0, data=data)
+
+            self.finish_parsing()
+            return AssemblerOperation(operation = 'comment',data = data , size = 0)
 
 
     def comment(self) -> AssemblerOperation:
