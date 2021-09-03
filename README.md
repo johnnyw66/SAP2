@@ -218,7 +218,9 @@ HLT| Stop uProc|_|4
 *5 Ocodes in total*
 
 **CLC and SETC are currently 'fudged' as they affect the sign and overflow FLAGS**
-Example Assembler (using cpp)
+
+
+Example Assembler Code (using the preprocessor *cpp*)
 ---
 ```
 .org 0x8000
@@ -302,6 +304,8 @@ hlt
 ```
 
 
+16-Bit Jump Table (using *cpp*)
+---
 
 ```
 
