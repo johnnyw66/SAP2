@@ -33,7 +33,8 @@ from abc import abstractmethod, ABC
 
 
 WSPACE = "\f\v\r\t\n "
-RAMADDRESS = 0x8000
+RAM_ADDRESS = 0x8000
+ROM_ADDRESS = 0x0000
 
 class Data(ABC):
     def __init__(self,data):
@@ -52,6 +53,27 @@ class Data(ABC):
     def __repr__(self):
         return f"Raw data: <{self.data}>"
 
+
+class FunctionData(Data):
+    # Useful for 8-bit data instructions -(movi,addi,subi etc)
+    # movi r0,@LOW(somesymbolname)
+    # movi r1,@HIGH(somesymbolname)
+    # or
+    # movi r0,@LOW(0x2fff)
+    # movi r1,@HIGH(0x2fff)
+
+    def __init__(self, fnc, data):
+        super().__init__(data)
+        self.fnc = fnc
+
+    def getData(self):
+        return [self.data.getData()[0]] if self.fnc == 'LOW' else \
+                [self.data.getData()[1]]
+
+    def __str__(self):
+        return f"FunctionData: fnc:{self.fnc} {super().__str__()}"
+    def __repr__(self):
+        return f"FunctionData: fnc:{self.fnc} {super().__str__()}"
 
 class SymbolWordData(Data):
 
@@ -76,6 +98,7 @@ class WordData(Data):
     def getData(self):
         value = self.data
         return [value & 0xff, value>>8 & 0xff]
+
     def __str__(self):
         return f"WordData: {super().__str__()}"
     def __repr__(self):
@@ -92,7 +115,6 @@ class ByteData(Data):
 
     def __str__(self):
         return f"ByteData: {super().__str__()}"
-
     def __repr__(self):
         return f"ByteData: {super().__str__()}"
 
@@ -103,6 +125,11 @@ class StringData(Data):
 
     def getData(self):
         return [ord(_x) for _x in (list(self.getRawData()) + [chr(0)])]
+
+    def __str__(self):
+        return f"StringData: {super().__str__()}"
+    def __repr__(self):
+        return f"StringData: {super().__str__()}"
 
 @dataclass
 class SupportOperation:
@@ -210,7 +237,8 @@ class BuildOperation:
 codeBuilder= {
     'mov' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0x90)),
     'movi' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x40)),
-    'movwi' : TripleByteCodeBuilder(LookupByOpByteCodeResolver({'sp':0x1c,'r0':0x28, 'r2':0x2a})),    # set SP/R0R1/R2R3 to address -  instruction
+    'movwi' : TripleByteCodeBuilder(LookupByOpByteCodeResolver({'sp':0x1c,'r0':0x28, 'r2':0x2a})),    # set SP/R0R1/R2R3 with a 16-bit address
+
 
     'ld' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x14)),
     'st' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x18)),
@@ -482,8 +510,11 @@ class BaseParser(ABC):
         raise ParserException(f"Parser.chars Expected {pattern} but got <{ch}>")
 
 
+    # Perhaps - get rid of this - and replace with 'try_function_rules'
+    # Using the 'getattr' function to find the actual function -
+    # just saves us having to preindex names with 'self.'
 
-    def tryrules(self,*rules):
+    def try_rules(self,*rules):
         self.gobblewhitespace()
 
         for rule in rules:
@@ -494,13 +525,23 @@ class BaseParser(ABC):
             except ParserException as e:
                 pass
 
+    def try_function_rules(self,*rules):
+        self.gobblewhitespace()
+
+        for rule in rules:
+            try:
+                rv = rule()
+                if (rv is not None):
+                    return rv
+            except ParserException as e:
+                pass
 
 
 
 class AssemblerParser(BaseParser):
     def __init__(self, symbolTable):
         super().__init__()
-        self.symbolTable = symbolTable  #@HERE
+        self.symbolTable = symbolTable
 
 
     def parse(self, text):
@@ -511,9 +552,11 @@ class AssemblerParser(BaseParser):
 
         while (self.pos < self.len):
 
-            rv = self.tryrules('comment','symbol','directive','instruction')
+            rv = self.try_rules('comment', 'symbol', 'directive', 'instruction')
+
             if (rv is None):
                 raise ParserException(f"Can not parse {self.text}")
+
             allops.append(rv)
 
         return allops
@@ -542,12 +585,12 @@ class AssemblerParser(BaseParser):
 
     def directive(self) -> AssemblerOperation:
         if (self.peek_chars(".")):
-            return self.tryrules('org','end','db','dw','ds','dt')
+            return self.try_rules('org','end','db','dw','ds','dt')
 
 
 
     def instruction(self) -> AssemblerOperation:
-        return self.tryrules('movwi','intermediate8','reg8','ld',\
+        return self.try_rules('movwi','intermediate8','reg8','ld',\
                             'call','singlebyte','singleop','out','pushpop','djnz')
 
 
@@ -555,7 +598,7 @@ class AssemblerParser(BaseParser):
 
     def org(self) -> AssemblerOperation:
         if (self.trymatch('org')):
-            return AssemblerOperation(operation ='org', data = self.number16bit(), size = 0) #@HERE
+            return AssemblerOperation(operation ='org', data = self.number16bit(), size = 0)
 
     def end(self) -> AssemblerOperation:
         if (self.trymatch('end')):
@@ -563,15 +606,15 @@ class AssemblerParser(BaseParser):
 
     def dw(self) -> AssemblerOperation:
         if (self.trymatch('dw')):
-            return AssemblerOperation(operation = 'dw', data = self.number16bit(), size = 2) #@HERE
+            return AssemblerOperation(operation = 'dw', data = self.number16bit(), size = 2)
 
     def db(self) -> AssemblerOperation:
         if (self.trymatch('db')):
-            return AssemblerOperation(operation = 'db', data = self.number8bit(), size = 1) #@HERE
+            return AssemblerOperation(operation = 'db', data = self.number8bit(), size = 1)
 
     def ds(self) -> AssemblerOperation:
         if (self.trymatch('ds')):
-            return AssemblerOperation(operation = 'ds', data =  0, size = self.number16bit().getRawData()) #@HERE
+            return AssemblerOperation(operation = 'ds', data =  0, size = self.number16bit().getRawData())
 
     def dt(self) -> AssemblerOperation:
         if (self.trymatch('dt')):
@@ -589,8 +632,8 @@ class AssemblerParser(BaseParser):
                 astr.append(ch)
 
             self.chars("'")
-            fstr = ''.join(astr)  #@HERE
-            return AssemblerOperation(operation = 'dt', data = StringData(fstr), size = len(fstr) + 1) #@HERE
+            fstr = ''.join(astr)
+            return AssemblerOperation(operation = 'dt', data = StringData(fstr), size = len(fstr) + 1)
 
 
     # Instruction operations
@@ -598,9 +641,9 @@ class AssemblerParser(BaseParser):
     def movwi(self) -> AssemblerOperation:
         op = self.trymatch('movwi')
         if (op is not None):
-            regl = self.tryrules('registers16')
+            regl = self.try_rules('registers16')
             self.chars(',')
-            data = self.tryrules('number16bit','symbolstr') #@HERE
+            data = self.try_rules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, reg = regl, data = data, size = 3)
         return None
 
@@ -620,9 +663,9 @@ class AssemblerParser(BaseParser):
     def ld(self) -> AssemblerOperation:
         op = self.trymatch('ld','st')
         if (op is not None):
-            regl = self.tryrules('registers')
+            regl = self.try_rules('registers')
             self.chars(',')
-            data = self.tryrules('number16bit','symbolstr') #@HERE
+            data = self.try_rules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, reg =  regl, data = data, size = 3)
         return None
 
@@ -630,7 +673,7 @@ class AssemblerParser(BaseParser):
         op = self.trymatch('call','jmp','jpz','jpnz','jpc',\
                             'jpnc','jps','jpns','jpo','jpno')
         if (op is not None):
-            data = self.tryrules('number16bit','symbolstr') #@HERE
+            data = self.try_rules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, data = data, size = 3)
         return None
 
@@ -638,7 +681,7 @@ class AssemblerParser(BaseParser):
     def singlebyte(self) -> AssemblerOperation:
         op = self.trymatch('inc','dec')
         if (op is not None):
-            reg = self.tryrules('registers','registers16')
+            reg = self.try_rules('registers','registers16')
             #SMELLY
             return AssemblerOperation(operation = op if isinstance(reg,int) else op+reg, reg = reg, size = 1)
         return None
@@ -653,14 +696,14 @@ class AssemblerParser(BaseParser):
     def out(self) -> AssemblerOperation:
         op = self.trymatch('out','shl','shr')
         if (op is not None):
-            reg = self.tryrules('registers')
+            reg = self.try_rules('registers')
             return AssemblerOperation(operation = op, reg = reg, size = 1)
         return None
 
     def pushpop(self) -> AssemblerOperation:
         op = self.trymatch('pop','push')
         if (op is not None):
-            reg = self.tryrules('registers')
+            reg = self.try_rules('registers')
             return AssemblerOperation(operation = op+'r'+str(reg), reg = reg,  size = 1)
         return None
 
@@ -671,15 +714,31 @@ class AssemblerParser(BaseParser):
         if (op is not None):
             reg = self.registers()
             self.chars(',')
-            data = self.tryrules('number16bit','symbolstr')
+            data = self.try_rules('number16bit','symbolstr')
             return AssemblerOperation(operation =  op, reg = reg, data = data, size = 3)
         return None
 
 
-    # Support functions
+    # Added support functions @LOW and @HIGH to be able to calculate
+    # an 8-bit value from a data or symbol address which is 16-bit
+    # eg. movi r0, @LOW(0x8100)  - movi r0, @LOW(lookuptable) movi r1,@HIGH(lookuptable)
+
     def intermediate(self, opcode: str) -> AssemblerOperation:
         rx = self.registers()
         self.chars(',')
+        if (self.peek_chars('@')):
+            fnc = self.trytrymatch('LOW','HIGH')
+            #if (fnc := self.trymatch('LOW','HIGH')):  #3.8!
+            if (fnc):
+                self.chars('(')
+                dvalue = self.try_rules('number16bit','symbolstr')
+                if (dvalue is None):
+                    return None
+                self.chars(')')
+                value = FunctionData(fnc,dvalue)
+                return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
+            # SHOULD NOT ARRIVE HERE! DO SOMETHING
+            return None
         value = self.number8bit()
         return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
 
@@ -691,7 +750,7 @@ class AssemblerParser(BaseParser):
 
 
     def registers16(self) -> str:
-            return self.trymatch('sp','r0','r2') #@HERE
+            return self.trymatch('sp','r0','r2')
 
     def registers(self) -> int:
         r = self.chars('rR')
@@ -709,18 +768,18 @@ class AssemblerParser(BaseParser):
                 break
             symbol.append(ch)
 
-        return SymbolWordData(''.join(symbol),self.symbolTable) #@HERE
+        return SymbolWordData(''.join(symbol),self.symbolTable)
 
-    #@HERE
+
     def number16bit(self) -> int:
-        num = self.tryrules('binarynumber','hexnumber','octalnumber','decnumber')
-        if (num is not None):  #@HERE
+        num = self.try_rules('binarynumber','hexnumber','octalnumber','decnumber')
+        if (num is not None):
             return WordData(num)
 
-    #@HERE
+
     def number8bit(self) -> int:
-        num = self.tryrules('binarynumber','hexnumber','octalnumber','decnumber')
-        if (num is not None):  #@HERE
+        num = self.try_rules('binarynumber','hexnumber','octalnumber','decnumber')
+        if (num is not None):
             return ByteData(num)
 
 
@@ -886,17 +945,21 @@ if __name__ == '__main__':
         return totalsize
 
 
-    def processLabels(ops: AssemblerOperation, labels: dict) -> None:
-        if (ops.operation == 'symbol'):
-            labelnm = ops.data.getRawData() #@HERE
-            addr = ops.pc
-            if (labelnm in labels):
-                raise SyntaxError(f"Replicated label '{labelnm}'",ops.line)
-            labels[labelnm] = addr
+    def processLabel(ops: AssemblerOperation, labels: dict) -> None:
+
+        labelnm = ops.data.getRawData()
+        addr = ops.pc
+        if (labelnm in labels):
+            raise SyntaxError(f"Replicated label '{labelnm}'",ops.line)
+        labels[labelnm] = addr
+
 
     def info(str,end=None) -> None:
         print(str,end='')
 
+    def print_if_true(check, str,*args,**kwargs):
+        if (check):
+            print(str,*args,**kwargs)
 
     def buildHelpText() -> str:
         return "\n\nExample: ./assembler.py example.asm [options]\n\n -v verbose\n -d debug\n -q quiet\n -s symbol table\n -3 [default] V3 addressed hex output\n -2 raw hex output\n -b binary output\n -n no output\n -r ROM address offset on V3 Hex output\n"
@@ -921,9 +984,13 @@ if __name__ == '__main__':
 
 
 
-    # ** Main Process Starts here ***
+    """ Main Process Starts here """
 
+    #print(sys.version_info)
+    #if not (sys.version_info.major == 3 and sys.version_info.minor == 8 ):
+    #    sys.exit(-1)
 
+    # Command Line options and check if source exists
     options,sourceFilename,assembler = handleCommandArgs(sys.argv)
 
     try:
@@ -933,73 +1000,82 @@ if __name__ == '__main__':
             raise Exception(f"Source file is needed to assemble!\n{hText}")
 
         if (not os.path.isfile(sourceFilename)):
-            raise Exception(f"Sourcefile '{sourceFilename}' does not exist.")
+            raise IOError(f"Sourcefile '{sourceFilename}' does not exist.")
 
-    except Exception as e:
+    except IOError as e:
         print(e)
         sys.exit(-1)
 
-    outTypeBinary = 0
-    outTypeRaw = 1
-    outTypeAddr = 2
 
-    pc = 0
-    line = 0
-    code = []
-    labels = {}
-    errors = 0
-    parser = AssemblerParser(labels) #@HERE
 
-    verbose ='v' in options
-    debug = 'd' in options
-    quiet = 'q' in options
-    symtable = 's' in options
-    help = 'h' in options
-    nooutput = 'n' in options
-    rom = 'r' in options
+    verbose_option ='v' in options
+    debug_option = 'd' in options
+    quiet_option = 'q' in options
+    symtable_option = 's' in options
+    help_option = 'h' in options
+    nooutput_option = 'n' in options
+    rom_option = 'r' in options
+    ram_address = RAM_ADDRESS  #Perhaps offer this as an option?
 
     outType  = OutputType.BINARY if 'b' in options\
                 else OutputType.RAWHEX if '2' in options\
                 else OutputType.ADDRESSEDHEX
 
-    if (help):
+    if (help_option):
         print(buildHelpText())
         sys.exit(0);
 
-    if (not quiet):
-        print(f"Trying to assemble '{sourceFilename}' \
-ROMMODE:{rom}' \
-verbose:{verbose} \
-quiet:{quiet} \
-debug:{debug} \
-symtable:{symtable}\n")
+    print_if_true(not quiet_option,f"Trying to assemble '{sourceFilename}' \
+ROMMODE:{rom_option}' \
+verbose:{verbose_option} \
+quiet:{quiet_option} \
+debug:{debug_option} \
+symtable:{symtable_option}\n")
+
+
+    labels = {}
+    parser = AssemblerParser(labels)        #Assembler Operations need a reference to the
+                                            #actual Symbol table ('labels') for the code generation - part -
+                                            #to resolve symbol names (addresses).
+
+                                            # There are no preprocessor symbols/constants (eg.'#DEFINE NUMBEROFLOOPS 0x22')
+                                            # handled by the parser as this can easily be
+                                            # implemented using a decent preprocessor
+                                            # such as 'cpp' or 'm4'
+
+                                            # The only thing we may need is something to handle
+                                            # finding bytes of an address -
+                                            #  such as movi r0,@LOW(16bitaddress/symbol)
+
 
     asm = open(sourceFilename, "r")
+
     completed = False
+    assembler_errors = 0
+    code = []
+    line = 0
 
     while not completed:
         try:
-
             text = asm.readline()
             if len(text) == 0:
+                completed = True
                 break
+
             line = line + 1
-            ops = None
             try:
-                ops = parser.parse(text.strip())
-            except Exception as e:
-                print(f"Assembler **FAILED** on Line {line} {e}")
-            # ops is an array of operation instructions - (in the case of 'label' followed by opcode instruction)
-            if (ops is not None):
-                for op in ops:
+                # Parse a line and build up code operations (a single line could have multiple operations)
+                operations = parser.parse(text.strip())
+                for op in operations:
                     if (op is not None):
-#                        op['line'] = line
-                        op.line = line
-                        if (debug):
-                            print(op)
-                        code.append(op)
+                        op.line = line          # Fill operator with line number
+                        #if (debug_option):
+                        print_if_true(debug_option, op)
+                        code.append(op)         # Place this in an ordered array for our builder
                         if (op.operation == 'end'):
                             completed = True
+            except Exception as e:
+                print(f"Assembler **FAILED** on Line {line} {e}")
 
         except KeyboardInterrupt:
             pass
@@ -1010,27 +1086,33 @@ symtable:{symtable}\n")
             #break
         except (ParseError, ZeroDivisionError) as e:
             print(f'Parse Error: {e} Line {line} {text}')
-            errors += 1
+            assembler_errors += 1
 
     # Parsing complete
-    if (errors > 0):
-        if (not quiet):
-            print("Build Failed! See a Code Doctor. Quick!")
+    if (assembler_errors > 0):
+        print_if_true(not quiet_option, f"Build Failed! {assembler_errors} assembler errors. See a Code Doctor. Quick!")
         sys.exit(-1)
 
     try:
 
+        program_counter = 0
         # Pre-process build a symbol address table
         for op in code:
-            if (op.operation == 'org'):
-                pc = op.data.getRawData()   #@HERE
-            op.pc = pc
-            pc += op.size
-            if (verbose):
-                print(op)
-            processLabels(op,labels)
 
-        if (not quiet and symtable):
+            if (op.operation == 'org'):
+                program_counter = op.data.getRawData() # SMELLY
+
+            op.pc = program_counter
+            program_counter += op.size
+
+            if (op.operation == 'symbol'):
+                processLabel(op,labels)
+
+            print_if_true(verbose_option, op)
+
+
+
+        if (not quiet_option and symtable_option):
             info("Symbol Table:\n")
             for lbl in labels:
                 info(f"\t'{lbl}': 0x{labels[lbl]:04x}\n")
@@ -1052,24 +1134,22 @@ symtable:{symtable}\n")
         #            print("ADDRESSEDHEX")
         #            break
         #info(f"{outType}")
-        if (not nooutput):
-            if (not quiet):
-                print(f"Producing LogiSym output file '{binName}'")
+        if (not nooutput_option):
+
+            print_if_true(not quiet_option, f"Producing LogiSym output file '{binName}'")
 
             if (outType == OutputType.BINARY):
                 size = produceBinFile(binName, code)
             elif (outType == OutputType.RAWHEX):
                 size = produceV2HexFile(binName, code)
             elif (outType == OutputType.ADDRESSEDHEX):
-                size = produceV3HexFile(binName, code, 0 if rom else RAMADDRESS)
+                size = produceV3HexFile(binName, code, ROM_ADDRESS if rom_option else ram_address)
             else:
                 raise Exception('Output type is not defined')
         else:
             size = produceDummyOuput(code)
 
-        if (not quiet):
-            print(f"\nSize: {size} bytes")
-            print("complete.\n")
+        print_if_true(not quiet_option, f"\nSize: {size} bytes\ncomplete.\n")
 
         sys.exit(0)
     except (SyntaxError) as e:
