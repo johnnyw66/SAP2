@@ -310,7 +310,7 @@ hlt
 ```
 
 ; Preprocess this source with the standard C preprocessor 'cpp'
-; Eg. 'cpp -DSOURCEADDR=0x1234 -P testmacro.asm tmp.asm'
+; Eg. 'cpp -DADDRESS=0x8000 -P testmacro.asm tmp.asm'
 ; and then assemble the processed cpp version - 'assember.py tmp.asm'
 
 
