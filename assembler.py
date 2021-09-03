@@ -53,6 +53,15 @@ class Data(ABC):
     def __repr__(self):
         return f"Raw data: <{self.data}>"
 
+#@dataclass
+#class CPPLineData(Data):
+#    line :int
+#    def __init__(self,data,line):
+#        super().__init__(data)
+#        self.line = line
+
+#    def getData(self):
+#        return this
 
 class FunctionData(Data):
     # Useful for 8-bit data instructions -(movi,addi,subi etc)
@@ -298,6 +307,9 @@ codeBuilder= {
     'exx' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x25)),
     'hlt' : SingleByteCodeBuilder(SimpleByteCodeResolver(0xff)),
 
+    'cppline' : NullByteCodeBuilder(),
+    'cppbuiltin' : NullByteCodeBuilder(),
+
     'org' : NullByteCodeBuilder(),
     'symbol' : NullByteCodeBuilder(),
     'comment' : NullByteCodeBuilder(),
@@ -315,10 +327,12 @@ codeBuilder= {
 class AssemblerOperation:
     operation : str = None
     pc : int = None
-    size : int = None
+    size : int = 0
     data : str = None
     reg : int = None
     regr : int = None
+    source_file:str = None
+    source_line:int = None
 
 
 class Builder:
@@ -536,6 +550,8 @@ class BaseParser(ABC):
             except ParserException as e:
                 pass
 
+    def finish_parsing(self):
+        self.pos = self.len + 1
 
 
 class AssemblerParser(BaseParser):
@@ -552,7 +568,7 @@ class AssemblerParser(BaseParser):
 
         while (self.pos < self.len):
 
-            rv = self.try_rules('comment', 'symbol', 'directive', 'instruction')
+            rv = self.try_rules('cpp_directive','comment', 'symbol', 'directive', 'instruction')
 
             if (rv is None):
                 raise ParserException(f"Can not parse {self.text}")
@@ -569,10 +585,35 @@ class AssemblerParser(BaseParser):
         pass
 
     # Top rules
+    # CPP directive - allows us to use the generic C preprocessor - such as cpp
+    def cpp_directive(self) -> AssemblerOperation:
+        if self.peek_chars('#'):
+            #print("cpp_directive",self)
+            data = self.text[self.pos:]
+            number = self.try_rules('decnumber')
+            if (number is not None):
+                # try and extract file source name or cpp function
+                self.gobblewhitespace()
+                if (self.chars('"')):
+                    fName = self.cpp_str()  #At this point we've either read in a file name
+                                            # or a CPP function type
+                    self.chars('"')
+                    # ignore everything else - after the trailing quote
+                    self.finish_parsing()
+                    # check to see if this is not some built-in definition.
+                    if (not fName.startswith("<")):
+                        return AssemblerOperation(operation = 'cppline', data = data, source_file = fName, source_line = number - 1 , size = 0)
+
+                #self.finish_parsing()
+                return AssemblerOperation(operation = 'cppbuiltin',size = 0, data=data)
+
+            self.finish_parsing()
+            return AssemblerOperation(operation = 'comment',data = data , size = 0)
+
 
     def comment(self) -> AssemblerOperation:
         """If we spot a comment TOKEN - then save text up to EOL and finish off parsing the line"""
-        if self.peek_chars(';#'):
+        if self.peek_chars(';'):
             data = self.text[self.pos:]
             self.pos = self.len + 1
             return AssemblerOperation(operation = 'comment',data = data , size = 0)
@@ -756,6 +797,19 @@ class AssemblerParser(BaseParser):
         r = self.chars('rR')
         reg = self.chars('0-3')
         return int(reg)
+
+    def cpp_str(self) -> str:
+        str_value = []
+        ch = self.chars('A-Za-z0-9_.<>//- ///')
+        str_value.append(ch)
+
+        while True:
+            ch = self.peek_chars('A-Za-z0-9_.<>//- ///')
+            if (ch is None):
+                break
+            str_value.append(ch)
+
+        return ''.join(str_value)
 
     def symbolstr(self) -> str:
         symbol = []
@@ -1054,6 +1108,7 @@ symtable:{symtable_option}\n")
     assembler_errors = 0
     code = []
     line = 0
+    current_filename = sourceFilename
 
     while not completed:
         try:
@@ -1067,15 +1122,26 @@ symtable:{symtable_option}\n")
                 # Parse a line and build up code operations (a single line could have multiple operations)
                 operations = parser.parse(text.strip())
                 for op in operations:
-                    if (op is not None):
-                        op.line = line          # Fill operator with line number
+
+                     if (op is not None):
+                        # Check for any CPP directives which would tell is the source file.
+                        # and line number
+                        if (op.operation == 'cppline'):
+                            line = op.source_line
+                            current_filename = op.source_file
+
+                        op.source_line = line          # Fill operator with line number
+                        op.source_file = current_filename
+
                         #if (debug_option):
                         print_if_true(debug_option, op)
                         code.append(op)         # Place this in an ordered array for our builder
+
                         if (op.operation == 'end'):
                             completed = True
+
             except Exception as e:
-                print(f"Assembler **FAILED** on Line {line} {e}")
+                print(f"Assembler **FAILED** on Line {line} '{current_filename}' {e}")
 
         except KeyboardInterrupt:
             pass
