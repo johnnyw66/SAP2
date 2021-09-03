@@ -470,6 +470,25 @@ opcodes = [
         {'Xx'},
     ]},
 
+    {'name':'MOVIW R0','bytecode': 0x28,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLk'},   # write low byte (in memory) to R0 and inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLk','k0'},  # write high byte to R1, inc pc to point to next opcode instruction
+    ]},
+
+    {'name':'MOVIW R2','bytecode': 0x2a,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLk','k1'},  # write low byte (in memory) to R2 and inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLk','k1','k0'},  # write high byte to R3, inc pc to point to next opcode instruction
+
+    ]},
+
     # OPCODES 0x26 to 0x3f are unused
 
 
