@@ -600,7 +600,7 @@ class AssemblerParser(BaseParser):
                     self.pos = self.len + 1
                     # check to see if this is not some built-in definition.
                     if (not fName.startswith("<")):
-                        return AssemblerOperation(operation = 'cppline', data = data, source_file = fName, source_line = number , size = 0)
+                        return AssemblerOperation(operation = 'cppline', data = data, source_file = fName, source_line = number - 1 , size = 0)
 
                 self.pos = self.len + 1
                 return AssemblerOperation(operation = 'cppbuiltin',size = 0, data=data)
