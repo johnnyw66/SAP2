@@ -1,4 +1,7 @@
 :start
+  movi  r0,@LOW(label1)
+  movi  r1,@HIGH(label1)
+  movwi r2,label1
   movwi sp,0xfffe
   movwi r0,0x1234
   movwi r2,0xabcd

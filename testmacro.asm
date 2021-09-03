@@ -1,7 +1,18 @@
+#include "memorymap.asm"
 
 ; Preprocess this source with the standard C preprocessor 'cpp'
-; Eg. 'cpp -P testmacro.asm testmacro_cpped.asm'
+; Eg. 'cpp -DSOURCEADDR=0x1234 -P testmacro.asm testmacro_cpped.asm'
 ; and then assemble the processed cpp version - 'assember.py testmacro_cpped.asm'
+
+
+
+
+
+
+
+#ifndef ADDRESS
+#define ADDRESS 0x8000
+#endif
 
 #define multbit(_skipadd)  clc \
                           shr r1 \
@@ -19,9 +30,9 @@
                           shl r2 \
                           shl r3
 
-
 ;                         RAM Source
-                          .org 0x8000
+                          .org ADDRESS
+
 :start
                           movi r0, 0xab
                           movi r1, 0x00   ; mov r0r1, 0x00ab

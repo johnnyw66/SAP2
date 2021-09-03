@@ -727,7 +727,7 @@ class AssemblerParser(BaseParser):
         rx = self.registers()
         self.chars(',')
         if (self.peek_chars('@')):
-            fnc = self.trytrymatch('LOW','HIGH')
+            fnc = self.trymatch('LOW','HIGH')
             #if (fnc := self.trymatch('LOW','HIGH')):  #3.8!
             if (fnc):
                 self.chars('(')
