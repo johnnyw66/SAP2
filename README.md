@@ -181,20 +181,20 @@ XORI Rx,8bit| Rx ^ 8bit -> Rx|Z S V O|8
 
 Opcode|Action|Flags|Tstates
 ------|------|-----|-------
-MOVI Rx,8bit | 8-bit value -> Rx| _|7
-LD Rx,16bitaddr |@(addr) -> Rx |_|0
-ST Rx,16bitaddr |@(addr) <- Rx |_|0
-MOVWI SP,16bitaddr| 16-bit value -> SP| _|0
-MOVWI R0,16bitaddr+| 16-bit value -> {R1,R0}|_|0
-MOVWI R2,16bitaddr+| 16-bit value -> {R3,R2}|_|0
+MOVI Rx,8bit | 8-bit value -> Rx| _|6
+LD Rx,16bitaddr |@(addr) -> Rx |_|7
+ST Rx,16bitaddr |@(addr) <- Rx |_|7
+MOVWI SP,16bitaddr| 16-bit value -> SP| _|7
+MOVWI R0,16bitaddr+| 16-bit value -> {R1,R0}|_|7
+MOVWI R2,16bitaddr+| 16-bit value -> {R3,R2}|_|7
 *4 Opcodes in total(bottom 2 to be implemented)*
 
 Opcode|Action|Flags|Tstates
 ------|------|-----|-------
-DJNZ Rx,16bitaddr | Rx - 1 -> Rx, 16bitaddr if NZ ? PC + 1 -> PC| Z S V O|0
-JPNZ 16bitaddr | PC <- PC + 1 if Z ? 16bitaddr|_|0
-JPNC 16bitaddr | PC <- PC + 1 if C ? 16bitaddr|_|0
-JMP  16bitaddr | PC <- 16bitaddr |_|0
+DJNZ Rx,16bitaddr | Rx - 1 -> Rx, 16bitaddr if NZ ? PC + 1 -> PC| Z S V O|8
+JPNZ 16bitaddr | PC <- PC + 1 if Z ? 16bitaddr|_|8
+JPNC 16bitaddr | PC <- PC + 1 if C ? 16bitaddr|_|8
+JMP  16bitaddr | PC <- 16bitaddr |_|8
 CALL 16bitaddr | @SP <- PC + 1, PC <- 16bitaddr, SP <- SP - 2| _|14
 RET| PC <- @SP|_|10
 *9 Opcodes in total*
