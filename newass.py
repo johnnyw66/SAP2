@@ -36,6 +36,119 @@ WSPACE = "\f\v\r\t\n "
 RAM_ADDRESS = 0x8000
 ROM_ADDRESS = 0x0000
 
+@dataclass
+class AssemblerOperation:
+    operation : str = None
+    pc : int = None
+    size : int = 0
+    data : str = None
+    reg : int = None
+    regr : int = None
+    source_file:str = None
+    source_line:int = None
+
+
+
+class Dissassembler:
+
+        class BaseDissassembler(ABC):
+
+            @abstractmethod
+            def dissassemble(self,op:AssemblerOperation) -> str:
+                pass
+
+        class DissImmediate(BaseDissassembler):
+
+                def dissassemble(self,op: AssemblerOperation) -> str:
+                    return op.operation +'\t'+ 'r' + str(op.reg) + ',' + f'{op.data.getData()[0]:02x}'
+
+        class DissImmediate16(BaseDissassembler):
+
+                def dissassemble(self,op: AssemblerOperation) -> str:
+                    return op.operation +'\t' + f'{op.data.getData()[1]<<8 | op.data.getData()[0]:04x}'
+
+        class DissRegImmediate16(BaseDissassembler):
+
+                def dissassemble(self,op: AssemblerOperation) -> str:
+                    return op.operation +'\t' + 'r' + str(op.reg) + ',' +f'{op.data.getData()[1]<<8 | op.data.getData()[0]:04x}'
+
+        class DissSingleReg(BaseDissassembler):
+
+                def dissassemble(self,op: AssemblerOperation) -> str:
+                    return op.operation +'\t'+ 'r' + str(op.reg)
+
+        class DissRegReg(BaseDissassembler):
+
+                def dissassemble(self,op: AssemblerOperation) -> str:
+                    return op.operation +'\t'+ 'r' + str(op.reg) + ',' + 'r' + str(op.regr)
+
+        class DissSingleByteOpCode(BaseDissassembler):
+
+                def dissassemble(self,op: AssemblerOperation) -> str:
+                    return op.operation
+
+
+        class DissData(BaseDissassembler):
+
+                def dissassemble(self,op: AssemblerOperation) -> str:
+                    data = ''.join([f'{_x:02X}' for _i,_x in enumerate(op.data.getData())])
+                    return op.operation +'\t'+ f'{data}'
+
+
+        def dissassemble(self,op:AssemblerOperation) -> str:
+            disactions = {
+                        'movwi'   : self.DissRegImmediate16(),
+                        'ld'   : self.DissRegImmediate16(),
+                        'st'   : self.DissRegImmediate16(),
+                        'djnz'   : self.DissRegImmediate16(),
+
+                        'shl'  : self.DissSingleReg(),
+                        'shr'  : self.DissSingleReg(),
+
+                        'out'  : self.DissSingleReg(),
+                        'inc'  : self.DissSingleReg(),
+                        'dec'  : self.DissSingleReg(),
+
+                        'call' : self.DissImmediate16(),
+                        'jmp' : self.DissImmediate16(),
+                        'jpz' : self.DissImmediate16(),
+                        'jpnz' : self.DissImmediate16(),
+                        'jpc' : self.DissImmediate16(),
+                        'jpnc' : self.DissImmediate16(),
+                        'jps' : self.DissImmediate16(),
+                        'jpns' : self.DissImmediate16(),
+                        'jpo' : self.DissImmediate16(),
+                        'jpno' : self.DissImmediate16(),
+
+                        'movi' : self.DissImmediate(),
+                        'addi' : self.DissImmediate(),
+                        'subi' : self.DissImmediate(),
+                        'andi' : self.DissImmediate(),
+                        'ori' :  self.DissImmediate(),
+                        'xori' : self.DissImmediate(),
+
+                        'mov' : self.DissRegReg(),
+                        'add' : self.DissRegReg(),
+                        'sub' : self.DissRegReg(),
+                        'and' : self.DissRegReg(),
+                        'or' : self.DissRegReg(),
+                        'xor' : self.DissRegReg(),
+
+                        'hlt' : self.DissSingleByteOpCode(),
+                        'nop' : self.DissSingleByteOpCode(),
+                        'ret' : self.DissSingleByteOpCode(),
+                        'clc' : self.DissSingleByteOpCode(),
+                        'setc' : self.DissSingleByteOpCode(),
+                        'exx' : self.DissSingleByteOpCode(),
+
+                        'db' : self.DissData(),
+                        'dw' : self.DissData(),
+                        'dt' : self.DissData(),
+                    }
+            return f'{ "?"+op.operation if op.operation not in disactions else disactions[op.operation].dissassemble(op)}'
+
+
+
 class Data(ABC):
     def __init__(self,data):
         self.data = data
@@ -313,17 +426,6 @@ codeBuilder= {
     'end' : NullByteCodeBuilder(),
 }
 
-
-@dataclass
-class AssemblerOperation:
-    operation : str = None
-    pc : int = None
-    size : int = 0
-    data : str = None
-    reg : int = None
-    regr : int = None
-    source_file:str = None
-    source_line:int = None
 
 
 class Builder:
@@ -990,109 +1092,11 @@ if __name__ == '__main__':
         return totalsize
 
 
-    class BaseDissassembler(ABC):
-
-        @abstractmethod
-        def dissassemble(self,op:AssemblerOperation) -> str:
-            pass
-
-    class DissImmediate(BaseDissassembler):
-
-            def dissassemble(self,op: AssemblerOperation) -> str:
-                return op.operation +'\t'+ 'r' + str(op.reg) + ',' + f'{op.data.getData()[0]:02x}'
-
-    class DissImmediate16(BaseDissassembler):
-
-            def dissassemble(self,op: AssemblerOperation) -> str:
-                return op.operation +'\t' + f'{op.data.getData()[1]<<8 | op.data.getData()[0]:04x}'
-
-    class DissRegImmediate16(BaseDissassembler):
-
-            def dissassemble(self,op: AssemblerOperation) -> str:
-                return op.operation +'\t' + 'r' + str(op.reg) + ',' +f'{op.data.getData()[1]<<8 | op.data.getData()[0]:04x}'
-
-    class DissSingleReg(BaseDissassembler):
-
-            def dissassemble(self,op: AssemblerOperation) -> str:
-                return op.operation +'\t'+ 'r' + str(op.reg)
-
-    class DissRegReg(BaseDissassembler):
-
-            def dissassemble(self,op: AssemblerOperation) -> str:
-                return op.operation +'\t'+ 'r' + str(op.reg) + ',' + 'r' + str(op.regr)
-
-    class DissImdepotent(BaseDissassembler):
-
-            def dissassemble(self,op: AssemblerOperation) -> str:
-                return op.operation
-
-
-    class DissData(BaseDissassembler):
-
-            def dissassemble(self,op: AssemblerOperation) -> str:
-                data = ''.join([f'{_x:02X}' for _i,_x in enumerate(op.data.getData())])
-                return op.operation +'\t'+ f'{data}'
-
-
-    def dissassemble(op:AssemblerOperation) -> str:
-        disactions = {
-                'movwi'   : DissRegImmediate16(),
-                'ld'   : DissRegImmediate16(),
-                'st'   : DissRegImmediate16(),
-                'djnz'   : DissRegImmediate16(),
-
-                'shl'  : DissSingleReg(),
-                'shr'  : DissSingleReg(),
-
-                'out'  : DissSingleReg(),
-                'inc'  : DissSingleReg(),
-                'dec'  : DissSingleReg(),
-
-                'call' : DissImmediate16(),
-                'jmp' : DissImmediate16(),
-                'jpz' : DissImmediate16(),
-                'jpnz' : DissImmediate16(),
-                'jpc' : DissImmediate16(),
-                'jpnc' : DissImmediate16(),
-                'jps' : DissImmediate16(),
-                'jpns' : DissImmediate16(),
-                'jpo' : DissImmediate16(),
-                'jpno' : DissImmediate16(),
-
-                'movi' : DissImmediate(),
-                'addi' : DissImmediate(),
-                'subi' : DissImmediate(),
-                'andi' : DissImmediate(),
-                'ori' :  DissImmediate(),
-                'xori' : DissImmediate(),
-
-                'mov' : DissRegReg(),
-                'add' : DissRegReg(),
-                'sub' : DissRegReg(),
-                'and' : DissRegReg(),
-                'or' : DissRegReg(),
-                'xor' : DissRegReg(),
-
-                'hlt' : DissImdepotent(),
-                'nop' : DissImdepotent(),
-                'ret' : DissImdepotent(),
-                'clc' : DissImdepotent(),
-                'setc' : DissImdepotent(),
-                'exx' : DissImdepotent(),
-
-                'db' : DissData(),
-                'dw' : DissData(),
-                'dt' : DissData(),
-
-
-
-            }
-
-        return f'{ "?"+op.operation if op.operation not in disactions else disactions[op.operation].dissassemble(op)}'
-
-
     def produceCodeOuput(ops) -> int:
         totalsize = 0
+
+        dissassembler = Dissassembler()
+
         for opindex,op in enumerate(ops):
             binarray = builder.build(op)
             sz = len(binarray)
@@ -1100,7 +1104,7 @@ if __name__ == '__main__':
                 print(f'{op.pc:04X}\t',end='')
                 bc = ''.join([f'{_x:02X}' for _i,_x in enumerate(binarray) if _i < 128])
                 print(f'{bc}',end='')
-                print(f'\t{dissassemble(op)}')
+                print(f'\t{dissassembler.dissassemble(op)}')
             totalsize += sz
         return totalsize
 
@@ -1121,7 +1125,7 @@ if __name__ == '__main__':
             print(str,*args,**kwargs)
 
     def buildHelpText() -> str:
-        return "\n\nExample: ./assembler.py example.asm [options]\n\n -v verbose\n -d debug\n -q quiet\n -s symbol table\n -3 [default] V3 addressed hex output\n -2 raw hex output\n -b binary output\n -n no output\n -r ROM address offset on V3 Hex output\n"
+        return "\n\nExample: ./assembler.py example.asm [options]\n\n -v verbose\n -d debug\n -q quiet\n -s symbol table\n -3 [default] V3 addressed hex output\n -2 raw hex output\n -b binary output\n -n no output [-c dissassembled code]\n -r ROM address offset on V3 Hex output\n"
 
 
     def handleCommandArgs(argv: [str]) -> ([str],str,str):
@@ -1173,6 +1177,8 @@ if __name__ == '__main__':
     symtable_option = 's' in options
     help_option = 'h' in options
     nooutput_option = 'n' in options
+    dissassembled_code_option ='c' in options
+
     rom_option = 'r' in options
     ram_address = RAM_ADDRESS  #Perhaps offer this as an option?
 
@@ -1318,8 +1324,8 @@ symtable:{symtable_option}\n")
             else:
                 raise Exception('Output type is not defined')
         else:
-            #size = produceDummyOuput(code)
-            size = produceCodeOuput(code)
+            size = produceCodeOuput(code) if dissassembled_code_option else produceDummyOuput(code)
+
 
         print_if_true(not quiet_option, f"\nSize: {size} bytes\ncomplete.\n")
 
