@@ -53,15 +53,6 @@ class Data(ABC):
     def __repr__(self):
         return f"Raw data: <{self.data}>"
 
-#@dataclass
-#class CPPLineData(Data):
-#    line :int
-#    def __init__(self,data,line):
-#        super().__init__(data)
-#        self.line = line
-
-#    def getData(self):
-#        return this
 
 class FunctionData(Data):
     # Useful for 8-bit data instructions -(movi,addi,subi etc)
@@ -999,6 +990,120 @@ if __name__ == '__main__':
         return totalsize
 
 
+    class BaseDissassembler(ABC):
+
+        @abstractmethod
+        def dissassemble(self,op:AssemblerOperation) -> str:
+            pass
+
+    class DissImmediate(BaseDissassembler):
+
+            def dissassemble(self,op: AssemblerOperation) -> str:
+                return op.operation +'\t'+ 'r' + str(op.reg) + ',' + f'{op.data.getData()[0]:02x}'
+
+    class DissImmediate16(BaseDissassembler):
+
+            def dissassemble(self,op: AssemblerOperation) -> str:
+                return op.operation +'\t' + f'{op.data.getData()[1]<<8 | op.data.getData()[0]:04x}'
+
+    class DissRegImmediate16(BaseDissassembler):
+
+            def dissassemble(self,op: AssemblerOperation) -> str:
+                return op.operation +'\t' + 'r' + str(op.reg) + ',' +f'{op.data.getData()[1]<<8 | op.data.getData()[0]:04x}'
+
+    class DissSingleReg(BaseDissassembler):
+
+            def dissassemble(self,op: AssemblerOperation) -> str:
+                return op.operation +'\t'+ 'r' + str(op.reg)
+
+    class DissRegReg(BaseDissassembler):
+
+            def dissassemble(self,op: AssemblerOperation) -> str:
+                return op.operation +'\t'+ 'r' + str(op.reg) + ',' + 'r' + str(op.regr)
+
+    class DissImdepotent(BaseDissassembler):
+
+            def dissassemble(self,op: AssemblerOperation) -> str:
+                return op.operation
+
+
+    class DissData(BaseDissassembler):
+
+            def dissassemble(self,op: AssemblerOperation) -> str:
+                data = ''.join([f'{_x:02X}' for _i,_x in enumerate(op.data.getData())])
+                return op.operation +'\t'+ f'{data}'
+
+
+    def dissassemble(op:AssemblerOperation) -> str:
+        disactions = {
+                'movwi'   : DissRegImmediate16(),
+                'ld'   : DissRegImmediate16(),
+                'st'   : DissRegImmediate16(),
+                'djnz'   : DissRegImmediate16(),
+
+                'shl'  : DissSingleReg(),
+                'shr'  : DissSingleReg(),
+
+                'out'  : DissSingleReg(),
+                'inc'  : DissSingleReg(),
+                'dec'  : DissSingleReg(),
+
+                'call' : DissImmediate16(),
+                'jmp' : DissImmediate16(),
+                'jpz' : DissImmediate16(),
+                'jpnz' : DissImmediate16(),
+                'jpc' : DissImmediate16(),
+                'jpnc' : DissImmediate16(),
+                'jps' : DissImmediate16(),
+                'jpns' : DissImmediate16(),
+                'jpo' : DissImmediate16(),
+                'jpno' : DissImmediate16(),
+
+                'movi' : DissImmediate(),
+                'addi' : DissImmediate(),
+                'subi' : DissImmediate(),
+                'andi' : DissImmediate(),
+                'ori' :  DissImmediate(),
+                'xori' : DissImmediate(),
+
+                'mov' : DissRegReg(),
+                'add' : DissRegReg(),
+                'sub' : DissRegReg(),
+                'and' : DissRegReg(),
+                'or' : DissRegReg(),
+                'xor' : DissRegReg(),
+
+                'hlt' : DissImdepotent(),
+                'nop' : DissImdepotent(),
+                'ret' : DissImdepotent(),
+                'clc' : DissImdepotent(),
+                'setc' : DissImdepotent(),
+                'exx' : DissImdepotent(),
+
+                'db' : DissData(),
+                'dw' : DissData(),
+                'dt' : DissData(),
+
+
+
+            }
+
+        return f'{ "?"+op.operation if op.operation not in disactions else disactions[op.operation].dissassemble(op)}'
+
+
+    def produceCodeOuput(ops) -> int:
+        totalsize = 0
+        for opindex,op in enumerate(ops):
+            binarray = builder.build(op)
+            sz = len(binarray)
+            if (sz > 0):
+                print(f'{op.pc:04X}\t',end='')
+                bc = ''.join([f'{_x:02X}' for _i,_x in enumerate(binarray) if _i < 128])
+                print(f'{bc}',end='')
+                print(f'\t{dissassemble(op)}')
+            totalsize += sz
+        return totalsize
+
     def processLabel(ops: AssemblerOperation, labels: dict) -> None:
 
         labelnm = ops.data.getRawData()
@@ -1213,7 +1318,8 @@ symtable:{symtable_option}\n")
             else:
                 raise Exception('Output type is not defined')
         else:
-            size = produceDummyOuput(code)
+            #size = produceDummyOuput(code)
+            size = produceCodeOuput(code)
 
         print_if_true(not quiet_option, f"\nSize: {size} bytes\ncomplete.\n")
 
