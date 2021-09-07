@@ -8,7 +8,7 @@
 
 This SAP2 inspired microprocessor written for the **LogiSim Evolution** CAD can be built with standard TTL/CMOS logic chips.
 Fed up with soldering - I wanted to 'build' the microprocessor before my attempt to describe this in *Verilog
-HDL* and then placing the design on one of my Altera FPGAs. It will support over 80 instructions which are listed below.
+HDL* and then place the design on one of my Altera FPGAs. It will support over 80 instructions which are listed below.
 
 
 At some point I will add in I/O instructions and have it drive a VGA/Video Composite output
