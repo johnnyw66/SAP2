@@ -489,8 +489,21 @@ opcodes = [
 
     ]},
 
-    # OPCODES 0x26 to 0x3f are unused
 
+    # NEW Swap Instructions Test
+    {'name':'SWAP R0,R2','bytecode': 0x32,
+    'control':
+        macro('alumacro', rx=0, ry=2, afnc = 'XOR',latchflag = False) + \
+        macro('alumacro', rx=2, ry=0, afnc = 'XOR',latchflag = False) + \
+        macro('alumacro', rx=0, ry=2, afnc = 'XOR',latchflag = False)
+    },
+
+    {'name':'SWAP R1,R3','bytecode': 0x37,
+    'control':
+        macro('alumacro', rx=1, ry=3, afnc = 'XOR',latchflag = False) + \
+        macro('alumacro', rx=3, ry=1, afnc = 'XOR',latchflag = False) + \
+        macro('alumacro', rx=1, ry=3, afnc = 'XOR',latchflag = False)
+    },
 
     {'name':'MOVIR0','bytecode': 0x40,
     'control':

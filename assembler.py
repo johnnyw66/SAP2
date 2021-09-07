@@ -133,6 +133,7 @@ class Dissassembler:
                         'and' : self.DissRegReg(),
                         'or' : self.DissRegReg(),
                         'xor' : self.DissRegReg(),
+                        'swp' : self.DissRegReg(),
 
                         'hlt' : self.DissSingleByteOpCode(),
                         'nop' : self.DissSingleByteOpCode(),
@@ -378,6 +379,7 @@ codeBuilder= {
     'and' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0xc0)),
     'or' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0xd0)),
     'xor' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0xe0)),
+    'swp' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0x30)),
 
 
     'addi' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x50)),
@@ -789,7 +791,7 @@ class AssemblerParser(BaseParser):
         return None
 
     def reg8(self) -> AssemblerOperation:
-        m = self.trymatch('mov','add','sub','and','or','xor')
+        m = self.trymatch('mov','add','sub','and','or','xor','swp')
         if (m):
             return self.regreginstruction(m)
         return None
