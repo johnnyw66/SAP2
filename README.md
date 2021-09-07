@@ -13,7 +13,7 @@ HDL* and then placing the design on one of my Altera FPGAs. It will support over
 
 At some point I will add in I/O instructions and have it drive a VGA/Video Composite output
 along with a Serial UART. I will also split the current 64k RAM into a 32k ROM with 32k RAM
-(**completed ROM 0x0000 - 0x7fff RAM 0x8000 - 0xffff**)
+(**Now completed! ROM 0x0000 - 0x7fff RAM 0x8000 - 0xffff**)
 If my interest still holds - the ROM could contain some simple monitor program to load software over an RS232 serial port. Perhaps look at retargeting a C Compiler?
 
 
