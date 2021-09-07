@@ -6,7 +6,7 @@
 24 August 2021
 ---
 
-This microprocessor written for the **LogiSim Evolution** CAD can be built with standard TTL/CMOS logic chips.
+This SAP2 inspired microprocessor written for the **LogiSim Evolution** CAD can be built with standard TTL/CMOS logic chips.
 Fed up with soldering - I wanted to 'build' the microprocessor before my attempt to describe this in *Verilog
 HDL* and then placing the design on one of my Altera FPGAs. It will support over 80 instructions which are listed below.
 
