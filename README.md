@@ -220,7 +220,7 @@ HLT| Stop uProc|_|4
 **CLC and SETC are currently 'fudged' as they affect the sign and overflow FLAGS**
 
 
-Example Assembler Code (using the preprocessor *cpp*)
+Example: 16-bit Jump table (using the preprocessor *cpp*)
 ---
 ```
 .org 0x8000
@@ -304,7 +304,7 @@ hlt
 ```
 
 
-16-Bit Jump Table (using *cpp*)
+16-Bit Multiply (using *cpp*)
 ---
 
 ```
@@ -396,6 +396,14 @@ hlt
 
 
 ```
+
+```
+# Simple script to preprocess assembler source with cpp
+cpp $@ a.asm
+./assembler.py a.asm -3 -s
+rm -f a.asm
+```
+
 Software Requirements
 ----
 
