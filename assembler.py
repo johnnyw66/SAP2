@@ -181,7 +181,7 @@ class FunctionData(Data):
         self.fnc = fnc
 
     def getData(self):
-        return [self.data.getData()[0]] if self.fnc == 'LOW' else \
+        return [self.data.getData()[0]] if self.fnc == 'LOW' or self.fnc == '>' else \
                 [self.data.getData()[1]]
 
     def __str__(self):
@@ -608,6 +608,7 @@ class BaseParser(ABC):
             return None
 
     def chars(self, pattern: str, bump: bool = True) -> str:
+        self.gobblewhitespace()
 
         if (pattern not in self._cache):
             self._cache[pattern] = self.produce_chars_pattern(pattern)
@@ -862,21 +863,36 @@ class AssemblerParser(BaseParser):
     def intermediate(self, opcode: str) -> AssemblerOperation:
         rx = self.registers()
         self.chars(',')
-        if (self.peek_chars('@')):
-            fnc = self.trymatch('LOW','HIGH')
-            #if (fnc := self.trymatch('LOW','HIGH')):  #3.8!
-            if (fnc):
-                self.chars('(')
-                dvalue = self.try_rules('number16bit','symbolstr')
-                if (dvalue is None):
-                    return None
-                self.chars(')')
-                value = FunctionData(fnc,dvalue)
-                return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
-            # SHOULD NOT ARRIVE HERE! DO SOMETHING
-            return None
+        fnc = self.peek_chars('<>')
+        if (fnc):
+            dvalue = self.try_rules('number16bit','symbolstr')
+            if (dvalue is None):
+                return None
+            value = FunctionData(fnc,dvalue)
+            return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
+
         value = self.number8bit()
         return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
+
+
+    # def intermediateOLD(self, opcode: str) -> AssemblerOperation:
+    #     rx = self.registers()
+    #     self.chars(',')
+    #     if (self.peek_chars('@')):
+    #         fnc = self.trymatch('LOW','HIGH')
+    #         #if (fnc := self.trymatch('LOW','HIGH')):  #3.8!
+    #         if (fnc):
+    #             self.chars('(')
+    #             dvalue = self.try_rules('number16bit','symbolstr')
+    #             if (dvalue is None):
+    #                 return None
+    #             self.chars(')')
+    #             value = FunctionData(fnc,dvalue)
+    #             return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
+    #         # SHOULD NOT ARRIVE HERE! DO SOMETHING
+    #         return None
+    #     value = self.number8bit()
+    #     return AssemblerOperation(operation= opcode, reg = rx, data = value, size = 2)
 
     def regreginstruction(self, opcode: str) -> AssemblerOperation:
         rx = self.registers()

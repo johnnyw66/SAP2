@@ -38,9 +38,9 @@
     shl r1
     shl r0
     shl r1
-    
-    movi r2,@LOW(functable)
-    movi r3,@HIGH(functable)
+
+    movi r2,>functable
+    movi r3,<functable
 
     add  r2,r0
     add r3,r1
