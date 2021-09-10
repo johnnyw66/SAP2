@@ -574,6 +574,26 @@ opcodes = [
     ]
     },
 
+    # TODO ADD TO ASSEMBLER 
+    {'name':'LD R2,{R0R1}','bytecode': 0x4e,
+    'control': [
+            {'Ek','nLal'},
+            {'Ek','f0','nLah'},
+            {'E16','nLm'},
+            {'nCE','nLk','k1'},
+    ]
+    },
+
+    {'name':'LD R3,{R0R1}','bytecode': 0x4f,
+    'control': [
+            {'Ek','nLal'},
+            {'Ek','f0','nLah'},
+            {'E16','nLm'},
+            {'nCE','nLk','k0','k1'},
+    ]
+    },
+
+
     # 0x50 other Logic immediate functions
 
     {'name':'ADDI R0,','bytecode': 0x50,
