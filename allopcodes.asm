@@ -1,4 +1,9 @@
 :start
+  push r0
+  ;csp  r0
+  push r2
+  csp  r2
+
   movi  r0,>label1
   movi  r1,<label1
 ;  movi  r0 ,@LOW(label1)

@@ -438,6 +438,7 @@ opcodes = [
 
     {'name':'TODO PUSHALL','bytecode': 0x21, 'control':
     [
+        {'Es','Sa','nLa','nLb'}
     ]},
 
     {'name':'POP R0R1','bytecode': 0x22, 'control':
@@ -537,26 +538,41 @@ opcodes = [
 
     # XORI TODO
 
-    {'name':'TODO XORIR0','bytecode': 0x44,
+    {'name':'XORIR0','bytecode': 0x44,
     'control':
         macro('aluimmediatemacro', rx=0, afnc = 'XOR',latchflag = True)
     },
-    {'name':'TODO XORIR1','bytecode': 0x45,
+    {'name':'XORIR1','bytecode': 0x45,
     'control':
         macro('aluimmediatemacro', rx=1, afnc = 'XOR',latchflag = True)
     },
-    {'name':'TODO XORIR2','bytecode': 0x46,
+    {'name':'XORIR2','bytecode': 0x46,
     'control':
         macro('aluimmediatemacro', rx=2, afnc = 'XOR',latchflag = True)
     },
-    {'name':'TODO XORIR3','bytecode': 0x47,
+    {'name':'XORIR3','bytecode': 0x47,
     'control':
         macro('aluimmediatemacro', rx=3, afnc = 'XOR',latchflag = True)
     },
 
     # OPCODES 0x48 to 0x4f are unused
+    # copy SP - 16 bit copy of stack into R0R1 or R2R3 pair
 
+    {'name':'CSP R0','bytecode': 0x48,
+    'control': [
+        {'Es','Sa','nLa','nLb'},
+        {'nLk','Ea'},
+        {'nLk','Eb','k0'}
+    ]
+    },
 
+    {'name':'CSP R2','bytecode': 0x49,
+    'control': [
+        {'Es','Sa','nLa','nLb'},
+        {'nLk','Ea','k1'},
+        {'nLk','Eb','k1','k0'}
+    ]
+    },
 
     # 0x50 other Logic immediate functions
 

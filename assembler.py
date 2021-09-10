@@ -269,7 +269,7 @@ class SimpleByteCodeResolver(ByteCodeResolver):
 
 
 
-class LookupByOpByteCodeResolver(ByteCodeResolver):
+class LookupByOperandByteCodeResolver(ByteCodeResolver):
     def __init__(self, table):
         self.lut = table
 
@@ -351,8 +351,9 @@ class BuildOperation:
 codeBuilder= {
     'mov' : DoubleRegByteCodeBuilder(SimpleByteCodeResolver(0x90)),
     'movi' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x40)),
-    'movwi' : TripleByteCodeBuilder(LookupByOpByteCodeResolver({'sp':0x1c,'r0':0x28, 'r2':0x2a})),    # set SP/R0R1/R2R3 with a 16-bit address
+    'movwi' : TripleByteCodeBuilder(LookupByOperandByteCodeResolver({'sp':0x1c,'r0':0x28, 'r1':0x28, 'r2':0x2a, 'r3': 0x2a})),    # set SP/R0R1/R2R3 with a 16-bit address
 
+    'csp' : SingleByteCodeBuilder(LookupByOperandByteCodeResolver({0:0x48, 1:0x48, 2:0x49, 3: 0x49})),
 
     'ld' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x14)),
     'st' : SingleRegByteCodeBuilder(SimpleByteCodeResolver(0x18)),
@@ -831,7 +832,7 @@ class AssemblerParser(BaseParser):
         return None
 
     def out(self) -> AssemblerOperation:
-        op = self.trymatch('out','shl','shr')
+        op = self.trymatch('out','shl','shr','csp')
         if (op is not None):
             reg = self.try_rules('registers')
             return AssemblerOperation(operation = op, reg = reg, size = 1)
