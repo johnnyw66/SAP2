@@ -162,6 +162,7 @@ SUB Rx,Ry|Rx - Ry -> Rx| Z V S|4
 AND Rx,Ry|Rx & Ry -> Rx|Z|4
 OR Rx,Ry|Rx or Rx-> R|Z S V|4
 XOR Rx,Ry| Rx ^ Ry -> Rx| Z S V|4
+SWP Rx,Ry| Rx <-> Ry|_|8
 INC Rx | Rx + 1 -> Rx | Z S V O|5
 SHL Rx | {Rx,Cf}<<1 -> Rx | Z S V C|5
 SHR Rx | {Cf,Rx}>>1 -> Rx | Z S V C|5
@@ -169,7 +170,8 @@ DEC Rx | Rx - 1 -> Rx | Z S V O|5
 INC SP | SP + 1 -> SP |_|5
 DEC SP | SP - 1 -> SP |_|5
 OUT Rx| Rx sent to Display Unit|_|4
-*46 Opcodes in total*
+CSP Rx| SP copied to RxRy pair|_|5
+*57 Opcodes in total*
 
 Opcode|Action|Flags|Tstates
 ------|------|-----|-------
