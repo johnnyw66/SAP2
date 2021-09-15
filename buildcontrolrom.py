@@ -558,7 +558,7 @@ opcodes = [
     # OPCODES 0x48 to 0x4f are unused
     # copy SP - 16 bit copy of stack into R0R1 or R2R3 pair
 
-    {'name':'CSP R0','bytecode': 0x48,
+    {'name':'CSP R0 (LD SP,[R0R1])','bytecode': 0x48,
     'control': [
         {'Es','Sa','nLa','nLb'},
         {'nLk','Ea'},
@@ -566,7 +566,7 @@ opcodes = [
     ]
     },
 
-    {'name':'CSP R2','bytecode': 0x49,
+    {'name':'CSP R2 (LD SP,[R2R3])','bytecode': 0x49,
     'control': [
         {'Es','Sa','nLa','nLb'},
         {'nLk','Ea','k1'},
@@ -574,8 +574,28 @@ opcodes = [
     ]
     },
 
-    # TODO ADD TO ASSEMBLER 
-    {'name':'LD R2,{R0R1}','bytecode': 0x4e,
+
+    {'name':'ST R2,[R0R1] TODO','bytecode': 0x4a,
+    'control': [
+            {'Ek','nLal'},           # R0 ubto low byte reg
+            {'Ek','f0','nLah'},      # R1 into high byte reg
+            {'E16','nLm'},           # Set Memory address location with {R0R1} pair
+            {'Ek','Lr','f1'}         # Finally Write the contents of REG2 reg to the current address in MAR.
+    ]
+    },
+
+    {'name':'ST R3,[R0R1] TODO','bytecode': 0x4b,
+    'control': [
+            {'Ek','nLal'},
+            {'Ek','f0','nLah'},
+            {'E16','nLm'},
+            {'nCE','nLk','k1'},
+            {'Ek','Lr','f1','f0'}         # Finally Write the contents of REG2 reg to the current address in MAR.
+    ]
+    },
+
+    # TODO ADD TO ASSEMBLER
+    {'name':'LD R2,[R0R1]','bytecode': 0x4e,
     'control': [
             {'Ek','nLal'},
             {'Ek','f0','nLah'},
@@ -584,7 +604,7 @@ opcodes = [
     ]
     },
 
-    {'name':'LD R3,{R0R1}','bytecode': 0x4f,
+    {'name':'LD R3,[R0R1]','bytecode': 0x4f,
     'control': [
             {'Ek','nLal'},
             {'Ek','f0','nLah'},
