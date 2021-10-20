@@ -425,7 +425,7 @@ microcode **NOP** value after running this script. It should match the 32-bit he
 
 **staticdisplay.py** Builds 7-Seg Control line Rom for the Decimal Display circuit.
 
-**The utilities where developed and tested on Python 3.7**
+**The utilities were developed and tested on Python 3.7**
 
 Thanks to...
 ---
