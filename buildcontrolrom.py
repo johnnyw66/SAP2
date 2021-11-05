@@ -851,7 +851,33 @@ opcodes = [
         #f1f0 = 10 JPC  2
 
     ]},
-    # JPS(0x68),JPNS(0x69), JPO(0x6a), JPNO(0x6b) not currently SUPPORTED
+    # JPS(0x68),JPNS(0x69),  not currently SUPPORTED
+
+    {'name':'JPV','bytecode': 0x6a,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','k0'},    # Enable both bytes of 2 address reg Write to PC if condition true
+                              # k0, f0,f1 bits select the condition
+        #k0f1f0 = 100 JPV
+
+    ]},
+
+    {'name':'JPNV','bytecode': 0x6b,
+    'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','Lp','k0','f0'},    # Enable both bytes of 2 address reg Write to PC if condition true
+                              # k0, f0,f1 bits select the condition
+        #k0f1f0 = 101 JPNV
+
+    ]},
 
     {'name':'JMP','bytecode': 0x6c,
     'control':

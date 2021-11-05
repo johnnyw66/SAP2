@@ -119,6 +119,8 @@ class Dissassembler:
                         'jpns' : self.DissImmediate16(),
                         'jpo' : self.DissImmediate16(),
                         'jpno' : self.DissImmediate16(),
+                        'jpv' : self.DissImmediate16(),
+                        'jpnv' : self.DissImmediate16(),
 
                         'movi' : self.DissImmediate(),
                         'addi' : self.DissImmediate(),
@@ -400,8 +402,8 @@ codeBuilder= {
     'jps' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x68)),
     'jpns' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x69)),
 
-    'jpo' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x6a)),
-    'jpno' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x6b)),
+    'jpv' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x6a)),
+    'jpnv' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x6b)),
 
     'jmp' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x6c)),
     'call' : TripleByteCodeBuilder(SimpleByteCodeResolver(0x6e)),
@@ -809,7 +811,7 @@ class AssemblerParser(BaseParser):
 
     def call(self) -> AssemblerOperation:
         op = self.trymatch('call','jmp','jpz','jpnz','jpc',\
-                            'jpnc','jps','jpns','jpo','jpno')
+                            'jpnc','jps','jpns','jpv','jpnv')
         if (op is not None):
             data = self.try_rules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, data = data, size = 3)
