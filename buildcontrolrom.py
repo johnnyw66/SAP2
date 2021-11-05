@@ -809,7 +809,7 @@ opcodes = [
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
         {'Ep','nLm'},
         {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
-        {'E16','Lp'},        # Enable both bytes of 2 address reg Write to PC if condition true
+        {'E16','Lp','k0','f0'},        # Enable both bytes of 2 address reg Write to PC if condition true
                             # f0,f1 bits select the condition
                             # f0,f1 = 00 current set to JPC
     ]},
@@ -873,9 +873,9 @@ opcodes = [
         {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
         {'Ep','nLm'},
         {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
-        {'E16','Lp','k0','f0'},    # Enable both bytes of 2 address reg Write to PC if condition true
+        {'E16','Lp','k0','f1'},    # Enable both bytes of 2 address reg Write to PC if condition true
                               # k0, f0,f1 bits select the condition
-        #k0f1f0 = 101 JPNV
+        #k0f1f0 = 110 JPNV
 
     ]},
 

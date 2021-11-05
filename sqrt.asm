@@ -8,7 +8,7 @@ movi r2,1
 ; Display the current estimate of sqr(197)
 out r2
 sub r0,r1
-jpv continue
+jpnv continue
 hlt
 :continue
 addi r1,2
