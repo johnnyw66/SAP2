@@ -12,7 +12,7 @@ jpnv continue
 hlt
 :continue
 addi r1,2
-addi r2,1
+inc r2
 jmp loop
 
 .end
