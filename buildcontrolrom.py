@@ -802,7 +802,7 @@ opcodes = [
 
 
 
-    {'name':'JPZ NOT SUPPORTED!!','bytecode': 0x64,
+    {'name':'JPZ','bytecode': 0x64,
     'control':
     [
         {'Ep','nLm'},
