@@ -542,15 +542,21 @@ class BaseParser(ABC):
         except ParseError as e:
             return None
 
-    def trymatch(self,*wantedtoks) -> str:
+    def trymatch(self,*wantedtoks,**opts) -> str:
         self.gobblewhitespace()
         z = list(wantedtoks)
         z.sort(key = lambda e: len(e),reverse=True)
         #print(z)
-
         for tok in z:
             caughttok = self.wanted(tok)
             if (caughttok != None):
+                if 'whitespace' in opts:
+                    if opts['whitespace']:
+                        ch = self.text[self.pos]
+                        if not (ch == ' ' or ch == '\t'):
+                            print(f"Parser Error. Expected whitespace but got <{ch}>")
+                            return None
+
                 self.gobblewhitespace()
                 return caughttok
 
@@ -811,7 +817,7 @@ class AssemblerParser(BaseParser):
 
     def call(self) -> AssemblerOperation:
         op = self.trymatch('call','jmp','jpz','jpnz','jpc',\
-                            'jpnc','jps','jpns','jpv','jpnv')
+                            'jpnc','jps','jpns','jpv','jpnv',whitespace=True)
         if (op is not None):
             data = self.try_rules('number16bit','symbolstr')
             return AssemblerOperation(operation = op, data = data, size = 3)
