@@ -196,11 +196,15 @@ Opcode|Action|Flags|Tstates
 ------|------|-----|-------
 DJNZ Rx,16bitaddr | Rx - 1 -> Rx, 16bitaddr if NZ ? PC + 1 -> PC| Z S V O|8
 JPNZ 16bitaddr | PC <- PC + 1 if Z ? 16bitaddr|_|8
+JPZ 16bitaddr | PC <- PC + 1 if !Z ? 16bitaddr|_|8
 JPNC 16bitaddr | PC <- PC + 1 if C ? 16bitaddr|_|8
+JPC 16bitaddr | PC <- PC + 1 if !C ? 16bitaddr|_|8
+JPNV 16bitaddr | PC <- PC + 1 if V ? 16bitaddr|_|8
+JPV 16bitaddr | PC <- PC + 1 if !V ? 16bitaddr|_|8
 JMP  16bitaddr | PC <- 16bitaddr |_|8
 CALL 16bitaddr | @SP <- PC + 1, PC <- 16bitaddr, SP <- SP - 2| _|14
 RET| PC <- @SP|_|10
-*9 Opcodes in total*
+*10 Opcodes in total*
 
 Opcode|Action|Flags|Tstates
 ------|------|-----|-------
