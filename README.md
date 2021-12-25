@@ -7,8 +7,16 @@
 ---
 
 This SAP2 inspired microprocessor written for the **LogiSim Evolution** CAD can be built with standard TTL/CMOS logic chips.
+A few years ago, I built a simple 8-bit microprocessor using standard TTL/CMOS logic chips. I wanted to limit by build to using boolean logic chips - so I even built an 8-bit adder from AND/OR/XOR chips - rather than using something like a couple of 74HCT283s. 
+
+The final processor was massive - fitting on a king sized bed. Although the processor worked - It had a very limited instruction set and was not very practical, to say the least! Initially, I tried to use breadboards but got fed up with wires popping out of place whenever I moved my build from under my bed. In the end, I resorted to hours of soldering.
+
 Fed up with soldering - I wanted to 'build' the microprocessor before my attempt to describe this in *Verilog
 HDL* and then place the design on one of my Altera FPGAs. It will support over 80 instructions which are listed below.
+
+**LogiSim Evolution** is a design tool which allows the user to define and simulate logic circuits. It is free and open-source and works on many operating systems - such as Linux, Mac OS and Windows. The main prerequisite is having an installed Java runtime on your system. For a detailed look - checkout the many Youtube tutorials such as https://www.youtube.com/watch?v=cMz7wyY_PxE
+
+In this project, I've included with the LogiSim source some Python utilities which I coded. Please do what you want with them. If you find them useful - please consider giving this project and repository a mention.
 
 
 At some point I will add in I/O instructions and have it drive a VGA/Video Composite output
