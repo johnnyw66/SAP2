@@ -11,7 +11,7 @@ A few years ago, I built a simple 8-bit microprocessor using TTL/CMOS logic. I w
 
 The final processor was massive - fitting on a king sized bed. Although the processor worked - It had a very limited instruction set and was not very practical, to say the least! Initially, I tried to use breadboards but got fed up with wires popping out of place whenever I moved my build from under my bed. In the end, I resorted to hours of soldering.
 
-Four years on and fed up with soldering - I wanted to 'build' and improved microprocessor before my attempt to describe this in *Verilog
+Four years on and fed up with soldering - I wanted to 'build' an improved microprocessor before my attempt to describe this in *Verilog
 HDL* and then place the design on one of my Altera FPGAs. The processor will support over 80 instructions, all of which are listed below.
 
 **LogiSim Evolution** is a design tool which allows the user to define and simulate logic circuits. It is free and open-source and works on many operating systems - such as Linux, Mac OS and Windows. The main prerequisite is having an installed Java runtime on your system. For a detailed look - checkout the many Youtube tutorials such as https://www.youtube.com/watch?v=cMz7wyY_PxE
