@@ -454,7 +454,7 @@ Look out for
 ---
 **James Sharman** - His YouTube content is amazing. Anyone new to building or understanding microprocessors - I would recommend watching **Ben's** channel - followed by **James's** videos on his **Pipelined CPU**. I use to work with James back in the 90s. He was **THE NERD** in our group of nerds. https://www.youtube.com/user/weirdboyjim
 
-**Bill Buzbee** - His **Magic-1** TTL mini computer is a truimph in terms of both hardware and software. His hardware is cool - but the supporting software is **awesome**, making this the only **TTL Computer** on the Youtube community I know of. **Magic-1** has its own OS (Minix), Compiler, Assembler and Linker. https://www.youtube.com/channel/UCVI4UsYLoRkWOG_bDMaHGgA 'We're not worthy!'
+**Bill Buzbee** - His **Magic-1** TTL mini computer is a truimph in terms of both hardware and software. His hardware is very cool - but the supporting software is **awesome**, making this the only **TTL Computer** on the Youtube community I know of. **Magic-1** has its own OS (Minix), Compiler, Assembler, Linker and Debugger!!! **We're not worthy!** https://www.youtube.com/channel/UCVI4UsYLoRkWOG_bDMaHGgA 
 
 
 
