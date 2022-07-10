@@ -7,6 +7,11 @@
 ---
 
 This SAP2 inspired microprocessor written for the **LogiSim Evolution** CAD can be built with standard TTL/CMOS logic chips.
+The SAP2 microprocessor is partially described in the Albert Malvino's book 'Digital Computer Electronics - An introduction to Microcomputers' (pub: 1983).
+The processor in the book is based on the 8080 instruction set.
+
+
+
 A few years ago, I built a simple 8-bit microprocessor using TTL/CMOS logic. I wanted to limit the build using boolean logic chips - so I even built an 8-bit adder from AND/OR/XOR chips - rather than using something like a couple of 74HCT283s. 
 
 The final processor was massive - fitting on a king sized bed. Although the processor worked - It had a very limited instruction set and was not very practical, to say the least! Initially, I tried to use breadboards but got fed up with wires popping out of place whenever I moved my build from under my bed. In the end, I resorted to hours of soldering.
