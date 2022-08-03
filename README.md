@@ -8,11 +8,11 @@
 
 This SAP2 inspired microprocessor written for the **LogiSim Evolution** CAD can be built with standard TTL/CMOS logic chips.
 'Simple As Possible 2' is partially described in the Albert Malvino's book **'Digital Computer Electronics - An introduction to Microcomputers'** (pub: 1983).
-The book goes on to describe an instruction set containing 42 instructions.
+The book goes on to describe the processor's architecture set containing 42 instructions.
 
 A few years ago, I built a simple 8-bit microprocessor using TTL/CMOS logic. I wanted to limit the build using boolean logic chips - so I even built an 8-bit adder from AND/OR/XOR chips - rather than using something like a couple of 74HCT283s. 
 
-The final processor was massive - fitting on a king sized bed. Although the processor worked - It had a very limited instruction set and was not very practical, to say the least! Initially, I tried to use breadboards but got fed up with wires popping out of place whenever I moved my build from under my bed. In the end, I resorted to hours of soldering.
+The final processor was massive - fitting on a king sized bed. Although the processor worked - It had a very limited instruction set and was not very practical, to say the least! Initially, I tried to build using just breadboards but got fed up with wires popping out of place whenever I moved my build from under my bed. In the end, I resorted to hours of soldering.
 
 Four years on and fed up with soldering - I wanted to 'build' an improved microprocessor before my attempt to describe this in *Verilog
 HDL* and then place the design on one of my Altera FPGAs. The processor will support over 80 instructions, all of which are listed below.
@@ -455,7 +455,7 @@ multiply or add operators?' - a question he was asked in a job interview back in
 
 Look out for
 ---
-**James Sharman** - His YouTube content is amazing. Anyone new to building or understanding microprocessors - I would recommend watching **Ben's** channel - followed by **James's** videos on his **Pipelined CPU**. I use to work with James back in the 90s. He was **THE NERD** in our group of nerds. https://www.youtube.com/user/weirdboyjim
+**James Sharman** - His YouTube content is an excellent 'adventure' into building a **Pipelined CPU**. Anyone new to building or understanding microprocessors - I would recommend watching **Ben's** channel - followed by **James's** videos on his **Pipelined CPU**. I use to work with James back in the 90s on the very latest gaming consoles. I'm guessing his inspiration for the pipeline design comes from working on the PlayStation PS1.  The PS1's CPU, the R3000, employed a 5-stage instruction pipeline.  https://www.youtube.com/user/weirdboyjim
 
 **Bill Buzbee** - His **Magic-1** TTL mini computer is a truimph in terms of both hardware and software. His hardware is very cool - but the supporting software is **awesome**, making this the only **TTL Computer** on the Youtube community I know of. **Magic-1** has its own OS (Minix), Compiler, Assembler, Linker and Debugger!!! **We're not worthy!** https://www.youtube.com/channel/UCVI4UsYLoRkWOG_bDMaHGgA 
 
