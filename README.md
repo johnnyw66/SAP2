@@ -1,4 +1,4 @@
-# SAP2 Inspired Project
+# SAP2 Inspired Project - A LogiSim Evolution Simulation
 
 
 ![SAP2 Inspired Project](/images/alusub.jpg)
