@@ -5,15 +5,19 @@
 
 Hello World
 ---
-Already familiar with LogiSim and just want a taster of what this microprocessor can do?
+Already familiar with **LogiSim** and just want a taster of what this microprocessor can do?
 Run **LogiSim Evolution** and open the project file **sap2.cir** using the File sub-menu.
-Left click on the main pane showing the circuit and keeping the mouse button down - scroll the pane so that you can see the **RAM Module**.
+Once loaded, left click on the main pane showing the circuit and keeping the mouse button down - scroll the pane so that you can see the **RAM Module**.
 Left click on the this module and select **load image** option and then select the file **sqrt.hex** followed by clicking on **Open**. 
-You should notice the Ram Module change from having a s sequence of zeros to starting with the hex bytes **40 c5**
+You should notice the Ram Module change from having a sequence of zeros to starting with the hex bytes **40 c5**
 
-![SAP2 Inspired Project](/images/sqrtmem.png)
+![Square Root Routine Loaded](/images/sqrtmem.png)
 
-We're now going to run a simple square root test assembled from the source **sqrt.asm** (listed below)
+We're now going to run a simple square root test assembled from the source **sqrt.asm** (listed below).
+The hexadecimal equivalent of this code is contained within the file **sqrt.hex**. LogiSim will store the binary equivalent in the Ram Module which the microprocessor will attempt to run, when started. The hex file **sqrt.hex** was produced using the Python utility **assembler.py** by running the command **python assembler.py sqrt.asm**.
+
+
+
 ````
 .org 0x8000
 
@@ -42,15 +46,15 @@ In the **Simulate** sub menu - make sure that the **auto tick frequency** option
 Scroll the main circuit window pane (left click and hold) to view the **DISPLAY MODULE**. Make sure you can see the **OUTPUT REGISTER** (Decimal)
 display.
 
-![SAP2 Inspired Project](/images/outputreg.png)
+![Output Reg](/images/outputreg.png)
 
 
 Start running the machine code by using the following commands:-
 
 **CONTROL+K** to start the microprocessor clock which will run the assembled machine code.
 You can use **CONTROL+R** to reset the microprocessor. Note: Mac Users (use the **CMD** key)
-The code will start to run updating the decimal display until it reaches the result '15', which is a (poor) approximation of the square root of
-197. The task it was programmed to do!
+
+With the cicuit set to auto tick - the code will start to run, updating the decimal display until it reaches the result '15', which is an approximation (albeit poor) of the square root of 197. The task it was programmed to do!
 
 
 
