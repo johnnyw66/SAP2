@@ -3,6 +3,52 @@
 
 ![SAP2 Inspired Project](/images/alusub.jpg)
 
+Hello World
+---
+Already familiar with LogiSim and just want a taster of what this microprocessor can do?
+Run **LogiSim Evolution** and open the project file **sap2.cir** using the File sub-menu.
+Left click on the main pane showing the circuit and keeping the mouse button down - scroll the pane so that you can see the **RAM Module**.
+Left click on the this module and select **load image** option and then select the file **sqrt.hex** followed by clicking on **Open**. 
+You should notice the Ram Module change from having a s sequence of zeros to starting with the hex bytes **40 c5**
+
+We're now going to run a simple square root test assembled from the source **sqrt.asm** (listed below)
+````
+.org 0x8000
+
+movi r0,197
+movi r1,1
+movi r2,1
+
+:loop
+; Display the current estimate of sqr(197)
+out r2
+sub r0,r1
+jpv foundit
+jpz foundit
+
+:continue
+addi r1,2
+inc r2
+jmp loop
+
+:foundit
+hlt
+
+.end
+`````
+In the **Simulate** sub menu - make sure that the **auto tick frequency** option is **64Hz**.
+Scroll the main circuit window pane (left click and hold) to view the **DISPLAY MODULE**. Make sure you can see the **OUTPUT REGISTER** (Decimal)
+display.
+
+Start running the machine code by using the following commands:-
+
+**CONTROL+K** to start the microprocessor clock which will run the assembled machine code.
+You can use **CONTROL+R** to reset the microprocessor. Note: Mac Users (use the **CMD** key)
+The code will start to run updating the decimal display until it reaches the result '15', which is a (poor) approximation of the square root of
+197. The task it was programmed to do!
+
+
+
 24 August 2021
 ---
 
