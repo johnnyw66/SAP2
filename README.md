@@ -11,6 +11,8 @@ Left click on the main pane showing the circuit and keeping the mouse button dow
 Left click on the this module and select **load image** option and then select the file **sqrt.hex** followed by clicking on **Open**. 
 You should notice the Ram Module change from having a s sequence of zeros to starting with the hex bytes **40 c5**
 
+![SAP2 Inspired Project](/images/sqrtmem.png)
+
 We're now going to run a simple square root test assembled from the source **sqrt.asm** (listed below)
 ````
 .org 0x8000
@@ -39,6 +41,9 @@ hlt
 In the **Simulate** sub menu - make sure that the **auto tick frequency** option is **64Hz**.
 Scroll the main circuit window pane (left click and hold) to view the **DISPLAY MODULE**. Make sure you can see the **OUTPUT REGISTER** (Decimal)
 display.
+
+![SAP2 Inspired Project](/images/outputreg.png)
+
 
 Start running the machine code by using the following commands:-
 
