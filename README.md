@@ -5,16 +5,25 @@
 
 Hello World
 ---
-Already familiar with **LogiSim** and just want a taster of what this microprocessor can do?
+The following text describes my design of a simple microprocessor using the **LogiSim** cad tool.
+
+Already familiar with **LogiSim**? Perhaps you just want a taster of what this microprocessor can do?
+
+Follow these simple steps, outlined below..
+
 Run **LogiSim Evolution** and open the project file **sap2.cir** using the File sub-menu.
-Once loaded, left click on the main pane showing the circuit and keeping the mouse button down - scroll the pane so that you can see the **RAM Module**.
+Once loaded, left click on the main circuit pane and keeping the mouse button down - scroll the pane so that you can see the **RAM Module**.
 Left click on the this module and select **load image** option and then select the file **sqrt.hex** followed by clicking on **Open**. 
 You should notice the Ram Module change from having a sequence of zeros to starting with the hex bytes **40 c5**
 
 ![Square Root Routine Loaded](/images/rammodule.png)
 
 We're now going to run a simple square root test assembled from the source **sqrt.asm** (listed below).
-The hexadecimal equivalent of this code is contained within the file **sqrt.hex**. LogiSim will store the binary equivalent in the Ram Module which the microprocessor will attempt to run, when started. The hex file **sqrt.hex** was produced using the Python utility **assembler.py** by running the command **python assembler.py sqrt.asm**.
+The hexadecimal equivalent of this code is contained within the file **sqrt.hex**. 
+
+**LogiSim** will store the binary equivalent in the Ram Module which the microprocessor will attempt to run, when started. 
+
+The hex file **sqrt.hex** was produced using the Python utility **assembler.py** by running the command **python assembler.py sqrt.asm**.
 
 
 
