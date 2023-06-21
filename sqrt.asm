@@ -8,11 +8,15 @@ movi r2,1
 ; Display the current estimate of sqr(197)
 out r2
 sub r0,r1
-jpnv continue
-hlt
+jpv foundit
+jpz foundit
+
 :continue
 addi r1,2
 inc r2
 jmp loop
+
+:foundit
+hlt
 
 .end
