@@ -3,68 +3,6 @@
 
 ![SAP2 Inspired Project](/images/alusub.jpg)
 
-Hello World
----
-The following text describes my design of a simple microprocessor using the **LogiSim** cad tool.
-
-Already familiar with **LogiSim**? Perhaps you just want a taster of what this microprocessor can do?
-
-Follow these simple steps, outlined below..
-
-Run **LogiSim Evolution** and open the project file **sap2.cir** using the File sub-menu.
-Once loaded, left click on the main circuit pane and keeping the mouse button down - scroll the pane so that you can see the **RAM Module**.
-Left click on the this module and select **load image** option and then select the file **sqrt.hex** followed by clicking on **Open**. 
-You should notice the Ram Module change from having a sequence of zeros to starting with the hex bytes **40 c5**
-
-![Square Root Routine Loaded](/images/rammodule.png)
-
-We're now going to run a simple square root test assembled from the source **sqrt.asm** (listed below).
-The hexadecimal equivalent of this code is contained within the file **sqrt.hex**. 
-
-**LogiSim** will store the binary equivalent in the Ram Module which the microprocessor will attempt to run, when started. 
-
-The hex file **sqrt.hex** was produced using the Python utility **assembler.py** by running the command **python assembler.py sqrt.asm**.
-
-
-
-````
-.org 0x8000
-
-movi r0,197
-movi r1,1
-movi r2,1
-
-:loop
-; Display the current estimate of sqr(197)
-out r2
-sub r0,r1
-jpv foundit
-jpz foundit
-
-:continue
-addi r1,2
-inc r2
-jmp loop
-
-:foundit
-hlt
-
-.end
-`````
-In the **Simulate** sub menu - make sure that the **auto tick frequency** option is **64Hz**.
-Scroll the main circuit window pane (left click and hold) to view the **DISPLAY MODULE**. Make sure you can see the **OUTPUT REGISTER** (Decimal)
-display.
-
-![Output Reg](/images/outputreg.png)
-
-
-Start running the machine code by using the following commands:-
-
-**CONTROL+K** to start the microprocessor clock which will run the assembled machine code.
-You can use **CONTROL+R** to reset the microprocessor. Note: Mac Users replace the **CMD** key for **CONTROL**.
-
-With the cicuit set to auto tick - the code will start to run, updating the decimal display until it reaches the result '15', which is an approximation (albeit poor) of the square root of 197. The task it was programmed to do!
-
 
 
 24 August 2021
@@ -125,6 +63,8 @@ Example code:
 
 .end
 `````
+
+
 **Issues**
 ---
 
@@ -485,6 +425,67 @@ cpp $@ a.asm
 ./assembler.py a.asm -3 -s
 rm -f a.asm
 ```
+Hello World
+---
+
+Already familiar with **LogiSim**? Perhaps you just want a taster of what this microprocessor can do?
+
+Follow these simple steps, outlined below..
+
+Run **LogiSim Evolution** and open the project file **sap2.cir** using the File sub-menu.
+Once loaded, left click on the main circuit pane and keeping the mouse button down - scroll the pane so that you can see the **RAM Module**.
+Left click on the this module and select **load image** option and then select the file **sqrt.hex** followed by clicking on **Open**. 
+You should notice the Ram Module change from having a sequence of zeros to starting with the hex bytes **40 c5**
+
+![Square Root Routine Loaded](/images/rammodule.png)
+
+We're now going to run a simple square root test assembled from the source **sqrt.asm** (listed below).
+The hexadecimal equivalent of this code is contained within the file **sqrt.hex**. 
+
+**LogiSim** will store the binary equivalent in the Ram Module which the microprocessor will attempt to run, when started. 
+
+The hex file **sqrt.hex** was produced using the Python utility **assembler.py** by running the command **python assembler.py sqrt.asm**.
+
+
+
+````
+.org 0x8000
+
+movi r0,197
+movi r1,1
+movi r2,1
+
+:loop
+; Display the current estimate of sqr(197)
+out r2
+sub r0,r1
+jpv foundit
+jpz foundit
+
+:continue
+addi r1,2
+inc r2
+jmp loop
+
+:foundit
+hlt
+
+.end
+`````
+In the **Simulate** sub menu - make sure that the **auto tick frequency** option is **64Hz**.
+Scroll the main circuit window pane (left click and hold) to view the **DISPLAY MODULE**. Make sure you can see the **OUTPUT REGISTER** (Decimal)
+display.
+
+![Output Reg](/images/outputreg.png)
+
+
+Start running the machine code by using the following commands:-
+
+**CONTROL+K** to start the microprocessor clock which will run the assembled machine code.
+You can use **CONTROL+R** to reset the microprocessor. Note: Mac Users replace the **CMD** key for **CONTROL**.
+
+With the cicuit set to auto tick - the code will start to run, updating the decimal display until it reaches the result '15', which is an approximation (albeit poor) of the square root of 197. The task it was programmed to do!
+
 
 Software Requirements
 ----
@@ -495,23 +496,27 @@ To run LogiSim - just type the command **java -jar logisim-evolution-3.5.0-all.j
 
 Python Utilities included-
 ----
-**buildmicrocode.py** - Builds microcode instructions used by the **controller** subcircuit.
-Note: If you want to modify the design of the processor by changing the control lines (their active state or pin order) - you'll need to run this utility and upload the generated file into the control ROM. 
+**buildcontrolrom.py** - Builds microcode instructions used by the **controller** subcircuit.
+
+If you want to modify the design of the processor - making changes to its instruction architecture or changing the control lines (their active state or pin order) - you'll need to run this utility and upload the generated file into the control ROM. 
 Simple run the python code from the command line.
 
-*python3 buildmicrocode.py*
+*python3 buildcontrolrom.py*
 
-Make sure you look at the microcode **NOP** value after running this script. It should match the 32-bit hex value on the comparator input in the **controller** sub-circuit. A mismatch in the circuit value will mean that all your machine code instructions taking the full 20 T states!
 ![Running buildmicrocode](/images/buildcontrolrom-running.png)
 
 ![NoOp buildmicrocode](/images/buildcontrolrom-nopcode.png)
 
 ![32-bit Comparator LogiSim](/images/controller_32bit_comparator.png)
 
-Running this utility produces the file 'microcode32bit.rom' which should be loaded into the control ROM found in the **controller** subcircuit.
+Make sure you look at the microcode **NOP** value after running this script. It should match the 32-bit hex value on the 32-bit comparator input in the **controller** sub-circuit. A mismatch in the circuit value will mean that all your machine code instructions taking the full 20 T states!
+
+Running buildcontrolrom.py produces the file **microcode32bit.rom** which should be loaded into the control ROM found in the **controller** subcircuit. You only need to do this once, whenever you make a change to the Instruction Set or Control lines of the controller.
 
 
 **assembler.py** - Python utitlity to convert assembler source (.asm) to binary (hex) machine code.
+Remember the RAM module starts at the address 32768 so most times (unless you're updating the processor's ROM routines) - you will need to use the directive **.ORG 0x8000**.
+
 
 **staticdisplay.py** Builds 7-Seg Control line Rom for the Decimal Display circuit.
 
