@@ -61,7 +61,7 @@ display.
 Start running the machine code by using the following commands:-
 
 **CONTROL+K** to start the microprocessor clock which will run the assembled machine code.
-You can use **CONTROL+R** to reset the microprocessor. Note: Mac Users (use the **CMD** key)
+You can use **CONTROL+R** to reset the microprocessor. Note: Mac Users replace the **CMD** key for **CONTROL**.
 
 With the cicuit set to auto tick - the code will start to run, updating the decimal display until it reaches the result '15', which is an approximation (albeit poor) of the square root of 197. The task it was programmed to do!
 
