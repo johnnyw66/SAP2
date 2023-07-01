@@ -496,8 +496,17 @@ To run LogiSim - just type the command **java -jar logisim-evolution-3.5.0-all.j
 Python Utilities included-
 ----
 **buildmicrocode.py** - Builds microcode instructions used by the **controller** subcircuit.
-Note: If you change the control lines (their active state or pin order) - make sure you look at the
-microcode **NOP** value after running this script. It should match the 32-bit hex value on the comparator input in the **controller** sub-circuit. A mismatch in the circuit value will mean that all your machine code instructions taking the full 20 T states!
+Note: If you want to modify the design of the processor by changing the control lines (their active state or pin order) - you'll need to run this utility and upload the generated file into the control ROM. 
+Simple run the python code from the command line.
+
+*python3 buildmicrocode.py*
+
+Make sure you look at the microcode **NOP** value after running this script. It should match the 32-bit hex value on the comparator input in the **controller** sub-circuit. A mismatch in the circuit value will mean that all your machine code instructions taking the full 20 T states!
+![Running buildmicrocode](/images/buildcontrolrom-running.png)
+
+![NoOp buildmicrocode](/images/buildcontrolrom-nopcode.png)
+
+Running this utility produces the file 'microcode32bit.rom' which should be loaded into the control ROM found in the **controller** subcircuit.
 
 
 **assembler.py** - Python utitlity to convert assembler source (.asm) to binary (hex) machine code.
