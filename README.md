@@ -506,6 +506,8 @@ Make sure you look at the microcode **NOP** value after running this script. It 
 
 ![NoOp buildmicrocode](/images/buildcontrolrom-nopcode.png)
 
+![32-bit Comparator LogiSim](/images/controller_32bit_comparator.png)
+
 Running this utility produces the file 'microcode32bit.rom' which should be loaded into the control ROM found in the **controller** subcircuit.
 
 
