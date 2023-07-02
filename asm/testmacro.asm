@@ -1,6 +1,6 @@
 
 ; Preprocess this source with the standard C preprocessor 'cpp'
-; Eg. 'cpp -ADDRESS=0x1234 -P testmacro.asm testmacro_cpped.asm'
+; Eg. 'cpp -DADDRESS=0x1234 -P testmacro.asm testmacro_cpped.asm'
 ; and then assemble the processed cpp version - 'python3 assember.py testmacro_cpped.asm'
 
 
