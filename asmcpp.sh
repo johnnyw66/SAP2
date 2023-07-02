@@ -1,4 +1,5 @@
-#cpp $1 tmp.asm
+# Simple script to use the C preprocessor
+# ./asmcpp.sh asm/testmacro.asm
 cpp $@ a.asm
-./assembler.py a.asm -3 -s
+python3 assembler.py a.asm -3 -s
 rm -f a.asm

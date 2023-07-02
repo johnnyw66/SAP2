@@ -604,10 +604,10 @@ class BaseParser(ABC):
 
         return ''.join(list(wanted))
 
-    def peek_chars(self, pattern: str) -> str:
+    def peek_chars(self, pattern: str, dont_gobble:bool=False) -> str:
 
         try:
-            return self.chars(pattern)
+            return self.chars(pattern, dont_gobble = dont_gobble)
         except ParserException as e:
             # We have not found a char match - so go back and check other rules/token matches
             return None
@@ -616,8 +616,9 @@ class BaseParser(ABC):
             # -  exhausted parsing our current line of text
             return None
 
-    def chars(self, pattern: str, bump: bool = True) -> str:
-        self.gobblewhitespace()
+    def chars(self, pattern: str, bump: bool = True, dont_gobble:bool=False) -> str:
+        if (not dont_gobble):
+            self.gobblewhitespace()
 
         if (pattern not in self._cache):
             self._cache[pattern] = self.produce_chars_pattern(pattern)
@@ -935,11 +936,11 @@ class AssemblerParser(BaseParser):
         symbol = []
         ch = self.chars('A-Za-z0-9_')
         symbol.append(ch)
-
         while True:
-            ch = self.peek_chars('A-Za-z0-9_')
+            ch = self.peek_chars('A-Za-z0-9_',dont_gobble=True)
             if (ch is None):
                 break
+
             symbol.append(ch)
 
         return SymbolWordData(''.join(symbol),self.symbolTable)
