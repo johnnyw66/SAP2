@@ -495,9 +495,14 @@ Note: Very near the output **DISPLAY MODULE**  I've also included debug output f
 Software Requirements
 ----
 
-Java 8 (I used java version "1.8.0_60" - major version 52 and 1.11 - major version 55) on Mac OS X 10.15 (Catalina) - August 2021
+**Java 8** (I used java version "1.8.0_60" - major version 52 and 1.11 - major version 55) on Mac OS X 10.15 (Catalina) - August 2021
 
 To run LogiSim - just type the command **java -jar logisim-evolution-3.5.0-all.jar** from a terminal.
+
+**Python 3.9** - Needed to run the assembler and build the display ROM and microcode instructions ROM.
+
+At some point I will also produce a Python Simulator for a version of a SAP2 Single Board Computer!
+
 
 Python Utilities included-
 ----
@@ -540,6 +545,10 @@ Options:-
 **staticdisplay.py** Builds 7-Seg Control line Rom for the Decimal Display circuit.
 
 **The utilities were developed and tested on Python 3.7**
+
+Coming Soon! SAP2 SBC Simulation
+---
+July 2024 - I am starting to code a SAP2 simulator in Python. Watch this space!!
 
 Thanks to...
 ---
