@@ -522,6 +522,20 @@ Running buildcontrolrom.py produces the file **microcode32bit.rom** which should
 **assembler.py** - Python utitlity to convert assembler source (.asm) to binary (hex) machine code.
 Remember the RAM module starts at the address 32768 so most times (unless you're updating the processor's ROM routines) - you will need to use the directive **.ORG 0x8000**.
 
+```
+Example Usage: ./assembler.py example.asm [options]
+
+Options:-
+ -v verbose
+ -d debug
+ -q quiet
+ -s symbol table
+ -3 [default] V3 addressed hex output
+ -2 raw hex output
+ -b binary output
+ -n no output [-c dissassembled code]
+ -r ROM address offset on V3 Hex output
+```
 
 **staticdisplay.py** Builds 7-Seg Control line Rom for the Decimal Display circuit.
 
