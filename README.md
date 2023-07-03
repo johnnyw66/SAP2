@@ -486,6 +486,10 @@ You can use **CONTROL+R** to reset the microprocessor. Note: Mac Users replace t
 
 With the cicuit set to auto tick - the code will start to run, updating the decimal display until it reaches the result '15', which is an approximation (albeit poor) of the square root of 197. 
 
+Note: Very near the output **DISPLAY MODULE**  I've also included debug output from the two banks of the four 8-bit registers (R3,R2,R1,R0 and their alternate counterparts). Look out for the labels **DBGREGBANK0** and **DBGREGBANK1** showing 32-bit values.
+
+
+
 
 
 Software Requirements
