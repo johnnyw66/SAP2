@@ -499,7 +499,7 @@ Software Requirements
 
 To run LogiSim - just type the command **java -jar logisim-evolution-3.5.0-all.jar** from a terminal.
 
-**Python 3.9** - Needed to run the assembler and build the display ROM and microcode instructions ROM.
+**Python 3.7** - Needed to run the assembler and build the display ROM and microcode instructions ROM.
 
 At some point I will also produce a Python Simulator for a version of a SAP2 Single Board Computer!
 
