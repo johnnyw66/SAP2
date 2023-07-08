@@ -546,9 +546,9 @@ Options:-
 
 **The utilities were developed and tested on Python 3.7**
 
-Coming Soon! SAP2 SBC Simulation
+Coming Soon! SAP2 Single Board Computer Emulator
 ---
-July 2024 - I am starting to code a SAP2 simulator in Python. Watch this space!!
+July 2024 - I am starting to code a SAP2 SBC simulator in Python. Watch this space!!
 
 Thanks to...
 ---
