@@ -167,6 +167,7 @@ Added example circuit to do memory mapped IO. Writes to 0x7ff0, 0x7ff1, 0x7ff2 s
 
 *User Register instructions 2 Banks of 4 registers R0, R1, R2, R3 plus PC,SP and Flag Register*
 
+*Flag Register - **Z** Zero **S** Sign **V** Overflow **O** Parity (Odd)*
 
 
 Opcode | Comment|Flags|Tstates
