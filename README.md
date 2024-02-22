@@ -524,6 +524,126 @@ Make sure you look at the microcode **NOP** value after running this script. It 
 
 Running buildcontrolrom.py produces the file **microcode32bit.rom** which should be loaded into the control ROM found in the **controller** subcircuit. You only need to do this once, whenever you make a change to the Instruction Set or Control lines of the controller.
 
+### What is Microcode and What Does the buildcontrolrom.py Utility Do?
+
+Microcode is a low-level hardware description language utilized in the control unit of a microprocessor to implement its instruction set architecture (ISA). It serves as an intermediary between machine code instructions (those written by programmers) and the hardware's actual implementation of those instructions.
+In a microprocessor, the control unit is responsible for fetching native instructions from memory, decoding them, and executing them. Microcode plays a crucial role in this process by translating individual instructions of the ISA into a sequence of micro-operations that the hardware can execute.
+
+The **buildcontrolrom.py** Python utility is designed to produce a binary/hex file of the microcode used to control our microprocessor's lines. This microcode, stored in ROM, is utilized by our control unit to execute each opcode instruction through a predefined sequence.
+Our microprocessor design currently employs 32 control lines, primarily for reading and writing to registers and memory.
+
+### How it Works:
+
+Instruction Fetch: The control unit retrieves the next instruction from memory.
+
+Instruction Decode: The control unit decodes the instruction to determine the required operation.
+
+Microcode Execution: Microcode translates the decoded instruction into a sequence of micro-operations, each corresponding to a specific hardware action such as reading from registers, performing arithmetic/logic operations, or accessing memory.
+
+Hardware Execution: The hardware executes the micro-operations sequentially to complete the instruction.
+
+Repeat: Steps 1-4 are repeated for each instruction in the program.
+Microcode allows for a flexible and efficient implementation of the processor's instruction set, enabling support for various instructions while maintaining a relatively simple hardware design. Additionally, microcode can be updated or modified to fix bugs, add new instructions, or improve performance without requiring a complete processor redesign.
+
+Let’s give you an example of how we coded one particular opcode in our ISA by referring to our source code **buildcontrolrom.py**.
+
+First look at the portion of the Python source which defines these control lines.
+
+````
+clLines = [
+    {'key':"Cp", 'bit':31, 'active': ACTIVEHIGH, 'desc':"Enable PC count (inc PC)"},
+    {'key':"Ep", 'bit':30, 'active': ACTIVEHIGH, 'desc':"Place PC onto the Bus"},
+    {'key':"nLm", 'bit':29, 'active': ACTIVELOW, 'desc':"Load contents of Bus into Memory Address Reg"},
+    {'key':"nCE", 'bit':28, 'active': ACTIVELOW, 'desc':"Place current data in RAM onto BUS"},
+
+    {'key':"nLi", 'bit':27, 'active': ACTIVELOW, 'desc':"Load contents of Bus into the Instruction Reg"},
+    {'key':"nEi", 'bit':26, 'active': ACTIVELOW, 'desc':"Place contents of the Instruction Reg onto the Bus"},
+    {'key':"nLa", 'bit':25, 'active': ACTIVELOW, 'desc':"Load contents of the Bus into the A Reg"},
+    {'key':"Ea",  'bit':24, 'active': ACTIVEHIGH, 'desc':"Place contents of the A Reg onto the BUS"},
+
+    {'key':"Eb",  'bit':23, 'active': ACTIVEHIGH, 'desc':"Place contents of the B Reg onto the BUS"},
+    {'key':"Eu",  'bit':22, 'active': ACTIVEHIGH, 'desc':"Enable ALU (output directly to B Reg)"},
+    {'key':"nLb", 'bit':21, 'active': ACTIVELOW, 'desc':"Load contents of B reg 'bus' into B Reg"},
+    {'key':"nLo", 'bit':20, 'active': ACTIVELOW, 'desc':"Load contents of Bus into Output Reg"},
+
+    {'key':"Lr",  'bit':19, 'active': ACTIVEHIGH, 'desc':"Load to RAM (STA op)"},
+    {'key':"Lp",  'bit':18, 'active': ACTIVEHIGH, 'desc':"Load PC (JUMP instructions) used with f1 and f0"},
+    {'key':"f1",  'alias':{'a1'},'bit':17, 'active': ACTIVEHIGH, 'desc':"JUMP condition function bit 1"},
+    {'key':"f0",  'alias':{'a0','Su'},'bit':16, 'active': ACTIVEHIGH, 'desc':"JUMP condition Function bit 0 {00 -> Carry, 01 -> Non Zero, 10 -> Parity Odd, 11 --> Always}"},
+#    {'key':"Cp", 'bit':7, 'active': ACTIVEHIGH, 'desc':"TEST DUP"},
+
+#
+    # Free control lines for use later
+    {'key':"nLal",  'bit':15, 'active': ACTIVELOW,'desc':"Load low byte of address with contents on DBUS"},
+    {'key':"nLah",  'bit':14, 'active': ACTIVELOW, 'desc':"Load high byte of address with contents on DBUS"},
+    {'key':"E16",  'bit':13, 'active': ACTIVEHIGH, 'desc':"Show DBUS<->ABUS regsiters (two) on Address Bus"},
+    {'key':"Lf",  'bit':12, 'active': ACTIVEHIGH, 'desc':"Latch Flag Register"},
+
+    {'key':"Ek",  'bit':11, 'active': ACTIVEHIGH,'desc':"Load Conents of Bank Reg onto DBUS"},
+    # Uses f0, f1
+    {'key':"nLk",  'bit':10, 'active': ACTIVELOW, 'desc':"Latch Conents on DBUS into Bank Reg"},
+    {'key':"k1",  'bit':9, 'active': ACTIVEHIGH, 'desc':"Bank Register Write Select bit 1"},
+    {'key':"k0",  'bit':8, 'active': ACTIVEHIGH, 'desc':"Bank Register Write select bit 0"},
+
+    # 'alias' allows us to refer to the same pins as different names - useful for shared select function pins
+    {'key':"f2",  'alias':{'a2'}, 'bit':7, 'active': ACTIVEHIGH,'desc':"Select bit for Constant Bank/ALU Function"},
+    {'key':"Ec",  'bit':6, 'active': ACTIVEHIGH, 'desc':"Place Constant (from Constant Bank) defined by {f2,f1,f0} on the DBUS"},
+    {'key':"Xx",  'bit':5, 'active': ACTIVEHIGH, 'desc':"Swap over reg banks (EXX instruction)"},
+    {'key':"Sa",  'bit':4, 'active': ACTIVEHIGH, 'desc':"'Source Address' Source for A B Reg pair can come from DBUS or Address BUS (0 is DBUS)"},
+
+    {'key':"Us",  'bit':3, 'active': ACTIVEHIGH,'desc':"Increment if 1 or Decrement if 0 - used with Cs"},
+    {'key':"Es",  'bit':2, 'active': ACTIVEHIGH, 'desc':"Place Stack Address on Address Bus"},
+    {'key':"Cs",  'bit':1, 'active': ACTIVEHIGH, 'desc':"Enable Counting"},
+    {'key':"nLs",  'bit':0, 'active': ACTIVELOW, 'desc':"Load StackPointer with contents on ABUS"},
+]
+
+````
+
+
+The definitions defined in this array are somewhat verbose and slightly inefficient in terms of speed - but I hope you agree that the tradeoff is readability. I’ve added a simple description in the ‘desc’ field which I hope you will also find useful.
+
+Our controller controls 32 lines on our SAP2, each one you should find on our hardware design.
+
+Let’s look at one of them.
+
+````
+{'key':"nLal",  'bit':15, 'active': ACTIVELOW,'desc':"Load low byte of address with contents on DBUS"},
+````
+
+This line is defined by the key name - the bit which is control and the level that needs to be outputted by the control unit when it is set. **ACTIVELOW** means the defined bit will be set to 0 when required.  **ACTIVEHIGH** will set that control line to 1 if used in our definition.
+
+You notice that I have reinforced the ‘active’ state with a pre index of ‘n’ in the key name.
+So in the above example bit 15 of our control unit will control actions on the Load address low byte 8 bit register. Since this control line is active low, I have placed an ‘n’ at the start. (‘n’ for ‘NOT’).
+
+
+Now let’s look at a particular sequence of microcode instructions for one of the opcodes.
+Look at the `opcodes` array in **buildcontrolrom.py** taking note of the comment that the first 3 microcode instructions are always the same for  all our opcode instructions -(search for the name **‘LD R0’**). The first three opcodes defined elsewhere - will read in the instruction to a meta register called the Instruction Register (IR) and bump the microprocessor’s program counter (PC) so it points to any more opcode data or the next opcode instruction to run.
+
+
+````
+    {'name':'LD R0','bytecode': 0x14, 'control':
+    [
+        {'Ep','nLm'},
+        {'Cp','nCE','nLal'},  # inc pc to point to high byte of address
+        {'Ep','nLm'},
+        {'Cp','nCE','nLah'},  # inc pc to point to next opcode instruction
+        {'E16','nLm'},        # Enable both bytes of 2 address reg Write to Memory Address Reg (MAR)
+
+        {'nCE','nLk'}         # Finally Write the contents of the current address in MAR to R0 reg
+    ]},
+````
+
+
+We can see from this entry that there are 6 control line instructions. Along with the default 3 from the FETCH cycles this makes a total of 9 control line instructions.
+On each microprocessor clock tick the control unit will take these 9 instructions and set/reset particular control lines.  The 9 instructions are used to build a portion of ROM used for our particular instruction (LD RO,address). You will see that each element in the array consists of a series of bits, defined by their clLines keys which are combined together to build a 32 bit control word.  So for this particular instruction our control unit will go through 9 clock cycles to present each of the 32 bits.
+
+
+### The microcode ‘NOP’ value
+
+A few words about this value.  It is calculated by going through all of the 32 bits defined clLines and setting the lines high or low depending on the ‘active’ value. We need to make sure that the NOP code value will present control lines on the control unit to the level that will effectively do nothing on the registers/latch lines they are controlling.
+
+The NOP value I have given for the defined clLines described above is 
+**3e 30 c4 01** hexadecimal (0011 0111 0011 0000 1010 0100 0000 0001 binary). The binary value is simply calculated by going through bits 31 to 0 defined in the table clLines, setting that bit’s value to 0 for **ACTIVEHIGH** and 1 for **ACTIVELOW**.
 
 **assembler.py** - Python utitlity to convert assembler source (.asm) to binary (hex) machine code.
 Remember the RAM module starts at the address 32768 so most times (unless you're updating the processor's ROM routines) - you will need to use the directive **.ORG 0x8000**.
@@ -542,6 +662,7 @@ Options:-
  -n no output [-c dissassembled code]
  -r ROM address offset on V3 Hex output
 ```
+
 
 **staticdisplay.py** Builds 7-Seg Control line Rom for the Decimal Display circuit.
 
