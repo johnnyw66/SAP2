@@ -610,7 +610,7 @@ Let’s look at one of them.
 {'key':"nLal",  'bit':15, 'active': ACTIVELOW,'desc':"Load low byte of address with contents on DBUS"},
 ````
 
-This line is defined by the key name - the bit which is control and the level that needs to be outputted by the control unit when it is set. **ACTIVELOW** means the defined bit will be set to 0 when required.  **ACTIVEHIGH** will set that control line to 1 if used in our definition.
+This line is defined by the key name, along with the control bit and the required signal level the control unit needs to used when the line is active. **ACTIVELOW** means the defined bit will be set to 0 when required.  **ACTIVEHIGH** will set that control line to 1 when activated.
 
 You notice that I have reinforced the ‘active’ state with a pre index of ‘n’ in the key name.
 So in the above example bit 15 of our control unit will control actions on the Load address low byte 8 bit register. Since this control line is active low, I have placed an ‘n’ at the start. (‘n’ for ‘NOT’).
@@ -632,7 +632,7 @@ Look at the `opcodes` array in **buildcontrolrom.py** taking note of the comment
         {'nCE','nLk'}         # Finally Write the contents of the current address in MAR to R0 reg
     ]},
 ````
-
+The entry  {'Ep','nLm'} means that the control output must set bit 30 and reset bit 29 when that particular microcode is triggered. Other bits on the 32 bit word are determined by the **microcode NOP value**.
 
 We can see from this entry that there are 6 control line instructions. Along with the default 3 from the FETCH cycles this makes a total of 9 control line instructions.
 On each microprocessor clock tick the control unit will take these 9 instructions and set/reset particular control lines.  The 9 instructions are used to build a portion of ROM used for our particular instruction (LD RO,address). You will see that each element in the array consists of a series of bits, defined by their clLines keys which are combined together to build a 32 bit control word.  So for this particular instruction our control unit will go through 9 clock cycles to present each of the 32 bits.
