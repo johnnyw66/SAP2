@@ -612,8 +612,8 @@ Let’s look at one of them.
 
 This line is defined by the key name, along with the control bit and the required signal level the control unit needs to used when the line is active. **ACTIVELOW** means the defined bit will be set to 0 when required.  **ACTIVEHIGH** will set that control line to 1 when activated.
 
-You notice that I have reinforced the ‘active’ state with a pre index of ‘n’ in the key name.
-So in the above example bit 15 of our control unit will control actions on the Load address low byte 8 bit register. Since this control line is active low, I have placed an ‘n’ at the start. (‘n’ for ‘NOT’).
+You may have noticed that I have reinforced the ‘active’ state with a pre index of ‘n’ in the key name.
+So in the above example, bit 15 of our control unit will control actions on the Load address low byte 8 bit register. Since this control line is active low, I have placed an ‘n’ at the start. (‘n’ for ‘NOT’).
 
 
 Now let’s look at a particular sequence of microcode instructions for one of the opcodes.
