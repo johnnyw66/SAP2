@@ -534,15 +534,12 @@ Our microprocessor design currently employs 32 control lines, primarily for read
 
 ### How it Works:
 
-Instruction Fetch: The control unit retrieves the next instruction from memory.
+1. Instruction Fetch: The control unit retrieves the next instruction from memory.
+1. Instruction Decode: The control unit decodes the instruction to determine the required operation.
+1. Microcode Execution: Microcode translates the decoded instruction into a sequence of micro-operations, each corresponding to a specific hardware action such as reading from registers, performing arithmetic/logic operations, or accessing memory.
+1. Hardware Execution: The hardware executes the micro-operations sequentially to complete the instruction.
+1. Repeat: Steps 1-4 are repeated for each instruction in the program.
 
-Instruction Decode: The control unit decodes the instruction to determine the required operation.
-
-Microcode Execution: Microcode translates the decoded instruction into a sequence of micro-operations, each corresponding to a specific hardware action such as reading from registers, performing arithmetic/logic operations, or accessing memory.
-
-Hardware Execution: The hardware executes the micro-operations sequentially to complete the instruction.
-
-Repeat: Steps 1-4 are repeated for each instruction in the program.
 Microcode allows for a flexible and efficient implementation of the processor's instruction set, enabling support for various instructions while maintaining a relatively simple hardware design. Additionally, microcode can be updated or modified to fix bugs, add new instructions, or improve performance without requiring a complete processor redesign.
 
 Let’s give you an example of how we coded one particular opcode in our ISA by referring to our source code **buildcontrolrom.py**.
@@ -645,6 +642,14 @@ A few words about this value.  It is calculated by going through all of the 32 b
 The NOP value I have given for the defined clLines described above is 
 **3e 30 c4 01** hexadecimal (0011 0111 0011 0000 1010 0100 0000 0001 binary). The binary value is simply calculated by going through bits 31 to 0 defined in the table clLines, setting that bit’s value to 0 for **ACTIVEHIGH** and 1 for **ACTIVELOW**.
 
+```
+# simple way of calculating NOP value
+nop_value = 0
+for control in clLines:
+    nop_value |= ((1<<control['bit']) if control['active'] == ACTIVELOW else 0) 
+print(f"NOP value = {nop_value:04x}")
+
+```
 **assembler.py** - Python utitlity to convert assembler source (.asm) to binary (hex) machine code.
 Remember the RAM module starts at the address 32768 so most times (unless you're updating the processor's ROM routines) - you will need to use the directive **.ORG 0x8000**.
 
