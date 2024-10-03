@@ -677,6 +677,9 @@ Coming Soon! SAP2 Single Board Computer Emulator.
 ---
 July 2024 - I've started to code a SAP2 SBC simulator in Python. Watch this space!!
 
+https://github.com/johnnyw66/sap2emu
+
+
 Thanks to...
 ---
 
