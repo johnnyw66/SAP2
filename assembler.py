@@ -328,6 +328,12 @@ class NullByteCodeBuilder(ByteCodeBuilder):
     def build_bytecode(self, support: SupportOperation) -> [int]:
         return []
 
+
+class IndirectByteCodeBuilder(ByteCodeBuilder):
+    #  TODO
+    def build_bytecode(self, support: SupportOperation) -> [int]:
+        return []
+
 class DataByteCodeBuilder(ByteCodeBuilder):
 
     def build_bytecode(self, support: SupportOperation) -> [int]:
@@ -415,6 +421,10 @@ codeBuilder= {
     'nop' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x00)),
     'exx' : SingleByteCodeBuilder(SimpleByteCodeResolver(0x25)),
     'hlt' : SingleByteCodeBuilder(SimpleByteCodeResolver(0xff)),
+
+    # Indirect addressing
+    'ist':IndirectByteCodeBuilder(),
+    'ild':IndirectByteCodeBuilder(),
 
     'cppline' : NullByteCodeBuilder(),
     'cppbuiltin' : NullByteCodeBuilder(),
@@ -812,9 +822,16 @@ class AssemblerParser(BaseParser):
         if (op is not None):
             regl = self.try_rules('registers')
             self.chars(',')
-            data = self.try_rules('number16bit','symbolstr')
-            return AssemblerOperation(operation = op, reg =  regl, data = data, size = 3)
+            if (self.peek_chars('(')):
+                regp = self.try_rules('registers16')
+                self.chars(')')
+                # SMELLY!
+                return AssemblerOperation(operation = "i" + op, reg =  regl, regr = regp, size = 1)
+            else:
+                data = self.try_rules('number16bit','symbolstr')
+                return AssemblerOperation(operation = op, reg =  regl, data = data, size = 3)
         return None
+
 
     def call(self) -> AssemblerOperation:
         op = self.trymatch('call','jmp','jpz','jpnz','jpc',\
