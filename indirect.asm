@@ -5,7 +5,6 @@ movwi r0,text
 ld r2,(r0)
 and r2,r2
 jpz finish
-; Display the current estimate of sqr(197)
 out r2
 addi r1, 1
 jpnc loop
@@ -16,6 +15,7 @@ jmp loop
 hlt
 
 :text
-.dt '***Hello World!'
+.dt '***Hello World!****'
+
 
 .end
