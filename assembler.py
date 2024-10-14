@@ -151,6 +151,11 @@ class Dissassembler:
             return f'{ "?"+op.operation if op.operation not in disactions else disactions[op.operation].dissassemble(op)}'
 
 
+class OperationNotSupported(Exception):
+    def __init__(self, operation, message="Operation not currently supported"):
+        self.operation = operation
+        self.message = f"{message}: {operation}"
+        super().__init__(self.message)
 
 class Data(ABC):
     def __init__(self,data):
@@ -237,6 +242,7 @@ class ByteData(Data):
 class StringData(Data):
 
     def __init__(self, data):
+        #print(f"StringData: {data}")
         super().__init__(data)
 
     def getData(self):
@@ -330,8 +336,53 @@ class NullByteCodeBuilder(ByteCodeBuilder):
 
 
 class IndirectByteCodeBuilder(ByteCodeBuilder):
-    #  TODO
+
     def build_bytecode(self, support: SupportOperation) -> [int]:
+        #print(f"IndirectByteCodeBuilder: BUILD INDIRECT {support}")
+        try:
+            #print(f"opcode: '{support.operation}' r{support.reg}, ({support.regr})'")
+
+            lookup = f'{support.reg}{support.regr}'
+            # Match current buildcontrolrom.py as of 14/10/24
+
+            opcode_table = {
+            'ild':{
+
+                #'0r2': 0x00,
+                #'0r3': 0x00,
+
+                #'1r2': 0x00,
+                #'1r3': 0x00,
+
+                '2r0': 0x4e,
+                '2r1': 0x4e,
+
+                '3r0': 0x4f,
+                '3r1': 0x4f,
+                },
+            'ist':{
+
+                #'0r2': 0x00,
+                #'0r3': 0x00,
+
+                #'1r2': 0x00,
+                #'1r3': 0x00,
+
+                '2r0': 0x4a,
+                '2r1': 0x4a,
+
+                '3r0': 0x4b,
+                '3r1': 0x4b,
+                }
+            }
+            try:
+                bytecode = opcode_table[support.operation][lookup]
+                return [bytecode]
+            except Exception as e:
+                print(f"Exception in lookup {e}")
+                raise OperationNotSupported(f"opcode: '{support.operation}' r{support.reg}, ({support.regr})'")
+        except OperationNotSupported as e:
+            print(f"{e}")
         return []
 
 class DataByteCodeBuilder(ByteCodeBuilder):
@@ -775,15 +826,15 @@ class AssemblerParser(BaseParser):
 
     def dt(self) -> AssemblerOperation:
         if (self.trymatch('dt')):
-            strmatch = 'A-Za-z0-9_@().!//-+# '
+            strmatch = 'A-Za-z0-9_@().!*[]//-+# '
             astr = []
             self.chars("'")
 
-            ch = self.chars(strmatch)
+            ch = self.chars(strmatch, dont_gobble = True)
             astr.append(ch)
 
             while True:
-                ch = self.peek_chars(strmatch)
+                ch = self.peek_chars(strmatch, dont_gobble = True)
                 if (ch is None):
                     break
                 astr.append(ch)

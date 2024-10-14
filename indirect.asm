@@ -1,12 +1,21 @@
 .org 0x8000
 
-movi r2,197
-movwi r0,data
-st r2,0
-st r2,(r0)
+movwi r0,text
+:loop
+ld r2,(r0)
+and r2,r2
+jpz finish
+; Display the current estimate of sqr(197)
+out r2
+addi r1, 1
+jpnc loop
+addi r0, 1
+jmp loop
 
+:finish
 hlt
-:data
-.ds 16
+
+:text
+.dt '***Hello World!'
 
 .end
