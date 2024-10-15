@@ -87,6 +87,10 @@ class Dissassembler:
                 def dissassemble(self,op: AssemblerOperation) -> str:
                     return op.operation
 
+        class DissSingleByteIndirectOpCode(BaseDissassembler):
+
+                def dissassemble(self,op: AssemblerOperation) -> str:
+                    return op.operation[1:] + '\t'+ f"r{op.reg},({op.regr})"
 
         class DissData(BaseDissassembler):
 
@@ -147,6 +151,10 @@ class Dissassembler:
                         'db' : self.DissData(),
                         'dw' : self.DissData(),
                         'dt' : self.DissData(),
+
+                        'ist' : self.DissSingleByteIndirectOpCode(),
+                        'ild' : self.DissSingleByteIndirectOpCode(),
+
                     }
             return f'{ "?"+op.operation if op.operation not in disactions else disactions[op.operation].dissassemble(op)}'
 
