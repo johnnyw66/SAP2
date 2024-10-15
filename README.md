@@ -203,6 +203,8 @@ Opcode|Action|Flags|Tstates
 MOVI Rx,8bit | 8-bit value -> Rx| _|6
 LD Rx,16bitaddr |@(addr) -> Rx |_|7
 ST Rx,16bitaddr |@(addr) <- Rx |_|7
+LD Rx,(Ry) |@(Ry,Ry+1) -> Rx |_|6
+ST Rx,(Ry) |@(Ry,Ry+1) <- Rx |_|6
 MOVWI SP,16bitaddr| 16-bit value -> SP| _|7
 MOVWI R0,16bitaddr+| 16-bit value -> {R1,R0}|_|7
 MOVWI R2,16bitaddr+| 16-bit value -> {R3,R2}|_|7
