@@ -208,7 +208,7 @@ ST Rx,(Ry) |@(Ry,Ry+1) <- Rx |_|6
 MOVWI SP,16bitaddr| 16-bit value -> SP| _|7
 MOVWI R0,16bitaddr+| 16-bit value -> {R1,R0}|_|7
 MOVWI R2,16bitaddr+| 16-bit value -> {R3,R2}|_|7
-*4 Opcodes in total(bottom 2 to be implemented)*
+*8 Opcodes in total*
 
 Opcode|Action|Flags|Tstates
 ------|------|-----|-------
