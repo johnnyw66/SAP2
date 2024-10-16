@@ -675,9 +675,22 @@ Options:-
 
 **The utilities were developed and tested on Python 3.7**
 
-Coming Soon! SAP2 Single Board Computer Emulator.
+
+SAP2 Emulator
 ---
-July 2024 - I've started to code a SAP2 SBC simulator in Python. Watch this space!!
+
+For those interested in exploring the SAP2 processor in a software environment, there is a Python-based SAP2 emulator available. This emulator faithfully replicates the SAP2 processor's architecture, including its instruction set, register bank switching, and flag handling. It allows you to write, load, and execute SAP2 assembly programs, making it an excellent tool for testing and debugging.
+
+## Key Features:
+Instruction Emulation: The emulator supports all core SAP2 instructions, including arithmetic, logic, and control operations.
+Register Bank Switching: Just like in the hardware implementation, the EXX opcode switches between two banks of registers.
+Memory-Mapped I/O: The emulator supports the same memory-mapped I/O architecture as the Logisim version, allowing for the simulation of hardware peripherals like sound chips or other devices.
+Disassembler: A built-in disassembler allows you to view the assembly code for any loaded program.
+Single-Step Execution: You can step through instructions one at a time to carefully observe the effects of each operation on the processor’s registers and memory.
+Timing Note:
+It’s important to note that the SAP2 emulator does not emulate the actual timings of the processor. While it accurately executes the instructions and manages state changes, it does not simulate the clock cycles or the precise timing behaviors of the hardware. This means that real-time constraints or delays caused by instruction timings in hardware are not replicated in the emulator. It is designed for logical correctness rather than cycle-accurate performance.
+
+You can find the SAP2 emulator here.
 
 https://github.com/johnnyw66/sap2emu
 
