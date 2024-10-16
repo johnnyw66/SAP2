@@ -689,7 +689,7 @@ For those interested in exploring the SAP2 processor in a software environment, 
 - Single-Step Execution: You can step through instructions one at a time to carefully observe the effects of each operation on the processor’s registers and memory.
 
 ## Timing Note:
-It’s important to note that the SAP2 emulator does not emulate the actual timings of the processor. While it accurately executes the instructions and manages state changes, it does not simulate the clock cycles or the precise timing behaviors of the hardware. This means that real-time constraints or delays caused by instruction timings in hardware are not replicated in the emulator. It is designed for logical correctness rather than cycle-accurate performance.
+The SAP2 emulator does not emulate the actual timings of the processor. While it accurately executes the instructions and manages state changes, it does not simulate the clock cycles or the precise timing behaviors of the hardware. This means that real-time constraints or delays caused by instruction timings in hardware are not replicated in the emulator. It is designed for logical correctness rather than cycle-accurate performance.
 
 You can find the SAP2 emulator here.
 
