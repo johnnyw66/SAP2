@@ -679,7 +679,7 @@ Options:-
 SAP2 Emulator
 ---
 
-For those interested in exploring the SAP2 processor in a software environment, there is a Python-based SAP2 emulator available. This emulator faithfully replicates the SAP2 processor's architecture, including its instruction set, register bank switching, and flag handling. It allows you to write, load, and execute SAP2 assembly programs, making it an excellent tool for testing and debugging.
+For those interested in exploring the SAP2 processor in a software environment, there is a Python-based <a href="https://github.com/johnnyw66/sap2emu">SAP2 emulator</a> available. This emulator faithfully replicates the SAP2 processor's architecture, including its instruction set, register bank switching, and flag handling. It allows you to write, load, and execute SAP2 assembly programs, making it an excellent tool for testing and debugging.
 
 ## Key Features:
 - Instruction Emulation: The emulator supports all core SAP2 instructions, including arithmetic, logic, and control operations.
@@ -689,7 +689,7 @@ For those interested in exploring the SAP2 processor in a software environment, 
 - Single-Step Execution: You can step through instructions one at a time to carefully observe the effects of each operation on the processor’s registers and memory.
 
 ## Timing Note:
-The SAP2 emulator does not emulate the actual timings of the processor. While it accurately executes the instructions and manages state changes, it does not simulate the clock cycles or the precise timing behaviors of the hardware. This means that real-time constraints or delays caused by instruction timings in hardware are not replicated in the emulator. It is designed for logical correctness rather than cycle-accurate performance.
+The <a href="https://github.com/johnnyw66/sap2emu">SAP2 emulator</a> does not emulate the actual timings of the processor. While it accurately executes the instructions and manages state changes, it does not simulate the clock cycles or the precise timing behaviors of the hardware. This means that real-time constraints or delays caused by instruction timings in hardware are not replicated in the emulator. It is designed for logical correctness rather than cycle-accurate performance.
 
 You can find the SAP2 emulator here.
 
