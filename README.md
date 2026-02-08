@@ -528,10 +528,10 @@ Running buildcontrolrom.py produces the file **microcode32bit.rom** which should
 
 ### What is Microcode and What Does the buildcontrolrom.py Utility Do?
 
-Microcode is a low-level hardware description language utilized in the control unit of a microprocessor to implement its instruction set architecture (ISA). It serves as an intermediary between machine code instructions (those written by programmers) and the hardware's actual implementation of those instructions.
+Microcode is a low-level hardware description language utilised in the control unit of a microprocessor to implement its instruction set architecture (ISA). It serves as an intermediary between machine code instructions (those written by programmers) and the hardware's actual implementation of those instructions.
 In a microprocessor, the control unit is responsible for fetching native instructions from memory, decoding them, and executing them. Microcode plays a crucial role in this process by translating individual instructions of the ISA into a sequence of micro-operations that the hardware can execute.
 
-The **buildcontrolrom.py** Python utility is designed to produce a binary/hex file of the microcode used to control our microprocessor's lines. This microcode, stored in ROM, is utilized by our control unit to execute each opcode instruction through a predefined sequence.
+The **buildcontrolrom.py** Python utility is designed to produce a binary/hex file of the microcode used to control our microprocessor's lines. This microcode, stored in ROM, is utilised by our control unit to execute each opcode instruction through a predefined sequence.
 Our microprocessor design currently employs 32 control lines, primarily for reading and writing to registers and memory.
 
 ### How it Works:
