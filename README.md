@@ -671,6 +671,57 @@ Options:-
 ```
 
 
+## SAP2 Microcode ROM Visualiser
+
+An interactive single-file HTML tool for exploring the microcode ROM of the SAP2 processor.
+Open `sap2_microcode_visualiser.html` directly in any modern browser — no server, no dependencies, no install required.
+
+![SAP2 Microcode Visualiser](images/visualiser_screenshot.png)
+<!-- Replace the above line with an actual screenshot if you have one -->
+
+### What it shows
+
+For every instruction in the SAP2 ISA the visualiser renders a timing grid with one column per T-state clock cycle and one row per control line (all 32 of them, exactly as defined in `buildcontrolrom.py`). Coloured dots indicate whether each control line is asserted or idle at that clock tick:
+
+| Colour | Meaning |
+|--------|---------|
+| **Purple** | Fetch cycle T-state — shared by every instruction |
+| **Teal** | Execute T-state — this control line is asserted |
+| Dark/dim | Line is idle at this T-state |
+
+### Features
+
+- **Full ISA coverage** — all instruction groups: misc, register–register, single-register, immediate, memory, wide load, stack, branch, and output
+- **Category filter and search** — quickly narrow to the instruction you care about
+- **Info bar** — shows opcode hex range, T-state count, instruction size in bytes, and which flags are affected
+- **Control line tooltips** — hover any row label to read a plain-English description of what that hardware line does
+- **Single HTML file** — self-contained, no internet connection needed after download
+
+### Usage
+
+```bash
+# No build step needed — just open in Chrome, Firefox, or Edge
+open sap2_microcode_visualiser.html        # macOS
+start sap2_microcode_visualiser.html       # Windows
+xdg-open sap2_microcode_visualiser.html   # Linux
+```
+
+### Suggested comparisons
+
+A few instruction pairs that illustrate interesting microcode trade-offs:
+
+- **`CALL` vs `RET`** — see the full 11-step execute sequence for `CALL` (14 T-states total) versus the 7-step pop-and-jump of `RET` (10 T-states)
+- **`LD Rx,addr` vs `LD Rx,(Ry)`** — direct addressing takes 3 bytes and 7 T-states; indirect addressing takes 1 byte and 6 T-states because the 16-bit address register pair is already loaded
+- **`ADD Rx,Ry` vs `ADDI Rx,imm8`** — the immediate form needs two extra T-states to fetch the operand byte from `[PC++]`
+- **`NOP` vs `HLT`** — both have a single idle execute T-state; the difference is entirely in the emulator/LogiSim halt logic, not the microcode
+
+### Relationship to `buildcontrolrom.py`
+
+The 32 control lines, their bit positions, and their active-high / active-low polarity in the visualiser are taken directly from the `clLines` array in `buildcontrolrom.py`. The NOP value displayed by that script should match what you see as the baseline (all-idle) state in the visualiser — every unlit dot represents a bit held at its ACTIVELOW or ACTIVEHIGH idle level.
+
+If you modify the processor's control lines or add new opcodes, update the `CL` and `INSTRS` arrays near the top of `sap2_microcode_visualiser.html` to keep the visualiser in sync.
+
+
 **staticdisplay.py** Builds 7-Seg Control line Rom for the Decimal Display circuit.
 
 **The utilities were developed and tested on Python 3.7**
