@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAP2 Microcode ROM Visualiser</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:        #0d0f14;
+    --bg2:       #13161e;
+    --bg3:       #1a1e28;
+    --border:    #252a38;
+    --border2:   #2e3447;
+    --text:      #c8d0e0;
+    --text2:     #7a859a;
+    --text3:     #4a5268;
+    --accent:    #00d4aa;
+    --accent2:   #7b6cff;
+    --amber:     #f0a030;
+    --red:       #ff5566;
+    --fetch-bg:  #2a1f5a;
+    --fetch-dot: #7b6cff;
+    --exec-bg:   #0d3028;
+    --exec-dot:  #00d4aa;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'IBM Plex Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 14px;
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .logo-block {
+    width: 36px; height: 36px;
+    background: var(--accent2);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    letter-spacing: -1px;
+    flex-shrink: 0;
+  }
+  h1 {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  h1 span { color: var(--accent); }
+  .header-sub {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+    margin-top: 2px;
+  }
+
+  /* ── Main layout ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    height: calc(100vh - 73px);
+  }
+
+  /* ── Sidebar ── */
+  aside {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sidebar-section {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--text3);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* search */
+  .search-wrap { position: relative; }
+  .search-wrap input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 7px 10px 7px 32px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .search-wrap input:focus { border-color: var(--accent2); }
+  .search-wrap input::placeholder { color: var(--text3); }
+  .search-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--text3); font-size: 12px;
+  }
+
+  /* category filter */
+  .cat-filter {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-top: 10px;
+  }
+  .cat-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+  }
+  .cat-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .cat-btn.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+  /* instruction list */
+  .instr-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  .instr-list::-webkit-scrollbar { width: 4px; }
+  .instr-list::-webkit-scrollbar-track { background: transparent; }
+  .instr-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .instr-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.1s;
+    border: 1px solid transparent;
+  }
+  .instr-item:hover { background: var(--bg3); }
+  .instr-item.active {
+    background: var(--bg3);
+    border-color: var(--border2);
+  }
+  .instr-item.active .instr-name { color: var(--accent); }
+  .instr-name {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    flex: 1;
+  }
+  .instr-opcode {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+  }
+  .instr-ts {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    background: var(--bg);
+    padding: 2px 5px;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .cat-group-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    text-transform: uppercase;
+    padding: 12px 10px 4px;
+  }
+
+  /* ── Main content ── */
+  main {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* info bar */
+  .info-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .info-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .chip-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+  .chip-val {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .chip-val.accent { color: var(--accent); }
+  .chip-val.accent2 { color: var(--accent2); }
+  .chip-val.amber { color: var(--amber); }
+
+  .info-divider {
+    width: 1px; height: 32px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+  .desc-text {
+    flex: 1;
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.5;
+    font-style: italic;
+    min-width: 200px;
+  }
+  .desc-text strong { color: var(--text); font-style: normal; font-weight: 500; }
+
+  /* legend */
+  .legend-bar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .leg-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); font-family: var(--mono); }
+  .leg-swatch { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; }
+
+  /* table area */
+  .table-wrap {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border2) transparent;
+  }
+  .table-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+  .table-wrap::-webkit-scrollbar-track { background: transparent; }
+  .table-wrap::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  table {
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 11px;
+    min-width: 100%;
+  }
+  thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border2);
+    padding: 8px 6px 6px;
+    text-align: center;
+    white-space: nowrap;
+    font-weight: 500;
+  }
+  thead th.cl-header {
+    text-align: left;
+    padding-left: 16px;
+    min-width: 80px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    text-transform: uppercase;
+  }
+  .th-fetch {
+    color: var(--fetch-dot);
+    font-size: 11px;
+    min-width: 46px;
+  }
+  .th-exec {
+    color: var(--exec-dot);
+    font-size: 11px;
+    min-width: 46px;
+  }
+  .th-sub {
+    display: block;
+    font-size: 9px;
+    font-weight: 400;
+    opacity: 0.6;
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #1a1e28;
+    transition: background 0.1s;
+  }
+  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody tr:hover .cl-name { color: var(--text); }
+
+  .cl-name {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+    padding: 0 10px 0 16px;
+    white-space: nowrap;
+    cursor: help;
+    height: 28px;
+    vertical-align: middle;
+  }
+  .cl-active { font-size: 10px; color: var(--text3); padding-left: 4px; }
+
+  .cell {
+    text-align: center;
+    vertical-align: middle;
+    padding: 3px 4px;
+    height: 28px;
+  }
+  .dot {
+    width: 20px; height: 20px;
+    border-radius: 4px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .dot-fetch  { background: var(--fetch-dot); opacity: 0.85; }
+  .dot-exec   { background: var(--exec-dot); }
+  .dot-idle   { background: var(--bg3); border: 1px solid var(--border); }
+  .dot-fetch-idle { background: var(--fetch-bg); border: 1px solid #3a2f7a; }
+
+  .no-results {
+    padding: 24px 10px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text3);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo-block">S2</div>
+    <div>
+      <h1>SAP2 <span>Microcode ROM</span> Visualiser</h1>
+      <div class="header-sub">johnnyw66/SAP2 · LogiSim Evolution · 32 control lines · ~90 opcodes</div>
+    </div>
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Instructions</div>
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="search" placeholder="Search opcodes…" autocomplete="off">
+      </div>
+      <div class="cat-filter" id="cat-filter"></div>
+    </div>
+    <div class="instr-list" id="instr-list"></div>
+  </aside>
+
+  <main>
+    <div class="info-bar" id="info-bar">
+      <div class="info-chip">
+        <span class="chip-label">mnemonic</span>
+        <span class="chip-val accent" id="ic-name">—</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-chip">
+        <span class="chip-label">opcode</span>
+        <span class="chip-val" id="ic-opcode">—</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-chip">
+        <span class="chip-label">T-states</span>
+        <span class="chip-val accent2" id="ic-ts">—</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-chip">
+        <span class="chip-label">bytes</span>
+        <span class="chip-val" id="ic-bytes">—</span>
+      </div>
+      <div class="info-divider"></div>
+      <div class="info-chip">
+        <span class="chip-label">flags</span>
+        <span class="chip-val amber" id="ic-flags">—</span>
+      </div>
+      <div class="info-divider"></div>
+      <p class="desc-text" id="ic-desc">Select an instruction from the sidebar.</p>
+    </div>
+    <div class="legend-bar">
+      <div class="leg-item"><span class="leg-swatch" style="background:var(--fetch-dot);opacity:0.85"></span>fetch cycle — shared by all instructions</div>
+      <div class="leg-item"><span class="leg-swatch" style="background:var(--exec-dot)"></span>execute — line asserted</div>
+      <div class="leg-item"><span class="leg-swatch" style="background:var(--fetch-bg);border:1px solid #3a2f7a"></span>fetch — line idle</div>
+      <div class="leg-item"><span class="leg-swatch" style="background:var(--bg3);border:1px solid var(--border)"></span>execute — line idle</div>
+    </div>
+    <div class="table-wrap">
+      <table id="mc-table"></table>
+    </div>
+  </main>
+</div>
+
+<script>
+const AH=1,AL=0;
+
+const CL=[
+  {key:"Cp",   bit:31, active:AH, desc:"Increment program counter (PC++)"},
+  {key:"Ep",   bit:30, active:AH, desc:"Place PC value onto the address bus"},
+  {key:"nLm",  bit:29, active:AL, desc:"Latch bus value into Memory Address Register (MAR)"},
+  {key:"nCE",  bit:28, active:AL, desc:"Output current RAM/ROM byte onto the data bus"},
+  {key:"nLi",  bit:27, active:AL, desc:"Load data bus into Instruction Register (IR)"},
+  {key:"nEi",  bit:26, active:AL, desc:"Output Instruction Register onto data bus"},
+  {key:"nLa",  bit:25, active:AL, desc:"Load data bus into ALU A register"},
+  {key:"Ea",   bit:24, active:AH, desc:"Output ALU A register onto data bus"},
+  {key:"Eb",   bit:23, active:AH, desc:"Output ALU B register onto data bus"},
+  {key:"Eu",   bit:22, active:AH, desc:"Enable ALU — output result directly to B reg"},
+  {key:"nLb",  bit:21, active:AL, desc:"Load data bus into ALU B register"},
+  {key:"nLo",  bit:20, active:AL, desc:"Load data bus into Output Register"},
+  {key:"Lr",   bit:19, active:AH, desc:"Write data bus to RAM (store operation)"},
+  {key:"Lp",   bit:18, active:AH, desc:"Load PC from address bus (jump operations)"},
+  {key:"f1",   bit:17, active:AH, desc:"Jump/ALU condition select bit 1"},
+  {key:"f0",   bit:16, active:AH, desc:"Jump/ALU condition select bit 0 {00=Carry, 01=NZ, 10=Parity, 11=Always}"},
+  {key:"nLal", bit:15, active:AL, desc:"Load low byte of 16-bit address register from data bus"},
+  {key:"nLah", bit:14, active:AL, desc:"Load high byte of 16-bit address register from data bus"},
+  {key:"E16",  bit:13, active:AH, desc:"Output 16-bit address register pair onto the address bus"},
+  {key:"Lf",   bit:12, active:AH, desc:"Latch Flag Register with ALU result flags"},
+  {key:"Ek",   bit:11, active:AH, desc:"Output selected bank register onto data bus"},
+  {key:"nLk",  bit:10, active:AL, desc:"Latch data bus value into bank register"},
+  {key:"k1",   bit:9,  active:AH, desc:"Bank register write select bit 1"},
+  {key:"k0",   bit:8,  active:AH, desc:"Bank register write select bit 0"},
+  {key:"f2",   bit:7,  active:AH, desc:"ALU function / constant bank select bit 2"},
+  {key:"Ec",   bit:6,  active:AH, desc:"Output constant bank (selected by {f2,f1,f0}) onto data bus"},
+  {key:"Xx",   bit:5,  active:AH, desc:"Swap register banks (EXX instruction)"},
+  {key:"Sa",   bit:4,  active:AH, desc:"A/B reg source: data bus (0) or address bus (1)"},
+  {key:"Us",   bit:3,  active:AH, desc:"Stack pointer direction: increment (1) or decrement (0)"},
+  {key:"Es",   bit:2,  active:AH, desc:"Output stack pointer onto address bus"},
+  {key:"Cs",   bit:1,  active:AH, desc:"Enable stack pointer counter"},
+  {key:"nLs",  bit:0,  active:AL, desc:"Load stack pointer from address bus"},
+];
+
+const FETCH=[
+  new Set(["Ep","nLm"]),
+  new Set(["Cp","nCE","nLi"]),
+  new Set([])
+];
+
+const INSTRS=[
+  // misc
+  {cat:"misc",   name:"NOP",          opcode:"0x00", bytes:1, flags:"—",    ts:4,
+   exec:[new Set([])]},
+  {cat:"misc",   name:"HLT",          opcode:"0xFF", bytes:1, flags:"—",    ts:4,
+   exec:[new Set([])]},
+  {cat:"misc",   name:"EXX",          opcode:"0x25", bytes:1, flags:"—",    ts:4,
+   exec:[new Set(["Xx"])]},
+  {cat:"misc",   name:"CLC",          opcode:"0x01", bytes:1, flags:"C",    ts:5,
+   exec:[new Set(["Lf"])]},
+  {cat:"misc",   name:"SETC",         opcode:"0x02", bytes:1, flags:"C",    ts:5,
+   exec:[new Set(["Lf","Ec"])]},
+  // output
+  {cat:"output", name:"OUT Rx",       opcode:"0x10–13", bytes:1, flags:"—", ts:4,
+   exec:[new Set(["Ek","nLo"])]},
+  // register-register
+  {cat:"reg-reg",name:"MOV Rx,Ry",    opcode:"0x90–9F", bytes:1, flags:"—", ts:4,
+   exec:[new Set(["Ek","nLk"])]},
+  {cat:"reg-reg",name:"ADD Rx,Ry",    opcode:"0xA0–AF", bytes:1, flags:"CZSV", ts:4,
+   exec:[new Set(["Ek","nLa"]),new Set(["Ek","nLb"]),new Set(["Eu","nLk","Lf"])]},
+  {cat:"reg-reg",name:"SUB Rx,Ry",    opcode:"0xB0–BF", bytes:1, flags:"ZVS",  ts:4,
+   exec:[new Set(["Ek","nLa"]),new Set(["Ek","nLb"]),new Set(["Eu","nLk","Lf","f0"])]},
+  {cat:"reg-reg",name:"AND Rx,Ry",    opcode:"0xC0–CF", bytes:1, flags:"Z",    ts:4,
+   exec:[new Set(["Ek","nLa"]),new Set(["Ek","nLb"]),new Set(["Eu","nLk","Lf","f1"])]},
+  {cat:"reg-reg",name:"OR Rx,Ry",     opcode:"0xD0–DF", bytes:1, flags:"ZSV",  ts:4,
+   exec:[new Set(["Ek","nLa"]),new Set(["Ek","nLb"]),new Set(["Eu","nLk","Lf","f1","f0"])]},
+  {cat:"reg-reg",name:"XOR Rx,Ry",    opcode:"0xE0–EF", bytes:1, flags:"ZSV",  ts:4,
+   exec:[new Set(["Ek","nLa"]),new Set(["Ek","nLb"]),new Set(["Eu","nLk","Lf","f2"])]},
+  // single-reg
+  {cat:"single", name:"INC Rx",       opcode:"0x88–8B", bytes:1, flags:"ZSVO", ts:5,
+   exec:[new Set(["Ek","nLa"]),new Set(["Eu","Lf","nLk"])]},
+  {cat:"single", name:"DEC Rx",       opcode:"0x8C–8F", bytes:1, flags:"ZSVO", ts:5,
+   exec:[new Set(["Ek","nLa"]),new Set(["Eu","Lf","nLk","f0"])]},
+  {cat:"single", name:"SHL Rx",       opcode:"0x84–87", bytes:1, flags:"ZSVC", ts:5,
+   exec:[new Set(["Ek","nLa"]),new Set(["Eu","Lf","nLk","f2","f1"])]},
+  {cat:"single", name:"SHR Rx",       opcode:"0x80–83", bytes:1, flags:"ZSVC", ts:5,
+   exec:[new Set(["Ek","nLa"]),new Set(["Eu","Lf","nLk","f2","f1","f0"])]},
+  // immediate
+  {cat:"imm",    name:"MOVI Rx,imm8", opcode:"0x40–43", bytes:2, flags:"—",    ts:6,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLk"])]},
+  {cat:"imm",    name:"ADDI Rx,imm8", opcode:"0x50–53", bytes:2, flags:"ZSVO", ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLb"]),new Set(["Ek","nLa"]),new Set(["Eu","nLk","Lf"])]},
+  {cat:"imm",    name:"SUBI Rx,imm8", opcode:"0x54–57", bytes:2, flags:"ZSVO", ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLb"]),new Set(["Ek","nLa"]),new Set(["Eu","nLk","Lf","f0"])]},
+  {cat:"imm",    name:"ANDI Rx,imm8", opcode:"0x58–5B", bytes:2, flags:"ZSVO", ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLb"]),new Set(["Ek","nLa"]),new Set(["Eu","nLk","Lf","f1"])]},
+  {cat:"imm",    name:"ORI Rx,imm8",  opcode:"0x5C–5F", bytes:2, flags:"ZSVO", ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLb"]),new Set(["Ek","nLa"]),new Set(["Eu","nLk","Lf","f1","f0"])]},
+  {cat:"imm",    name:"XORI Rx,imm8", opcode:"0x44–47", bytes:2, flags:"ZSVO", ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLb"]),new Set(["Ek","nLa"]),new Set(["Eu","nLk","Lf","f2"])]},
+  // memory
+  {cat:"memory", name:"LD Rx,addr",   opcode:"0x14–17", bytes:3, flags:"—",    ts:7,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["E16","nLm"]),new Set(["nCE","nLk"])]},
+  {cat:"memory", name:"ST Rx,addr",   opcode:"0x18–1B", bytes:3, flags:"—",    ts:7,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["E16","nLm"]),new Set(["Ek","Lr"])]},
+  {cat:"memory", name:"LD Rx,(Ry)",   opcode:"0x4E–4F", bytes:1, flags:"—",    ts:6,
+   exec:[new Set(["E16","nLm"]),new Set(["nCE","nLk"])]},
+  {cat:"memory", name:"ST Rx,(Ry)",   opcode:"0x4A–4B", bytes:1, flags:"—",    ts:6,
+   exec:[new Set(["E16","nLm"]),new Set(["Ek","Lr"])]},
+  // load-wide
+  {cat:"wide",   name:"MOVWI SP,imm", opcode:"0x1C",    bytes:3, flags:"—",    ts:7,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["E16","nLs"])]},
+  {cat:"wide",   name:"MOVWI R0,imm", opcode:"0x28",    bytes:3, flags:"—",    ts:7,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLk","k0"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLk"])]},
+  {cat:"wide",   name:"MOVWI R2,imm", opcode:"0x2A",    bytes:3, flags:"—",    ts:7,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLk","k0","k1"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLk","k1"])]},
+  // stack
+  {cat:"stack",  name:"PUSH R0",      opcode:"0x1F",    bytes:1, flags:"—",    ts:9,
+   exec:[new Set(["Es","nLm"]),new Set(["Ek","Lr"]),new Set(["Cs"]),new Set(["Es","nLm"]),new Set(["Ek","Lr","k0"]),new Set(["Cs"])]},
+  {cat:"stack",  name:"PUSH R2",      opcode:"0x20",    bytes:1, flags:"—",    ts:9,
+   exec:[new Set(["Es","nLm"]),new Set(["Ek","Lr","k1"]),new Set(["Cs"]),new Set(["Es","nLm"]),new Set(["Ek","Lr","k0","k1"]),new Set(["Cs"])]},
+  {cat:"stack",  name:"POP R0",       opcode:"0x22",    bytes:1, flags:"—",    ts:9,
+   exec:[new Set(["Cs","Us"]),new Set(["Es","nLm"]),new Set(["nCE","nLk","k0"]),new Set(["Cs","Us"]),new Set(["Es","nLm"]),new Set(["nCE","nLk"])]},
+  {cat:"stack",  name:"POP R2",       opcode:"0x23",    bytes:1, flags:"—",    ts:9,
+   exec:[new Set(["Cs","Us"]),new Set(["Es","nLm"]),new Set(["nCE","nLk","k0","k1"]),new Set(["Cs","Us"]),new Set(["Es","nLm"]),new Set(["nCE","nLk","k1"])]},
+  {cat:"stack",  name:"INC SP",       opcode:"0x1D",    bytes:1, flags:"—",    ts:5,
+   exec:[new Set(["Cs","Us"]),new Set([])]},
+  {cat:"stack",  name:"DEC SP",       opcode:"0x1E",    bytes:1, flags:"—",    ts:5,
+   exec:[new Set(["Cs"]),new Set([])]},
+  {cat:"stack",  name:"CSP Rx",       opcode:"0x24",    bytes:1, flags:"—",    ts:5,
+   exec:[new Set(["Es","Sa","nLk"]),new Set(["Es","Sa","nLk","k0"])]},
+  // branch
+  {cat:"branch", name:"JMP addr",     opcode:"0x6C",    bytes:3, flags:"—",    ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["Lp","E16","f1","f0"])]},
+  {cat:"branch", name:"JPNZ addr",    opcode:"0x64",    bytes:3, flags:"—",    ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["Lp","E16","f0"])]},
+  {cat:"branch", name:"JPZ addr",     opcode:"0x65",    bytes:3, flags:"—",    ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["Lp","E16"])]},
+  {cat:"branch", name:"JPNC addr",    opcode:"0x66",    bytes:3, flags:"—",    ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["Lp","E16","f1"])]},
+  {cat:"branch", name:"JPC addr",     opcode:"0x67",    bytes:3, flags:"—",    ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["Lp"])]},
+  {cat:"branch", name:"JPNV addr",    opcode:"0x6A",    bytes:3, flags:"—",    ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["Lp","E16","f2","f0"])]},
+  {cat:"branch", name:"JPV addr",     opcode:"0x6B",    bytes:3, flags:"—",    ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["Lp","E16","f2"])]},
+  {cat:"branch", name:"DJNZ Rx,addr", opcode:"0x60–63", bytes:3, flags:"ZSVO", ts:8,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),new Set(["Ek","nLa"]),new Set(["Eu","nLk","Lf","f0"]),new Set(["Lp","E16","f0"])]},
+  {cat:"branch", name:"CALL addr",    opcode:"0x6E",    bytes:3, flags:"—",    ts:14,
+   exec:[new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLal"]),new Set(["Ep","nLm"]),new Set(["Cp","nCE","nLah"]),
+         new Set(["Es","nLm"]),new Set(["Ek","Lr"]),new Set(["Cs"]),
+         new Set(["Es","nLm"]),new Set(["Ek","Lr","k0"]),new Set(["Cs"]),
+         new Set(["Lp","E16","f1","f0"])]},
+  {cat:"branch", name:"RET",          opcode:"0x6F",    bytes:1, flags:"—",    ts:10,
+   exec:[new Set(["Cs","Us"]),new Set(["Es","nLm"]),new Set(["nCE","nLal"]),
+         new Set(["Cs","Us"]),new Set(["Es","nLm"]),new Set(["nCE","nLah"]),
+         new Set(["Lp","E16","f1","f0"])]},
+];
+
+const DESCS={
+  "NOP":          "No operation. All control lines remain at their idle (NOP) state during the execute T-state. Pure pipeline padding.",
+  "HLT":          "Halt. The execute stage issues no control signals. The CPU stops advancing the PC and idles indefinitely.",
+  "EXX":          "Exchange register banks. The Xx line pulses to toggle the current bank index between 0 and 1. Only one T-state needed.",
+  "CLC":          "Clear carry flag. Lf latches the flag register with the carry bit forced to 0 via the ALU NOP path.",
+  "SETC":         "Set carry flag. Ec drives a constant '1' from the constant bank onto the data bus; Lf latches it into the flag register.",
+  "OUT Rx":       "Output register to display. Ek drives the selected bank register onto the bus; nLo latches it into the Output Register.",
+  "MOV Rx,Ry":    "Register copy. The source register (Ek) is driven onto the bus and the destination register latches it via nLk. No flags affected.",
+  "ADD Rx,Ry":    "8-bit add. Destination → ALU A (Ek+nLa), source → ALU B (Ek+nLb), ALU result enabled (Eu) and written back with flags (Lf).",
+  "SUB Rx,Ry":    "8-bit subtract. Identical to ADD but f0 selects the subtract function inside the ALU combinational logic.",
+  "AND Rx,Ry":    "Bitwise AND. f1=1 selects the AND function in the ALU; only the Z flag is architecturally meaningful for AND.",
+  "OR Rx,Ry":     "Bitwise OR. {f1,f0}=11 selects OR; Z, S and V flags are updated from the result.",
+  "XOR Rx,Ry":    "Bitwise XOR. f2=1 selects XOR in the ALU function decoder. Z, S and V flags updated.",
+  "INC Rx":       "Increment register. The register is fed to ALU A; Eu with default function adds 1 and the result is latched back with flags.",
+  "DEC Rx":       "Decrement register. Like INC but f0 selects the subtract/decrement ALU path.",
+  "SHL Rx":       "Shift left through carry. {f2,f1}=11 selects left-shift in the ALU; carry-out becomes the new C flag.",
+  "SHR Rx":       "Shift right through carry. {f2,f1,f0}=111 selects right-shift; carry-in feeds the MSB, carry-out updates C flag.",
+  "MOVI Rx,imm8": "Load immediate 8-bit. Two extra T-states after fetch: PC points to the operand byte (Ep+nLm), which is read (Cp+nCE) directly into the bank register (nLk).",
+  "ADDI Rx,imm8": "Add immediate. Operand fetched from [PC++] into ALU B, then register value into ALU A, result and flags latched.",
+  "SUBI Rx,imm8": "Subtract immediate. Same as ADDI but f0 chooses the subtract ALU function.",
+  "ANDI Rx,imm8": "AND immediate. Operand loaded into B, register into A, f1 selects AND, result and Z flag latched.",
+  "ORI Rx,imm8":  "OR immediate. {f1,f0} selects OR; result written back with flags.",
+  "XORI Rx,imm8": "XOR immediate. f2 selects XOR; result and flags latched.",
+  "LD Rx,addr":   "Load from 16-bit address. Low byte fetched into nLal, high byte into nLah, E16 drives the 16-bit MAR, RAM byte read into register via nLk.",
+  "ST Rx,addr":   "Store to 16-bit address. Address loaded same as LD; then Ek drives the register and Lr writes it to RAM.",
+  "LD Rx,(Ry)":   "Indirect load. The R0/R1 pair already holds the target address; E16 drives it onto the address bus immediately, saving 4 T-states vs LD Rx,addr.",
+  "ST Rx,(Ry)":   "Indirect store. E16 drives R0/R1 address; Ek+Lr writes the register to that RAM location.",
+  "MOVWI SP,imm": "Load stack pointer with 16-bit immediate. Address bytes fetched into the 16-bit address register, then nLs latches the full value into SP.",
+  "MOVWI R0,imm": "Load R0/R1 pair. Low byte fetched into R0 via k0 select; high byte fetched into R1. Little-endian order.",
+  "MOVWI R2,imm": "Load R2/R3 pair. Same microcode pattern as MOVWI R0 but k1 selects the upper register pair.",
+  "PUSH R0":      "Push R0/R1 pair. Two bytes written to [SP] and [SP-1] via Es+Lr, SP decremented twice by Cs. 6 execute T-states.",
+  "PUSH R2":      "Push R2/R3 pair. Identical pattern to PUSH R0 but k1/k0 selects R2 and R3.",
+  "POP R0":       "Pop R0/R1 from stack. SP incremented twice (Cs+Us), two bytes read from stack addresses into the register pair.",
+  "POP R2":       "Pop R2/R3 from stack. Same as POP R0 but k1 selects R2/R3.",
+  "INC SP":       "Increment SP. Cs enables the SP counter; Us=1 selects the increment direction. Takes 5 T-states total.",
+  "DEC SP":       "Decrement SP. Cs enables the counter; Us=0 (absent) selects decrement direction.",
+  "CSP Rx":       "Copy SP to register pair. Es drives SP onto the address bus; Sa=1 routes the address bus into the A/B register path, latched into two consecutive registers.",
+  "JMP addr":     "Unconditional jump. Address fetched into 16-bit register; Lp with {f1,f0}=11 selects 'always' condition — PC always updated.",
+  "JPNZ addr":    "Jump if not zero. {f0}=1 selects the not-zero condition; Lp only loads PC if Z flag is clear.",
+  "JPZ addr":     "Jump if zero. {f0}=0 selects the zero condition; PC updated only when Z flag is set.",
+  "JPNC addr":    "Jump if no carry. {f1}=1 selects carry condition; jump taken when C flag is clear.",
+  "JPC addr":     "Jump if carry. Lp alone (no f bits set) selects the carry-set condition.",
+  "JPNV addr":    "Jump if no overflow. {f2,f0} selects overflow condition; jump taken when V flag is clear.",
+  "JPV addr":     "Jump if overflow. {f2} selects overflow condition; PC loaded when V flag is set.",
+  "DJNZ Rx,addr":"Decrement and jump if not zero. 16-bit address fetched, register decremented through ALU (f0=subtract), flags latched; Lp taken if Z is clear.",
+  "CALL addr":    "Call subroutine. Address fetched, current PC pushed onto stack in two bytes (via SP with Cs decrement), then PC loaded from address register. Heaviest opcode at 14 T-states.",
+  "RET":          "Return from subroutine. SP incremented twice, two bytes popped from stack into the address register pair, PC loaded unconditionally via Lp+{f1,f0}=11.",
+};
+
+const CATS=[
+  {id:"all",    label:"all"},
+  {id:"misc",   label:"misc"},
+  {id:"reg-reg",label:"reg–reg"},
+  {id:"single", label:"single"},
+  {id:"imm",    label:"imm"},
+  {id:"memory", label:"memory"},
+  {id:"wide",   label:"wide"},
+  {id:"stack",  label:"stack"},
+  {id:"branch", label:"branch"},
+  {id:"output", label:"output"},
+];
+
+let currentCat="all";
+let currentSearch="";
+let currentIdx=0;
+
+function filteredInstrs(){
+  return INSTRS.filter((ins,i)=>{
+    const catOk = currentCat==="all" || ins.cat===currentCat;
+    const q=currentSearch.toLowerCase();
+    const searchOk = !q || ins.name.toLowerCase().includes(q) || ins.opcode.toLowerCase().includes(q) || ins.cat.toLowerCase().includes(q);
+    return catOk && searchOk;
+  });
+}
+
+function buildSidebar(){
+  const list=document.getElementById('instr-list');
+  const filtered=filteredInstrs();
+  if(!filtered.length){
+    list.innerHTML='<div class="no-results">No matching instructions</div>';
+    return;
+  }
+  let html='';
+  let lastCat='';
+  filtered.forEach((ins)=>{
+    const idx=INSTRS.indexOf(ins);
+    if(ins.cat!==lastCat){
+      const catLabel=CATS.find(c=>c.id===ins.cat)?.label||ins.cat;
+      html+=`<div class="cat-group-label">${catLabel}</div>`;
+      lastCat=ins.cat;
+    }
+    const active=idx===currentIdx?'active':'';
+    html+=`<div class="instr-item ${active}" data-idx="${idx}">
+      <span class="instr-name">${ins.name}</span>
+      <span class="instr-opcode">${ins.opcode}</span>
+      <span class="instr-ts">T${ins.ts}</span>
+    </div>`;
+  });
+  list.innerHTML=html;
+  list.querySelectorAll('.instr-item').forEach(el=>{
+    el.addEventListener('click',()=>{
+      currentIdx=+el.dataset.idx;
+      buildSidebar();
+      buildTable(INSTRS[currentIdx]);
+    });
+  });
+}
+
+function buildTable(instr){
+  const allTs=[...FETCH,...instr.exec];
+  const nTs=allTs.length;
+  const tbl=document.getElementById('mc-table');
+  let html='<thead><tr><th class="cl-header">control line</th>';
+  for(let t=0;t<nTs;t++){
+    const isFetch=t<FETCH.length;
+    const cls=isFetch?'th-fetch':'th-exec';
+    const lbl=isFetch?'fetch':'exec';
+    html+=`<th class="${cls}">T${t+1}<span class="th-sub">${lbl}</span></th>`;
+  }
+  html+='</tr></thead><tbody>';
+  for(const cl of CL){
+    html+=`<tr><td class="cl-name" title="${cl.desc}">${cl.key}</td>`;
+    for(let t=0;t<nTs;t++){
+      const set=allTs[t];
+      const active=set.has(cl.key);
+      const isFetch=t<FETCH.length;
+      let dotCls;
+      if(active){
+        dotCls=isFetch?'dot-fetch':'dot-exec';
+      } else {
+        dotCls=isFetch?'dot-fetch-idle':'dot-idle';
+      }
+      html+=`<td class="cell"><span class="dot ${dotCls}"></span></td>`;
+    }
+    html+='</tr>';
+  }
+  html+='</tbody>';
+  tbl.innerHTML=html;
+
+  document.getElementById('ic-name').textContent=instr.name;
+  document.getElementById('ic-opcode').textContent=instr.opcode;
+  document.getElementById('ic-ts').textContent=instr.ts;
+  document.getElementById('ic-bytes').textContent=instr.bytes+' byte'+(instr.bytes>1?'s':'');
+  document.getElementById('ic-flags').textContent=instr.flags;
+  const desc=DESCS[instr.name]||'Microcode sequence for '+instr.name+'.';
+  document.getElementById('ic-desc').innerHTML=`<strong>${instr.name}</strong> — ${desc}`;
+}
+
+function buildCatFilter(){
+  const wrap=document.getElementById('cat-filter');
+  wrap.innerHTML=CATS.map(c=>`<button class="cat-btn${c.id===currentCat?' active':''}" data-cat="${c.id}">${c.label}</button>`).join('');
+  wrap.querySelectorAll('.cat-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      currentCat=btn.dataset.cat;
+      buildCatFilter();
+      const f=filteredInstrs();
+      if(f.length) currentIdx=INSTRS.indexOf(f[0]);
+      buildSidebar();
+      if(INSTRS[currentIdx]) buildTable(INSTRS[currentIdx]);
+    });
+  });
+}
+
+document.getElementById('search').addEventListener('input',e=>{
+  currentSearch=e.target.value;
+  const f=filteredInstrs();
+  if(f.length) currentIdx=INSTRS.indexOf(f[0]);
+  buildSidebar();
+  if(INSTRS[currentIdx]) buildTable(INSTRS[currentIdx]);
+});
+
+buildCatFilter();
+buildSidebar();
+buildTable(INSTRS[0]);
+</script>
+</body>
+</html>
