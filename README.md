@@ -746,6 +746,152 @@ You can find the SAP2 emulator here.
 
 https://github.com/johnnyw66/sap2emu
 
+## SAP2 Monitor
+
+A ROM-resident machine monitor for the SAP2 processor, written entirely in
+SAP2 assembly.  It occupies the ROM space (0x0000–0x7FFF) and provides an
+interactive command line over the serial port, giving you memory inspection,
+modification, hex dump, inline program loading, and execution from a terminal.
+
+Assemble with:
+
+```bash
+python3 assembler.py monitor.asm -r -s
+```
+
+### Memory map
+
+| Region | Address range | Contents |
+|--------|--------------|----------|
+| ROM | 0x0000 – 0x7FFF | Monitor code and string constants |
+| RAM | 0x8000 – 0xFFFF | User programs, stack, monitor workspace |
+| Serial IN | 0x6001 | Memory-mapped keyboard input |
+| Serial OUT | 0x6000 | Memory-mapped terminal output |
+
+The stack pointer is initialised to 0xFFFF (top of RAM) on reset.
+
+### Commands
+
+```
+> M <addr>           Examine 8 bytes from <addr>
+> M <addr> <byte>    Write <byte> to <addr>
+> G <addr>           Jump to <addr> (return to monitor via JMP 0x0000)
+> D <addr>           Hex dump 16 bytes from <addr> in two rows of 8
+> R                  Display registers R0–R3 and SP
+> L <addr>           Load hex bytes into memory from <addr> (see below)
+> H                  Print command summary
+```
+
+All addresses and byte values are entered as uppercase or lowercase hex
+without a prefix — `8000`, `3A`, `ff` are all valid.
+
+#### L — inline hex loader
+
+The `L` command loads space-separated byte pairs entered on successive lines,
+writing them sequentially into memory starting at the given address.  A line
+containing only `.` (or an empty line) terminates the load and prints the
+total number of bytes written.
+
+```
+> L 8000
+: 3E 01 D3 00 76
+: 4A FF
+: .
+Loaded 0x0007 bytes
+```
+
+Multiple bytes per line are supported.  The byte count is displayed as a
+four-digit hex value so blocks larger than 255 bytes are reported correctly.
+
+### Memory-mapped I/O
+
+SAP2 has no dedicated IN or OUT instructions.  All serial communication is
+performed using standard `LD` and `ST` instructions against two fixed
+addresses, exactly as if they were RAM locations.
+
+#### Keyboard input (0x6001)
+
+Reading address 0x6001 returns the ASCII code of the most recently pressed
+key, or 0x00 if no key is waiting.  A single read therefore acts as both
+the status poll and the data fetch — there is no separate status register.
+
+The monitor polls in a tight loop:
+
+```asm
+:GET_CHAR
+    MOVWI  R0, 0x6001       ; R0=0x60 (high), R1=0x01 (low)
+:_gc_poll
+    LD     R2, (R0)         ; 0x00 = no key, else ASCII keycode
+    AND    R2, R2           ; set Z flag without changing R2
+    JPNZ   _gc_poll         ; Z set = zero = no key yet, loop
+    RET                     ; Z clear = R2 holds the character
+```
+
+#### Terminal output (0x6000)
+
+Writing any byte to address 0x6000 transmits it to the terminal immediately.
+There is no TX-busy flag and no polling is required — the write takes effect
+in the same instruction cycle.
+
+```asm
+:PRINT_CHAR
+    PUSH   R0
+    PUSH   R1
+    MOVWI  R0, 0x6000       ; R0=0x60 (high), R1=0x00 (low)
+    ST     R2, (R0)         ; transmit immediately
+    POP    R1
+    POP    R0
+    RET
+```
+
+#### Byte order
+
+`MOVWI R0, 0xHHLL` places the high byte in R0 and the low byte in R1.
+The 16-bit indirect address used by `LD Rx,(R0)` and `ST Rx,(R0)` is
+computed as `R0 × 256 + R1`, so R0 is always the high byte of the pointer
+pair.  All 16-bit pointer loads in the monitor follow this convention.
+
+### Register conventions
+
+| Register | Role in monitor |
+|----------|----------------|
+| R0 | High byte of 16-bit pointer pair |
+| R1 | Low byte of 16-bit pointer pair |
+| R2 | Character buffer / general scratch |
+| R3 | Loop counter / comparison scratch |
+| R0R1 | 16-bit indirect address for `LD`/`ST` |
+| R0'–R3' | Alternate bank — used as accumulators in parse routines |
+| SP | Stack pointer, initialised to 0xFFFF |
+
+The alternate register bank (accessed via `EXX`) is used in `PARSE_HEX16`,
+`PARSE_HEX8`, and `CMD_LOAD` to hold accumulators and byte counters without
+RAM spills, keeping the primary bank free for pointer and counter duties.
+
+### Conditional branch note
+
+The SAP2 conditional jump mnemonics are inverted relative to conventional
+expectation.  The monitor comments every branch with the actual hardware
+condition being tested:
+
+| Opcode | Mnemonic | Actual condition |
+|--------|----------|-----------------|
+| 0x64 | `JPNZ` | Jumps when Z flag **is set** (result was zero) |
+| 0x65 | `JPZ` | Jumps when Z flag **is clear** (result was non-zero) |
+| 0x66 | `JPNC` | Jumps when C flag **is set** (no borrow) |
+| 0x67 | `JPC` | Jumps when C flag **is clear** (borrow occurred) |
+
+### Returning to the monitor from user code
+
+The `G` command jumps to the user address with no return address pushed.
+To return to the monitor prompt, user code should execute:
+
+```asm
+JMP 0x0000
+```
+
+This re-enters the monitor at the reset vector, re-initialises the stack
+pointer, clears the workspace, and reprints the banner before dropping back
+to the `>` prompt.
 
 Thanks to...
 ---
